@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          01-02-2023
+    Fecha:          21-02-2023
     Titulo:         introducción a RUST
     Descripción:    Inicio ;-)
     Referencias:
@@ -42,7 +42,6 @@ mod ejer_lets_get_rusty;
 mod ejer_rust_en_sp;
 mod proyectos;
 
-
 //include! ("cripto.rs");
 //pub mod cripto;
 mod poo;
@@ -51,6 +50,7 @@ mod lib_closure;
 mod lib_flujos;
 mod lib_errores;
 mod cap13;
+
 
 
  fn main() {
@@ -65,12 +65,17 @@ mod cap13;
     //dbg!(argumentos);
     let parametro0 =&argumentos[0];
     println!("Uno: {}", parametro0);
+
+    let primer_argumento = env::args().skip(1).next();
+    match name {
+        Some(n) => println!("¡Hola! {}", n),
+        None => panic!("No he recibido ningún nombre"),
+    }
 */
 
 
-    ejer_rust_en_sp::ejer_genericos_option_result::result_0();
-    ejer_rust_en_sp::ejer_genericos_option_result::result_1();
-    ejer_rust_en_sp::ejer_genericos_option_result::result_2();
+
+
 
 
 
@@ -117,7 +122,7 @@ mod cap13;
 */
 
 
-/* Ordenar                  
+/* Revisar                  
     lib_closure::closure_0();
     lib_closure::closure_Hyperbolic_1();
     lib_closure::closure_Hyperbolic_2();
