@@ -23,7 +23,8 @@
 ***************************************************************************************/
 // Archivos de módulos
 pub mod ejer_basicos;
-pub mod ejer_control_bucles;
+pub mod ejer_estructuras_de_control;
 pub mod ejer_estructuras0;
 pub mod ejer_estructuras1;
+pub mod ejer_estructuras2;
 pub mod ejer_genericos_option_result;

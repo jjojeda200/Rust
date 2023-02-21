@@ -86,12 +86,12 @@ mod cap13;
     ejer_rust_en_sp::ejer_basicos::duración_funciones();
     ejer_rust_en_sp::ejer_basicos::duración_tipos();
 */
-/* Bucles, Control          
-    ejer_rust_en_sp::ejer_control_bucles::igual();
-    ejer_rust_en_sp::ejer_control_bucles::bucles_y_control();
-    ejer_rust_en_sp::ejer_control_bucles::option_prueba_concepto_0();
-    ejer_rust_en_sp::ejer_control_bucles::option_prueba_concepto_1();
-    ejer_rust_en_sp::ejer_control_bucles::option_prueba_concepto_2();
+/* Estructuras de control   
+    ejer_rust_en_sp::ejer_estructuras_de_control::igual();
+    ejer_rust_en_sp::ejer_estructuras_de_control::bucles_y_control();
+    ejer_rust_en_sp::ejer_estructuras_de_control::option_prueba_concepto_0();
+    ejer_rust_en_sp::ejer_estructuras_de_control::option_prueba_concepto_1();
+    ejer_rust_en_sp::ejer_estructuras_de_control::option_prueba_concepto_2();
 */
 /* Estructuras 0            
     ejer_rust_en_sp::ejer_estructuras0::arreglos(4);
