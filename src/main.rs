@@ -70,6 +70,7 @@ mod cap13;
 
     ejer_rust_en_sp::ejer_genericos_option_result::result_0();
     ejer_rust_en_sp::ejer_genericos_option_result::result_1();
+    ejer_rust_en_sp::ejer_genericos_option_result::result_2();
 
 
 
@@ -104,14 +105,15 @@ mod cap13;
 /* Genéricos/Option/Result  
     ejer_rust_en_sp::ejer_genericos_option_result::genericos_0();
     ejer_rust_en_sp::ejer_genericos_option_result::genericos_1();
-
     ejer_rust_en_sp::ejer_genericos_option_result::option_intro_0();
     ejer_rust_en_sp::ejer_genericos_option_result::option_intro_1();
     ejer_rust_en_sp::ejer_genericos_option_result::option_intro_2();
-
     ejer_rust_en_sp::ejer_genericos_option_result::option_0();
     ejer_rust_en_sp::ejer_genericos_option_result::option_1();
     ejer_rust_en_sp::ejer_genericos_option_result::option_2();
+    ejer_rust_en_sp::ejer_genericos_option_result::result_0();
+    ejer_rust_en_sp::ejer_genericos_option_result::result_1();
+    ejer_rust_en_sp::ejer_genericos_option_result::result_2();
 */
 
 

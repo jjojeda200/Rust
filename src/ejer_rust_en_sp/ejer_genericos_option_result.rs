@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          14-02-2023
+    Fecha:          20-02-2023
     Titulo:         introducción a RUST
     Descripción:    Tipos Genéricos
     Referencias:
@@ -369,52 +369,79 @@ pub fn result_0() {
     */
 }
 
-
 //***************************************************************************** Result - Intro 1
 #[allow(dead_code)]
 pub fn result_1() {
     let titulo = String::from(" Result - Intro 1 ");
     imprime_titulo(&titulo);
-    /* Nota:    
-    El uso de match con Option y Result puede requerir mucho código. Por ejemplo, el
-    método .get() devuelve un Option sobre un Vec.
-    */
+
+    // El método .get() devuelve un Option sobre un Vec.
     let mut vector = vec![1, 2, 3, 6, 5, 4];
     let get_one = vector.get(0);    // recupera el primer número
     let get_two = vector.get(10);   // recupera None
     println!("{:?}", get_one);
     println!("{:?}", get_two);
 
-    //************************************* Obtener los valores usando match
+    //************************************* Obtiene los valores usando match
     for index in 0..10 {
         match vector.get(index) {
-          Some(number) => println!("Obtener los valores usando match: {}", number),
+          Some(number) => println!("Obtiene los valores usando match: {}", number),
           None => {}
         }
     }
 
-    //************************************* Obtener los números usando if let Some
+    //************************************* Obtiene los números usando if let Some
     /* Importante:  
     if let Some(number) = vector(index) significa que "compruebe si el valor de vector(index)
     es compatible con Some(number).
     */
     for index in 0..10 {
         if let Some(number) = vector.get(index) {
-            println!("Obtener los valores usando if let Some: {}", number);
+            println!("Obtiene los valores usando if let Some: {}", number);
         }
     }
 
     //************************************* 
-
     let mut indice = 0;
     while let Some(numero) = vector.get(indice) {
-        println!("Obtener los valores usando while let Some y .get: {}", numero);
-        indice += 1; // Incrementar el índice en cada iteración
+        println!("Obtiene los valores usando while let Some y .get: {}, Longitud del vector: {}", numero, vector.len());
+        indice += 1;
     }        
  
     while let Some(valor) = vector.pop() {
-        println!("Obtener los valores usando while let Some y .pop: {}, Longitud del vector: {}", valor, vector.len());
+    // while let Some: continua mientras hay valores, cuando no queden valores pop retorna None
+    // y se saldrá del bucle while
+        println!("Obtiene los valores usando while let Some y .pop: {}, Longitud del vector: {}", valor, vector.len());
     }
 
 }
 
+//***************************************************************************** Result - Intro 2
+#[allow(dead_code)]
+#[allow(unused_variables)]
+pub fn result_2() {
+    let titulo = String::from(" Result - Intro 2 ");
+    imprime_titulo(&titulo);
+    /* Nota:    
+    Para obtener solo los números, se puede usar el método parse::<i32>(). Este
+    método intenta convertir un &str en un i32 y lo entrega en un valor de tipo
+    Result ya que podría no funcionar si se le pasa algo que no es un número entero.
+    */
+
+    let weather_vec = vec![
+        vec!["Berlin", "cloudy", "5", "-7", "78"],
+        vec!["Athens", "sunny", "not humid", "20", "10", "50"],
+    ];
+
+    for mut city in weather_vec {
+        // En los datos, el primer elemento es el nombre de la ciudad
+        println!("Para la ciudad de {}:", city[0]);
+        while let Some(infor) = city.pop() {
+            // while let Some: continua mientras hay valores, cuando no queden
+            // valores pop retorna None y se saldrá del bucle while
+            if let Ok(number) = infor.parse::<i32>() {
+            println!("El número es: {}", infor);
+            }
+        }
+    }
+}
