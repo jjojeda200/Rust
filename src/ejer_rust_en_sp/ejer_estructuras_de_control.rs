@@ -95,14 +95,14 @@ pub fn igual() {
     }
 }
 
-//***************************************************************************** Bucles
+//***************************************************************************** Bifurcaciones y Bucles
 #[allow(dead_code)]
 pub fn bucles_y_control() {
     let titulo = String::from(" Bucles y control ");
     imprime_titulo(&titulo);
 
     let num = 2;
-//************************************* IF, ELSE IF, ELSE
+//************************************* Bifurcaciones IF, ELSE IF, ELSE
     if num == 2 {
         println!("Es el dos");
     } else if num == 1 {
@@ -111,7 +111,7 @@ pub fn bucles_y_control() {
         println!("Es un número diferente")
     }
 
-//************************************* MATCH
+//************************************* Bifurcaciones MATCH
     match num {
         0 => println!("Es cero"),
         1 => println!("Es uno"),
@@ -119,7 +119,7 @@ pub fn bucles_y_control() {
         _ => println!("Es otro número ")
     }
 
-//************************************* LOOP
+//************************************* Bucles LOOP
     let mut contador = 0;
     loop {
         contador +=1;
@@ -131,13 +131,13 @@ pub fn bucles_y_control() {
         }
     }
 
-//************************************* WHILE
+//************************************* Bucles WHILE
     while contador < num {
         contador +=1;
         println!("El contador = {}", contador);
     }
 
-//************************************* FOR
+//************************************* Bucles FOR
 /* Nota:    
 Un bucle for repite la ejecución un número determinado de veces.
 Este tipo de bucles suele utilizar rangos, se utiliza .. y ..=
