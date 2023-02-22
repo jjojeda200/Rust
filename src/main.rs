@@ -75,13 +75,14 @@ mod cap13;
 
 
 
-
+    ejer_rust_en_sp::ejer_basicos::var_y_tipos();
 
 
 
 
 //*****************************************************************************
 /* Características básicas  
+    ejer_rust_en_sp::ejer_basicos::var_y_tipos();
     ejer_rust_en_sp::ejer_basicos::var_y_funciones();
     ejer_rust_en_sp::ejer_basicos::duración_funciones();
     ejer_rust_en_sp::ejer_basicos::duración_tipos();
@@ -120,7 +121,10 @@ mod cap13;
     ejer_rust_en_sp::ejer_genericos_option_result::result_1();
     ejer_rust_en_sp::ejer_genericos_option_result::result_2();
 */
-
+/* Estructuras 2            
+    ejer_rust_en_sp::ejer_estructuras2::hashmap_0();
+    ejer_rust_en_sp::ejer_estructuras2::btreemap_0();
+*/
 
 /* Revisar                  
     lib_closure::closure_0();

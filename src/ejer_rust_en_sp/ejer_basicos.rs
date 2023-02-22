@@ -33,6 +33,61 @@
 fn imprime_titulo(titulo: &String){
     println!("\n{:*^80}", titulo);
 }
+//***************************************************************************** Variables y tipos de datos
+/*  Notas:      
+Type  permite definir un alias para un tipo de datos:
+type Entero = i32
+type Byte = u8
+*/
+use std::any::type_name;
+use std::mem::{size_of_val,size_of};
+
+#[allow(dead_code)]
+pub fn var_y_tipos() {
+    let titulo = String::from(" Variables y tipos de datos ");
+    imprime_titulo(&titulo);
+
+    //************************************* Booleanos y relacionales
+    println!("************************** Booleanos y relacionales");
+    let a = true;
+    let b = false;
+    let c = true;
+    println!("a | b & !c = {}", a | b & !c);
+    println!("(a|b)&!c   = {}", (a|b)&!c);
+    //************************************* Carácter
+    println!("************************** Carácter");
+    let mut val = '5';
+    println!("La variable val \"{}\" es del alfabeto {}", val, val.is_alphabetic());
+    println!("La variable val \"{}\" es un número    {}", val, val.is_numeric());
+    val = 'a';
+    println!("La variable val \"{}\" es mayúscula    {}", val, val.is_uppercase());
+    println!("La variable val \"{}\" ahora es        {}", val, val.to_uppercase());
+
+    //************************************* Números Max y Min
+    println!("************************** Números Max y Min");
+    println!("Valor mínimo de un u8 MIN {}, valor máximo u8 MAX {}", std::u8::MIN, std::u8::MAX);
+    println!("Valor mínimo de un u8 MIN {:x}, valor máximo u8 MAX {:x}", std::u8::MIN, std::u8::MAX);
+    println!("Valor mínimo de un usize MIN {}, valor máximo usize MAX {}", std::usize::MIN, std::usize::MAX);
+    println!("Valor mínimo de un usize MIN {:x}, valor máximo usize MAX {:x}", std::usize::MIN, std::usize::MAX);
+    //************************************* Tamaño y tipo de variables
+    println!("************************** Tamaño y tipo de variables");
+    type Byte = u8;
+    let val_x:Byte = 0xff;
+    let val_y = 1024;
+    println!("La variable val_x \"{}\" ocupa {} byte", val_x, size_of_val(&val_x));
+    println!("La variable val_y \"{}\" ocupa {} byte", val_y, size_of_val(&val_y));
+    // size_of::<tipo>() devuelve el tamaño en byte ocupado por el tipo
+    println!("Un  u16 ocupa {} byte", size_of::<u16>());
+    println!("Un u128 ocupa {} byte", size_of::<u128>());
+
+    let val_punto = Punto(2048, 128);
+    println!("El objeto val_punto ocupa {} bytes y ocupa {} byte", size_of_val(&val_punto), size_of::<Punto>());
+    println!("El tipo de \"type Byte\" es: {}, y de la struct \"Punto\" es: {}", type_name::<Byte>(), type_name::<Punto>());
+
+}
+
+struct Punto( u128,u8 );
+
 //*****************************************************************************
 /*  Nota: Opciones en llamada a función con variables
     1-> Transferencia de la propiedad de la variable con perdida. Si se intenta 
