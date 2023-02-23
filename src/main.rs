@@ -81,8 +81,6 @@ mod cap13;
 
     ejer_rust_en_sp::ejer_estructuras2::metodos_0();
 
-    ejer_rust_en_sp::ejer_estructuras2::hashmap_vectores();
-
 
 //*****************************************************************************
 /* Características básicas  
@@ -130,6 +128,8 @@ mod cap13;
     ejer_rust_en_sp::ejer_estructuras2::hashmap_0();
     ejer_rust_en_sp::ejer_estructuras2::btreemap_0();
     ejer_rust_en_sp::ejer_estructuras2::metodos_0();
+    ejer_rust_en_sp::ejer_estructuras2::metodos_1();
+    ejer_rust_en_sp::ejer_estructuras2::hashmap_vectores();
 */
 
 /* Revisar                  

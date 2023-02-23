@@ -116,16 +116,18 @@ pub fn btreemap_0() {
 
 }
 
-//***************************************************************************** Métodos adicionales asociados 
+//***************************************************************************** Algunos métodos asociados 
 /* Notas    .insert:    
-La función .insert en Rust se utiliza para insertar un valor en un HashMap.
-La función .insert toma dos argumentos: la llave(clave) y el valor.  Por ejemplo:
+Se utiliza para insertar un valor en un HashMap. La función toma dos 
+argumentos: la llave(clave) y el valor.  Por ejemplo:
 
-        let mut my_map = HashMap::new();
-
-        my_map.insert("llave", "valor");
-
+        let mut mi_map = HashMap::new();
+        mi_map.insert("llave", "valor");
         println!("El mapa actual es: {:?}", my_map);
+*/
+/* Notas    .entry:    
+Se utiliza para buscar un valor en un HashMap. La función entry devuelve un
+objeto Entry que representa la clave en el mapa.
 */
 /* Notas    .on_insert: 
  Este método permite acceder a una entrada en un HashMap después de que se haya
@@ -196,6 +198,31 @@ pub fn metodos_0() {
     let titulo = String::from(" Algunos métodos adicionales ");
     imprime_titulo(&titulo);
 
+    // .insert
+    let mut mi_map = BTreeMap::new();
+    mi_map.insert("Llave 1", 0);
+
+    // .entry
+    let entry = mi_map.entry("Llave 1");
+    println!("Existe la : {:?}", mi_map.,entry);
+    let entry = mi_map.entry("Llave 2");
+    println!("Mi Map: {:?}", entry);
+
+
+
+
+
+    for (llave, num) in &mi_map {
+        println!("{}, {}", llave, num);
+    }
+    println!("Mi Map: {:?}", mi_map);
+}
+//***************************************************************************** Algunos métodos asociados
+#[allow(dead_code)]
+pub fn metodos_1() {
+    let titulo = String::from(" Ejemplo practico HashMap ");
+    imprime_titulo(&titulo);
+
     let book_collection = vec!["Valor 1", "Valor 2", "Valor 3", "Valor 2"];
 
     let mut book_hashmap = HashMap::new();
@@ -216,6 +243,7 @@ pub fn metodos_0() {
 }
 
 //***************************************************************************** Vectores como valor
+#[allow(dead_code)]
 /* Notas:   
 Para utilizar un vector como valor en un HashMap, puedes crear un HashMap cuyos
 valores sean vectores
