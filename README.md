@@ -1,7 +1,7 @@
 # José Juan Ojeda Granados
 # introducción a RUST
 # Ejercicios básicos ordenados + o - por temas y origen de la información
-/***************************************************************************************
+/***************************************************************************************\n
     Rust Programming Language
                 https://doc.rust-lang.org/stable/book/
     Rust Reference
