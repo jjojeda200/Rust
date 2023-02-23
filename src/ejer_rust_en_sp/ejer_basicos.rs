@@ -101,7 +101,7 @@ struct Punto( u128,u8 );
 */
 #[allow(dead_code)]
 pub fn var_y_funciones() {
-    let titulo = String::from(" Introducción básica datos y funciones ");
+    let titulo = String::from(" Introducción básica datos y funciones 0 ");
     imprime_titulo(&titulo);
 
     /* Nota:
@@ -134,6 +134,26 @@ fn imprimir_ref(variable_ref: &String) {
 fn imprimir_ref_mut(variable_ref_mut: &mut String) {
     variable_ref_mut.push_str(" - modificada");
     println!("{}", variable_ref_mut);
+}
+
+//*****************************************************************************
+/*  Nota: Opciones de retorno de variable en llamada a función
+*/
+#[allow(dead_code)]
+pub fn var_y_ret_funciones() {
+    let titulo = String::from(" Introducción básica datos y funciones 1 ");
+    imprime_titulo(&titulo);
+
+    let x = su_re(2, 4);
+    println!("{}, {}", x.0,x.1);
+    let (y, z) = su_re(6, 8);
+    println!("{}, {}", y, z);
+}
+
+fn su_re(a:u8,b:u8) -> (u8,u8){
+    let var_a = a + a;
+    let var_b = b + b;
+    return (var_a, var_b);
 }
 
 //*****************************************************************************

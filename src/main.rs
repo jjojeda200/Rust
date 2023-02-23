@@ -30,6 +30,10 @@
 
 ***************************************************************************************/
 /* Notas:   
+Expresiones son instrucciones que devuelven algún valor como resultado.
+Declaraciones son instrucciones que no dan lugar a ningún resultado.
+*/
+/* Notas:   
 A este tipo de etiquetado con # seguido de un nombre, se le denomina en Rust atributo
 #derive(Debug)
 #[allow(dead_code)]
@@ -75,8 +79,6 @@ mod cap13;
 
 
 
-    ejer_rust_en_sp::ejer_basicos::var_y_tipos();
-
 
 
 
@@ -84,6 +86,7 @@ mod cap13;
 /* Características básicas  
     ejer_rust_en_sp::ejer_basicos::var_y_tipos();
     ejer_rust_en_sp::ejer_basicos::var_y_funciones();
+    ejer_rust_en_sp::ejer_basicos::var_y_ret_funciones();
     ejer_rust_en_sp::ejer_basicos::duración_funciones();
     ejer_rust_en_sp::ejer_basicos::duración_tipos();
 */
