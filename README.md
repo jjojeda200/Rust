@@ -1,7 +1,7 @@
 # José Juan Ojeda Granados
 # introducción a RUST
 # Ejercicios básicos ordenados + o - por temas y origen de la información
-/***************************************************************************************
+***************************************************************************************
 
     Rust Programming Language
                 https://doc.rust-lang.org/stable/book/
@@ -28,4 +28,5 @@
                 https://doc.rust-lang.org/std/index.html
 
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
-***************************************************************************************/
+***************************************************************************************
+

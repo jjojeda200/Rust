@@ -30,6 +30,9 @@
 
 ***************************************************************************************/
 
+use std::collections::HashMap;  // HashMap en lugar de std::collections::HashMap
+use std::collections::BTreeMap; // BTreeMap lugar de std::collections::BTreeMap
+
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo);
 }
@@ -42,9 +45,6 @@ HashMap::new() y se pueden insertar nuevos elementos mediante .insert(clave, val
 - Los HashMap no están ordenados.
 - Los BTreeMap mantienen el orden por clave.
 */
-use std::collections::HashMap;  // HashMap en lugar de std::collections::HashMap
-use std::collections::BTreeMap; // BTreeMap lugar de std::collections::BTreeMap
-
 #[derive(Debug)]
 struct Ciudad {
     nombre: String,
@@ -114,4 +114,127 @@ pub fn btreemap_0() {
     println!("{:?}", ciudad_btreemap.get(&"Kar"));
     println!("{:?}", ciudad_btreemap.get(&"Ber"));
 
+}
+
+//***************************************************************************** Métodos adicionales asociados 
+/* Notas    .insert:    
+La función .insert en Rust se utiliza para insertar un valor en un HashMap.
+La función .insert toma dos argumentos: la llave(clave) y el valor.  Por ejemplo:
+
+        let mut my_map = HashMap::new();
+
+        my_map.insert("llave", "valor");
+
+        println!("El mapa actual es: {:?}", my_map);
+*/
+/* Notas    .on_insert: 
+ Este método permite acceder a una entrada en un HashMap después de que se haya
+ insertado una nueva entrada. Por ejemplo:
+
+        let mut my_map = HashMap::new();
+
+        my_map.insert("llave", "valor");
+        my_map.entry("llave")
+            .on_insert(|e| { println!("Se insertó la entrada {:?}", e); });
+
+        println!("El mapa actual es: {:?}", my_map);
+
+Se inserta una entrada en el mapa. Luego, se accede a la entrada de "llave" y
+se imprime un mensaje indicando que se insertó una nueva entrada.
+Finalmente, se imprime el mapa actual.
+*/
+/* Notas    .or_insert: 
+Este método permite acceder a una entrada en un HashMap y insertar un valor 
+predeterminado si la entrada no existe. Si la entrada existe, se devuelve 
+una referencia mutable a ella. Por ejemplo:
+
+        let mut my_map = HashMap::new();
+
+        let entrada = my_map.entry("llave").or_insert("nuevo_valor");
+
+        println!("El valor actual es: {}", entrada);
+
+En este ejemplo, se accede a la entrada de "llave" y se inserta "nuevo_valor"
+si la entrada no existe. Luego, se imprime el valor actual de la entrada
+*/
+/* Notas    .entry:     
+Este método permite acceder a una entrada en un HashMap para su manipulación. 
+Si la entrada existe, se devuelve una referencia mutable a ella. Si no
+existe, se inserta una entrada con un valor predeterminado y se devuelve
+una referencia mutable a ella. Por ejemplo:
+
+        let mut my_map = HashMap::new();
+        my_map.insert("llave", "valor");
+
+        let entrada = my_map.entry("llave");
+        entrada.insert("nuevo_valor");
+
+        println!("El valor actual es: {}", entrada);
+
+Se accede a la entrada de "llave" y se inserta "nuevo_valor". Luego, se
+imprime el valor actual de la entrada.
+*/
+/* Notas    .on_entry:  
+Este método permite acceder a un valor existente en un HashMap y realizar una
+acción antes de que se retorne el valor. Por ejemplo:
+
+        let mut my_map = HashMap::new();
+        my_map.insert("llave", "valor");
+
+        let resultado = my_map.entry("llave")
+            .on_entry(|e| { println!("El valor actual es: {}", e) })
+            .or_insert("nuevo_valor");
+
+        println!("El valor final es: {}", resultado);
+
+Si la llave "llave" ya existe en el mapa, se imprimirá "El valor actual es: 
+valor". Luego, se insertará "nuevo_valor" en el mapa y se asignará el 
+resultado a la variable resultado.
+*/
+
+pub fn metodos_0() {
+    let titulo = String::from(" Algunos métodos adicionales ");
+    imprime_titulo(&titulo);
+
+    let book_collection = vec!["Valor 1", "Valor 2", "Valor 3", "Valor 2"];
+
+    let mut book_hashmap = HashMap::new();
+
+    for book in book_collection {
+        let return_value = book_hashmap.entry(book).or_insert(0);
+        // return_value es una referencia mutable.
+        // Si no contiene nada, se asigna un cero.
+        *return_value +=1;  // Ahora return_value vale al menos 1.
+                            // Y tenía algún valor, lo incrementa en uno
+    }
+
+    for (book, numero) in &book_hashmap {
+        println!("{}, {}", book, numero);
+    }
+
+    println!("HashMap de libros: {:?}", book_hashmap);
+}
+
+//***************************************************************************** Vectores como valor
+/* Notas:   
+Para utilizar un vector como valor en un HashMap, puedes crear un HashMap cuyos
+valores sean vectores
+*/
+pub fn hashmap_vectores() {
+    let titulo = String::from(" Vectores como valor ");
+    imprime_titulo(&titulo);
+
+    let mut map: HashMap<String, Vec<i32>> = HashMap::new();
+    
+    map.insert("clave1".to_string(), vec![1, 2, 3]);
+    map.insert("clave2".to_string(), vec![4, 5, 6]);
+    map.insert("clave3".to_string(), vec![7, 8, 9]);
+
+    println!("{:?}", map);
+
+    map.entry("clave1".to_string()).or_insert(vec![]).push(4);
+    map.entry("clave1".to_string()).or_insert(vec![]).push(5);
+    map.entry("clave1".to_string()).or_insert(vec![]).push(6);
+
+    println!("{:?}", map);
 }
