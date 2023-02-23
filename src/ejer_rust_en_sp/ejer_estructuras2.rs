@@ -119,39 +119,14 @@ argumentos: la llave(clave) y el valor.  Por ejemplo:
         mi_map.insert("llave", "valor");
         println!("El mapa actual es: {:?}", my_map);
 */
-/* Notas    .entry:    
-Se utiliza para buscar un valor en un HashMap. La función entry devuelve un
-objeto Entry que representa la clave en el mapa.
-*/
-/* Notas    .on_insert: 
- Este método permite acceder a una entrada en un HashMap después de que se haya
- insertado una nueva entrada. Por ejemplo:
-
-        let mut my_map = HashMap::new();
-
-        my_map.insert("llave", "valor");
-        my_map.entry("llave")
-            .on_insert(|e| { println!("Se insertó la entrada {:?}", e); });
-
-        println!("El mapa actual es: {:?}", my_map);
-
-Se inserta una entrada en el mapa. Luego, se accede a la entrada de "llave" y
-se imprime un mensaje indicando que se insertó una nueva entrada.
-Finalmente, se imprime el mapa actual.
-*/
 /* Notas    .or_insert: 
 Este método permite acceder a una entrada en un HashMap y insertar un valor 
 predeterminado si la entrada no existe. Si la entrada existe, se devuelve 
 una referencia mutable a ella. Por ejemplo:
 
         let mut my_map = HashMap::new();
-
         let entrada = my_map.entry("llave").or_insert("nuevo_valor");
-
         println!("El valor actual es: {}", entrada);
-
-En este ejemplo, se accede a la entrada de "llave" y se inserta "nuevo_valor"
-si la entrada no existe. Luego, se imprime el valor actual de la entrada
 */
 /* Notas    .entry:     
 Este método permite acceder a una entrada en un HashMap para su manipulación. 
@@ -161,56 +136,64 @@ una referencia mutable a ella. Por ejemplo:
 
         let mut my_map = HashMap::new();
         my_map.insert("llave", "valor");
-
         let entrada = my_map.entry("llave");
         entrada.insert("nuevo_valor");
-
-        println!("El valor actual es: {}", entrada);
-
-Se accede a la entrada de "llave" y se inserta "nuevo_valor". Luego, se
-imprime el valor actual de la entrada.
 */
-/* Notas    .on_entry:  
-Este método permite acceder a un valor existente en un HashMap y realizar una
-acción antes de que se retorne el valor. Por ejemplo:
-
-        let mut my_map = HashMap::new();
-        my_map.insert("llave", "valor");
-
-        let resultado = my_map.entry("llave")
-            .on_entry(|e| { println!("El valor actual es: {}", e) })
-            .or_insert("nuevo_valor");
-
-        println!("El valor final es: {}", resultado);
-
-Si la llave "llave" ya existe en el mapa, se imprimirá "El valor actual es: 
-valor". Luego, se insertará "nuevo_valor" en el mapa y se asignará el 
-resultado a la variable resultado.
-*/
-
+#[allow(dead_code)]
 pub fn metodos_0() {
-    let titulo = String::from(" Algunos métodos adicionales ");
+    let titulo = String::from(" Introducción a métodos adicionales ");
     imprime_titulo(&titulo);
 
-// .insert
+
+let claves = vec!["Llave 1", "Llave 2", "Llave 3", "Llave 4", "Llave 5", "Llave 6"];
+
+    // Inserta la primera clave "Llave 1"
     let mut mi_map = BTreeMap::new();
     mi_map.insert("Llave 1", 0);
 
-// .entry
+    //*************************************
+    println!("Comprueba si existen \"Llave 1\" y \"Lave 2\"");
     let mut existe = mi_map.entry("Llave 1");
-    println!("Existe la clave: {:?}",existe);
+    println!("Existe la clave \"Llave 1\": {:?}",existe);
     existe = mi_map.entry("Llave 2");
-    println!("Existe la clave: {:?}", existe);
+    println!("Existe la clave \"Llave 2\": {:?}", existe);
 
+    //*************************************
+    // Comprueba si existen y si es no, inserta las contenidas en el vector claves
+    for var_llave in claves {
+        mi_map.entry(var_llave).or_insert(0);
+    }
 
+    //*************************************
+    // Comprueba si existen y si es no, lo inserta y le da valor, si es si, modifica
+    // el valor. var_valor es una referencia mutable.
+    existe = mi_map.entry("Llave 8");
+    println!("Existe la clave \"Llave 8\": {:?}", existe);
+    let var_valor = mi_map.entry("Llave 8").or_insert(0);
+    *var_valor += 1;
+    existe = mi_map.entry("Llave 8");
+    println!("Existe la clave \"Llave 8\": {:?}", existe);
+    println!("Tiene valor \"Llave 8\": {:?}", mi_map.get("Llave 8"));
+    mi_map.remove_entry("Llave 8");
+    existe = mi_map.entry("Llave 8");
+    println!("Existe la clave \"Llave 8\": {:?}", existe);
+    println!("Tiene valor \"Llave 8\": {:?}", mi_map.get("Llave 8"));
 
-
+    //*************************************
+    let var_valor = mi_map.entry("Llave 2").or_insert(0);
+    *var_valor += 1;
+    println!("Nuevo valor para la clave \"Llave 2\": {:?}", mi_map.entry("Llave 2"));
+    println!("Tiene valor: {:?}", mi_map.get("Llave 2"));
 
     for (llave, num) in &mi_map {
         println!("{}, {}", llave, num);
     }
     println!("Mi Map: {:?}", mi_map);
 }
+
+
+
+
 //***************************************************************************** Algunos métodos asociados
 #[allow(dead_code)]
 pub fn metodos_1() {

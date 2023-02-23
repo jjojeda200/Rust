@@ -22,12 +22,6 @@
                 https://doc.rust-lang.org/std/index.html
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
-    Dependencias:
-
-    Compilar:
-
-    Licencia:
-
 ***************************************************************************************/
 /* Notas:   
 Expresiones son instrucciones que devuelven algún valor como resultado.
