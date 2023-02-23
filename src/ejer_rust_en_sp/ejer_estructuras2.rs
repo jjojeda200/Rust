@@ -198,15 +198,15 @@ pub fn metodos_0() {
     let titulo = String::from(" Algunos métodos adicionales ");
     imprime_titulo(&titulo);
 
-    // .insert
+// .insert
     let mut mi_map = BTreeMap::new();
     mi_map.insert("Llave 1", 0);
 
-    // .entry
-    let entry = mi_map.entry("Llave 1");
-    println!("Existe la : {:?}", mi_map.,entry);
-    let entry = mi_map.entry("Llave 2");
-    println!("Mi Map: {:?}", entry);
+// .entry
+    let mut existe = mi_map.entry("Llave 1");
+    println!("Existe la clave: {:?}",existe);
+    existe = mi_map.entry("Llave 2");
+    println!("Existe la clave: {:?}", existe);
 
 
 
