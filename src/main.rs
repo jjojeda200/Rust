@@ -46,7 +46,6 @@ mod poo;
 mod lib_memoria;
 mod lib_closure;
 mod lib_flujos;
-mod lib_errores;
 mod cap13;
 
 
@@ -73,6 +72,8 @@ mod cap13;
 
 
 
+    ejer_gestion_errores::enum_opciones();
+    ejer_gestion_errores::gestion_error();
     ejer_rust_en_sp::ejer_estructuras2::metodos_0();
 
 
@@ -145,8 +146,6 @@ mod cap13;
     lib_memoria::memoria_prt1();
     
 
-    lib_errores::enum_opciones();
-    lib_errores::gestion_error();
 
 
     poo::poo();

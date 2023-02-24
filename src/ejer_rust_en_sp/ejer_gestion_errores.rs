@@ -57,7 +57,7 @@ use std::io::ErrorKind;
 
 /* Nota: 
 El operador ? es un atajo para match que devuelve el error si Result es Err,
-o devuelve el valor de Ok si Result es Ok.
+o devuelve el valor envuelto en Ok si Result es correcto.
 */
 
 #[allow(dead_code)]
