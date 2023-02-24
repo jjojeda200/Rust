@@ -24,6 +24,8 @@
 
 ***************************************************************************************/
 
+use std::collections::BTreeMap;
+
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo);
 }
@@ -42,24 +44,37 @@ Result (y Option) es el operador ?
 El operador ? es un atajo para match que devuelve el error si Result es Err,
 o devuelve el valor envuelto en Ok si Result es correcto.
 */
-fn identificador0(id:u8) -> String{
-    if id == 1 {
-        let cadena = Option::Some("Id UNO".to_string());
-        println!("Cadena envolviendo un: {:?}", cadena);
-        let val_ok = cadena.unwrap();
-        return val_ok;
-    } else  {
-        return "Identidad No existe".to_string();
-    }
-    
-}
+
 #[allow(dead_code)]
 pub fn fn_interrogante() {
-    let titulo = String::from(" Operador ? ");
-    imprime_titulo(&titulo);
-    
+
+    let claves = vec!["Llave 1", "Llave 2", "Llave 3", "Llave 4", "Llave 5", "Llave 6"];
+
+    // Inserta la primera clave "Llave 1"
+    let mut mi_map = BTreeMap::new();
+    mi_map.insert("Llave 1", 0);
+
+    for var_llave in claves {
+        mi_map.entry(var_llave).or_insert(0);
+    }
+    let retorno = get_value(&mi_map, "Llave 2");
+    println!("{:?}", retorno);
+
+    match get_value(&mi_map, "Llave 8") {
+        Ok(valor) => println!("Valor: {}", valor),
+        Err(mensaje) => println!("Error: {}", mensaje),
+    }
 }
 
+fn get_value(map: &BTreeMap<&str, i32>, key: &str) -> Result<i32, String> {
+    let value = map.get(key).ok_or("Valor no encontrado")?;
+    Ok(*value)
+}
+
+/* fn insert_value<'a>(map: &mut BTreeMap<&str'a, i32>, key: &'a str, value: i32) -> Result<(), String> {
+    map.insert(key, value).ok_or("Error insertando")?;
+    Ok(())
+} */
 
 //***************************************************************************** unwrap
 /* Nota:        
@@ -87,13 +102,13 @@ pub fn fn_unwrap_1() {
     let titulo = String::from(" unwrap 1 ");
     imprime_titulo(&titulo);
 
-    let identidad = identificador1(1);
-        println!("Identidad: {}", identidad);
-    let identidad = identificador1(2);
-        println!("Identidad: {}", identidad);
+    let identidad = identificador0(1);
+        println!("Identidad 1: {}", identidad);
+    let identidad = identificador0(2);
+        println!("Identidad 2: {}", identidad);
 }
 
-fn identificador1(id:u8) -> String{
+fn identificador0(id:u8) -> String{
     if id == 1 {
         let cadena = Option::Some("Id UNO".to_string());
         println!("Cadena envuelta por: {:?}, sin desenvolver", cadena);
@@ -107,22 +122,28 @@ fn identificador1(id:u8) -> String{
 }
 
 
-//***************************************************************************** unwrap
+
+
+//***************************************************************************** expect
 /* Nota:        
+Por otro lado, el método expect se utiliza de manera similar a unwrap, pero nos
+permite proporcionar un mensaje de error personalizado en caso de que el valor
+sea None o Err. El mensaje de error personalizado se pasa como argumento a expect.
 
-En este caso, como sabemos que numero tiene un valor, podemos utilizar unwrap
-para obtener ese valor sin necesidad de manejar un posible error.
-
-Por otro lado, el método expect se utiliza de manera similar a unwrap, pero nos permite proporcionar un mensaje de error personalizado en caso de que el valor sea None o Err. El mensaje de error personalizado se pasa como argumento a expect.
-
-Por ejemplo, si tenemos una variable resultado de tipo Result<i32, &str> que podría ser un valor Ok o Err, podemos utilizar expect para manejar el caso en el que sea Err y proporcionar un mensaje de error personalizado:
+Por ejemplo, si tenemos una variable resultado de tipo Result<i32, &str> que podría
+ser un valor Ok o Err, podemos utilizar expect para manejar el caso en el que sea Err
+y proporcionar un mensaje de error personalizado:
 
 
 let resultado: Result<i32, &str> = Err("No se pudo obtener el valor");
 let valor = resultado.expect("Error al obtener el valor");
 
-En este caso, si resultado es Err, el programa terminará y se imprimirá el mensaje de error personalizado que hemos proporcionado en expect. Si resultado es Ok, se devolverá el valor subyacente como en el caso de unwrap.
+En este caso, si resultado es Err, el programa terminará y se imprimirá el mensaje de
+error personalizado que hemos proporcionado en expect. Si resultado es Ok, se devolverá
+el valor subyacente como en el caso de unwrap.
 
-En general, es recomendable utilizar expect en lugar de unwrap en situaciones en las que se espera que el valor subyacente sea None o Err, ya que nos permite proporcionar información útil sobre el error que se ha producido.
+En general, es recomendable utilizar expect en lugar de unwrap en situaciones en las que
+se espera que el valor subyacente sea None o Err, ya que nos permite proporcionar
+información útil sobre el error que se ha producido.
 */
 //*****************************************************************************

@@ -42,7 +42,7 @@ mod ejer_hiperbolic;
 mod ejer_lets_get_rusty;
 mod ejer_rust_en_sp;
 mod proyectos;
-mod RustStandardLibrary;
+mod rust_standard_library;
 mod poo;
 mod lib_memoria;
 mod lib_closure;
@@ -68,8 +68,6 @@ mod cap13;
         None => panic!("No he recibido ningún nombre"),
     }
 */
-
-    RustStandardLibrary::std_ops_try::fn_std_ops_try_0();
 
     ejer_rust_en_sp::ejer_gestion_errores::fn_interrogante();
     ejer_rust_en_sp::ejer_gestion_errores::fn_unwrap_0();
@@ -165,21 +163,21 @@ mod cap13;
 }
 
 //*****************************************************************************
-/* The Rust Standard Library
+/* The Rust Standard Library    
+    rust_standard_library::std_ops_try::fn_std_ops_try_0();
 
 */
-/* Hiperbolic          
+/* Hiperbolic                   
     ejer_hiperbolic::vt_03::vt_03();
     ejer_hiperbolic::vt_16::vt_16();
     
 */
-/* Let's Get Rusty     
+/* Let's Get Rusty              
     ejer_lets_get_rusty::vt_39::xx();
 
 */
 
-
-/* proyectos           
+/* proyectos                    
     proyectos::firebase::firebase();
     proyectos::sim_cpu::sim_cpu();
 

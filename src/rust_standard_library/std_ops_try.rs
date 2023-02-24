@@ -24,7 +24,7 @@ pub fn fn_std_ops_try_0() {
 
     let numbers = vec![1, 2, 3, 4, 5];
     let sum = simple_fold(numbers.iter(), 0, |acc, x| acc + x);
-    println!("Suma : {}", sum);       // Imprime "Sum: 15"
+    println!("La suma de los valores del vector: {}", sum);
 }
 
 /* Descripción:     
