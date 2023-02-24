@@ -1,2 +1,0 @@
-"https://nodeesp-d0b20-default-rtdb.firebaseio.com/"
-KEY "yu2MQsnxJedOuqsNA48LOqTp8g7LE3BE5w5wNPK6"
