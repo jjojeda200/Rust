@@ -24,155 +24,105 @@
 
 ***************************************************************************************/
 
-//*****************************************************************************
-enum Opciones<T> {
-    None,
-    Some(T),
+fn imprime_titulo(titulo: &String) {
+    println!("\n{:*^80}", titulo);
 }
 
-fn identificador(id:u8) -> Opciones<std::string::String>{
-    if id == 1 {
-        return Opciones::Some("Id : UNO".to_string());
-    }
-    return Opciones::None;
-}
-
+//***************************************************************************** panic!
 #[allow(dead_code)]
-pub fn enum_opciones() {
-    let identidad = match identificador(1){
-        Opciones::Some(id) => id,
-        Opciones::None => {
-            println!("Identidad no existe");
-            return
-        }        
-    };
-    println!("Identidad 1 : {}", identidad);
+pub fn funcion_panic(){
+    let mensaje = "Error: Llamada intencionada a la macro panic!";
+    panic!("{}",mensaje);
 }
 
-//*****************************************************************************
-// https://www.youtube.com/watch?v=y3wUCb-uS3g&t=495s
-// Usados en fn de gestión de errores
-use std::fs::File;
-use std::io::ErrorKind;
-
-/* Nota: 
+//***************************************************************************** ?
+/* Nota:        
+Una forma más corta que "match" y que "if let" de gestionar un valor de tipo
+Result (y Option) es el operador ?
 El operador ? es un atajo para match que devuelve el error si Result es Err,
 o devuelve el valor envuelto en Ok si Result es correcto.
 */
-
+fn identificador0(id:u8) -> String{
+    if id == 1 {
+        let cadena = Option::Some("Id UNO".to_string());
+        println!("Cadena envolviendo un: {:?}", cadena);
+        let val_ok = cadena.unwrap();
+        return val_ok;
+    } else  {
+        return "Identidad No existe".to_string();
+    }
+    
+}
 #[allow(dead_code)]
-pub fn gestion_error(){
-
-
-//********************************* "panic" si el fichero no existe
-/* 
-    let titulo = " \"panic\" si fichero no existe ";    
-    println!("{:*^80}", titulo);    // sin variable, relleno con *, centrado, longitud de 80 caracteres
-
-    let fd_result = File::open("ErrorLog.txt");
-
-    let fd = match fd_result {
-       Result::Ok(fichero) => fichero,
-       Result::Err(error) => panic!("Problema abriendo el archivo {:?}", error),
-    };
-    println!("Resultado: {:?}", fd);
-*/
-
-//********************************* Mensaje si fichero no existe o sin permiso
-/* Nota: 
-Abrir un archivo llamado "errorLog.txt" utilizando la función open de la biblioteca std::fs.
-Si la apertura del archivo es exitosa, se guarda el archivo en la variable file.
-De lo contrario, se compara el tipo de error con los diferentes valores de ErrorKind
-para determinar cómo responder. Se usa una función match para manejar los errores,
-lo que permite tener un control detallado de los diferentes tipos de errores
-que pueden ocurrir.
-*/
-/*
-let titulo = " Mensaje si fichero no existe o sin permiso ";
-    println!("{:*^80}\n", titulo);
-
-    let fd_result = File::open("ErrorLog.txt");
-
-    let fd = match fd_result {
-        Result::Ok(fichero) => fichero,
-        Result::Err(error) => {
-            match error.kind() {
-                std::io::ErrorKind::NotFound => println!("El archivo no existe"),
-                std::io::ErrorKind::PermissionDenied => println!("Permiso denegado para el archivo"),
-                _ => println!("Otro error: {:?}", error),
-            }
-            return;
-        }
-    };
-    println!("Resultado: {:?}", fd);
-*/
-
-//********************************* Crea archivo si no existe, \"panic\" para otros errores
-/*
-    let titulo = " Crea archivo si no existe, \"panic\" para otros errores ";
-    println!("{:*^80}\n", titulo);
-
-    let fd_result = File::open("ErrorLog.txt");
-
-    let fd = match fd_result {
-        Result::Ok(fichero) => fichero,
-        Result::Err(error) => match error.kind()
-        {
-            ErrorKind::NotFound => match File::create("ErrorLog.txt")
-            {
-                Ok(fichero_creado) => fichero_creado,
-                Err(error) => panic!("Problema creando el archivo {:?}", error),
-            },
-            ErrorKind::PermissionDenied => match File::create("ErrorLog.txt") {
-                Ok(fichero_creado) => fichero_creado,
-                Err(error) => panic!("Problema permisos acceso al archivo denegado {:?}", error),
-            },
-            otros_errores => { panic!("Problema xxxx el archivo {:?}", otros_errores) }
-        },
-    };
-    println!("Resultado: {:?}", fd);
-*/
-
-//********************************* Método con IF (Crea archivo si no existe, \"panic\" para otros errores)
-/* Nota: 
-    Es importante notar que también se pueden utilizar otras estructuras de 
-    control de flujo, como if let o while let, para lograr el mismo objetivo.
- */
-
-    let titulo = " Método con IF (Crea archivo si no existe, \"panic\" para otros errores) ";
-    println!("{:*^80}\n", titulo);
-
-    let fd_result = File::open("ErrorLog.txt").unwrap_or_else(|error|{
-        if error.kind() == ErrorKind::NotFound {
-            File::create("ErrorLog.txt").unwrap_or_else(|error|{
-                panic!("Problema creando el archivo {:?}", error);
-            })
-        } else if error.kind() == ErrorKind::PermissionDenied {
-            println!("Error: {}", error.kind());
-            panic!("Problema permiso acceso al archivo {:?}", error);
-        } else {
-            println!("Error sin definir ");
-            panic!("Problema con el archivo {:?}", error);
-        }
-    });
-    println!("Resultado: {:?}", fd_result);
-
-    // Otra forma de presentar un mensaje de error con panic -->
-    // let fd = File::open("Error.txt").expect("Fallo abriendo otro archivo");
-//*************************************
+pub fn fn_interrogante() {
+    let titulo = String::from(" Operador ? ");
+    imprime_titulo(&titulo);
+    
 }
 
 
-/*
-Leer el contenido del archivo y guardarlo en la variable contents. Si la lectura es ok,
-se imprime el contenido del archivo. De lo contrario, se imprime un mensaje de error
-que indica que hubo un problema al leer el archivo.
+//***************************************************************************** unwrap
+/* Nota:        
+unwrap como expect son métodos que se utilizan para manejar los valores Option
+y Result, que son tipos de datos que pueden o no tener un valor.
 
-    let mut contents = String::new();
-    match file.read_to_string(&mut contents) {
-        Ok(_) => println!("El contenido del archivo es: {}", contents),
-        Err(error) => println!("Error al leer el archivo: {:?}", error),
-    }
+El método unwrap se utiliza para desempaquetar un valor de tipo Option o Result
+y devolver el valor subyacente si existe, o producir un error en caso contrario.
+unwrap con un valor None o un Err, producirá un error en tiempo de ejecución.
+
+Teniendo una variable numero de tipo Option<i32> que sabemos que tiene un
+valor, podemos utilizar unwrap para obtener el valor subyacente:
 */
+pub fn fn_unwrap_0() {
+    let titulo = String::from(" unwrap 0 ");
+    imprime_titulo(&titulo);
+    
+    let numero: Option<i32> = Some(5);
+    let valor = numero.unwrap();
+    println!("El valor es: {}", valor);
+}
 
+#[allow(dead_code)]
+pub fn fn_unwrap_1() {
+    let titulo = String::from(" unwrap 1 ");
+    imprime_titulo(&titulo);
+
+    let identidad = identificador1(1);
+        println!("Identidad: {}", identidad);
+    let identidad = identificador1(2);
+        println!("Identidad: {}", identidad);
+}
+
+fn identificador1(id:u8) -> String{
+    if id == 1 {
+        let cadena = Option::Some("Id UNO".to_string());
+        println!("Cadena envuelta por: {:?}, sin desenvolver", cadena);
+        let val_ok = cadena.unwrap();
+        println!("Cadena desenvuelta de el Some: {}", val_ok);
+        return val_ok;
+    } else  {
+        return "Identidad No existe".to_string();
+    }
+    
+}
+
+
+//***************************************************************************** unwrap
+/* Nota:        
+
+En este caso, como sabemos que numero tiene un valor, podemos utilizar unwrap
+para obtener ese valor sin necesidad de manejar un posible error.
+
+Por otro lado, el método expect se utiliza de manera similar a unwrap, pero nos permite proporcionar un mensaje de error personalizado en caso de que el valor sea None o Err. El mensaje de error personalizado se pasa como argumento a expect.
+
+Por ejemplo, si tenemos una variable resultado de tipo Result<i32, &str> que podría ser un valor Ok o Err, podemos utilizar expect para manejar el caso en el que sea Err y proporcionar un mensaje de error personalizado:
+
+
+let resultado: Result<i32, &str> = Err("No se pudo obtener el valor");
+let valor = resultado.expect("Error al obtener el valor");
+
+En este caso, si resultado es Err, el programa terminará y se imprimirá el mensaje de error personalizado que hemos proporcionado en expect. Si resultado es Ok, se devolverá el valor subyacente como en el caso de unwrap.
+
+En general, es recomendable utilizar expect en lugar de unwrap en situaciones en las que se espera que el valor subyacente sea None o Err, ya que nos permite proporcionar información útil sobre el error que se ha producido.
+*/
 //*****************************************************************************

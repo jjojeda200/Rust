@@ -23,32 +23,31 @@
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
 ***************************************************************************************/
-/* Notas:   
+/* Notas:                   
 Expresiones son instrucciones que devuelven algún valor como resultado.
-Declaraciones son instrucciones que no dan lugar a ningún resultado.
+Declaraciones y Sentencias son instrucciones que no dan lugar a ningún resultado.
 */
-/* Notas:   
+/* Notas:                   
 A este tipo de etiquetado con # seguido de un nombre, se le denomina en Rust atributo
 #derive(Debug)
 #[allow(dead_code)]
 #[allow(unused_variables)]
 */
 
-//use ejer_hiperbolic::*;
+// Declaración de módulos   
+//include! ("cripto.rs");
+//pub mod cripto;
+//use ejer_hiperbolic::*;   
 mod ejer_hiperbolic;
 mod ejer_lets_get_rusty;
 mod ejer_rust_en_sp;
 mod proyectos;
-
-//include! ("cripto.rs");
-//pub mod cripto;
+mod RustStandardLibrary;
 mod poo;
 mod lib_memoria;
 mod lib_closure;
 mod lib_flujos;
 mod cap13;
-
-
 
  fn main() {
 // $env:RUST_BACKTRACE=0
@@ -70,29 +69,29 @@ mod cap13;
     }
 */
 
+    RustStandardLibrary::std_ops_try::fn_std_ops_try_0();
 
-
-    ejer_gestion_errores::enum_opciones();
-    ejer_gestion_errores::gestion_error();
-    ejer_rust_en_sp::ejer_estructuras2::metodos_0();
-
+    ejer_rust_en_sp::ejer_gestion_errores::fn_interrogante();
+    ejer_rust_en_sp::ejer_gestion_errores::fn_unwrap_0();
+    ejer_rust_en_sp::ejer_gestion_errores::fn_unwrap_1();
 
 //*****************************************************************************
-/* Características básicas  
+/* Características básicas                      
     ejer_rust_en_sp::ejer_basicos::var_y_tipos();
     ejer_rust_en_sp::ejer_basicos::var_y_funciones();
     ejer_rust_en_sp::ejer_basicos::var_y_ret_funciones();
     ejer_rust_en_sp::ejer_basicos::duración_funciones();
     ejer_rust_en_sp::ejer_basicos::duración_tipos();
 */
-/* Estructuras de control   
+/* Estructuras de control                       
     ejer_rust_en_sp::ejer_estructuras_de_control::igual();
     ejer_rust_en_sp::ejer_estructuras_de_control::bucles_y_control();
+    // Primera pruebas con Option
     ejer_rust_en_sp::ejer_estructuras_de_control::option_prueba_concepto_0();
     ejer_rust_en_sp::ejer_estructuras_de_control::option_prueba_concepto_1();
     ejer_rust_en_sp::ejer_estructuras_de_control::option_prueba_concepto_2();
 */
-/* Estructuras 0            
+/* Estructuras 0                                
     ejer_rust_en_sp::ejer_estructuras0::arreglos(4);
     ejer_rust_en_sp::ejer_estructuras0::vector();
     ejer_rust_en_sp::ejer_estructuras0::tupla();
@@ -101,12 +100,19 @@ mod cap13;
     ejer_rust_en_sp::ejer_estructuras0::desestructurar();
     ejer_rust_en_sp::ejer_estructuras0::operador_punto();
 */
-/* Estructuras 1            
+/* Estructuras 1                                
     ejer_rust_en_sp::ejer_estructuras1::metodo_0();
     ejer_rust_en_sp::ejer_estructuras1::metodo_1();
     ejer_rust_en_sp::ejer_estructuras1::metodo_2();
 */
-/* Genéricos/Option/Result  
+/* Estructuras 2                                
+    ejer_rust_en_sp::ejer_estructuras2::hashmap_0();
+    ejer_rust_en_sp::ejer_estructuras2::btreemap_0();
+    ejer_rust_en_sp::ejer_estructuras2::metodos_0();
+    ejer_rust_en_sp::ejer_estructuras2::metodos_1();
+    ejer_rust_en_sp::ejer_estructuras2::hashmap_vectores();
+*/
+/* Genéricos/Option/Result                      
     ejer_rust_en_sp::ejer_genericos_option_result::genericos_0();
     ejer_rust_en_sp::ejer_genericos_option_result::genericos_1();
     ejer_rust_en_sp::ejer_genericos_option_result::option_intro_0();
@@ -119,13 +125,15 @@ mod cap13;
     ejer_rust_en_sp::ejer_genericos_option_result::result_1();
     ejer_rust_en_sp::ejer_genericos_option_result::result_2();
 */
-/* Estructuras 2            
-    ejer_rust_en_sp::ejer_estructuras2::hashmap_0();
-    ejer_rust_en_sp::ejer_estructuras2::btreemap_0();
-    ejer_rust_en_sp::ejer_estructuras2::metodos_0();
-    ejer_rust_en_sp::ejer_estructuras2::metodos_1();
-    ejer_rust_en_sp::ejer_estructuras2::hashmap_vectores();
+/* Errores Panic/?/Result/Unwrap/Assent         
+    ejer_rust_en_sp::ejer_gestion_errores::funcion_panic();
+    ejer_rust_en_sp::ejer_gestion_errores::fn_interrogante();
+    ejer_rust_en_sp::ejer_gestion_errores::fn_unwrap_0();
+    ejer_rust_en_sp::ejer_gestion_errores::fn_unwrap_1();
+
+
 */
+
 
 /* Revisar                  
     lib_closure::closure_0();
@@ -146,8 +154,6 @@ mod cap13;
     lib_memoria::memoria_prt1();
     
 
-
-
     poo::poo();
 
     //-----------------------------
@@ -159,17 +165,22 @@ mod cap13;
 }
 
 //*****************************************************************************
-/*  proyectos           
-    proyectos::firebase::firebase();
-    proyectos::sim_cpu::sim_cpu();
+/* The Rust Standard Library
 
 */
-/*  Hiperbolic          
+/* Hiperbolic          
     ejer_hiperbolic::vt_03::vt_03();
     ejer_hiperbolic::vt_16::vt_16();
     
 */
-/*  Let's Get Rusty     
+/* Let's Get Rusty     
     ejer_lets_get_rusty::vt_39::xx();
+
+*/
+
+
+/* proyectos           
+    proyectos::firebase::firebase();
+    proyectos::sim_cpu::sim_cpu();
 
 */
