@@ -44,7 +44,26 @@ Result (y Option) es el operador ?
 El operador ? es un atajo para match que devuelve el error si Result es Err,
 o devuelve el valor envuelto en Ok si Result es correcto.
 */
+/* Descripción  
+El código proporcionado es un ejemplo en Rust que utiliza la estructura de datos
+BTreeMap para crear un mapa que asocia claves de tipo &str con valores de tipo i32.
+La función principal (main) realiza las siguientes operaciones:
 
+1   Crea un vector de seis claves de tipo &str.
+2   Crea un mapa vacío (mi_map) y agrega la primera clave "Llave 1" con un valor de cero.
+3   Utiliza un bucle for para iterar sobre las claves restantes en el vector y agregarlas
+    al mapa utilizando la función "entry" y "or_insert", lo que significa que si la clave
+    ya está en el mapa, se deja el valor existente y si no está en el mapa, se agrega la
+    clave con un valor de cero.
+4   Llama a la función "get_value" dos veces para obtener el valor asociado con la clave
+    "Llave 2" y la clave inexistente "Llave 8". La función "get_value" busca la clave en
+    el mapa y devuelve un resultado que indica si se encontró el valor asociado con la
+    clave o si ocurrió un error.
+5   Llama a la función "insert_value" para agregar una nueva clave "Llave 8" con un valor
+    de 2. La función "insert_value" agrega la clave y el valor al mapa y devuelve un
+    resultado que indica si se realizó la inserción con éxito o si ocurrió un error.
+6   Imprime el mapa completo.
+*/
 #[allow(dead_code)]
 pub fn fn_interrogante() {
 
@@ -57,6 +76,7 @@ pub fn fn_interrogante() {
     for var_llave in claves {
         mi_map.entry(var_llave).or_insert(0);
     }
+
     let retorno = get_value(&mi_map, "Llave 2");
     println!("{:?}", retorno);
 
@@ -64,17 +84,33 @@ pub fn fn_interrogante() {
         Ok(valor) => println!("Valor: {}", valor),
         Err(mensaje) => println!("Error: {}", mensaje),
     }
-}
 
+    match insert_value(&mut mi_map, "Llave 8", 2){
+        Ok(valor) => println!("Valor: {:?}", valor),
+        Err(mensaje) => println!("Error: {}", mensaje),      
+    }
+
+    println!("{:?}", mi_map);
+
+}
+/* Descripción  
+Las funciones "get_value" y "insert_value" son funciones auxiliares que se utilizan para
+buscar y agregar claves y valores al mapa. La función "get_value" toma una referencia al
+mapa y una clave y devuelve un resultado que contiene el valor asociado con la clave si
+se encuentra en el mapa, o un mensaje de error si no se encuentra la clave en el mapa.
+La función "insert_value" toma una referencia mutable al mapa, una clave y un valor, y
+modifica la clave y el valor al mapa si está presente, o devuelve un mensaje de error si
+la clave no está presente en el mapa y la inserta.
+*/
 fn get_value(map: &BTreeMap<&str, i32>, key: &str) -> Result<i32, String> {
     let value = map.get(key).ok_or("Valor no encontrado")?;
     Ok(*value)
 }
 
-/* fn insert_value<'a>(map: &mut BTreeMap<&str'a, i32>, key: &'a str, value: i32) -> Result<(), String> {
-    map.insert(key, value).ok_or("Error insertando")?;
+fn insert_value<'a>(map: &mut BTreeMap<&'a str, i32>, key: &'a str, value: i32) -> Result<(), String> {
+    map.insert(key, value).ok_or("Clave no existe, se ha insertando")?;
     Ok(())
-} */
+}
 
 //***************************************************************************** unwrap
 /* Nota:        
