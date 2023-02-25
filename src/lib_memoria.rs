@@ -61,7 +61,7 @@ pub fn memoria_deref() {
 }
 
 //***************************************************************************** Manejo alloc y dealloc
-/*
+/* Notas:   
     Es importante tener en cuenta que la función malloc no está disponible por defecto
     en Rust, por lo que debemos importar la biblioteca std::alloc. Además, debemos
     usar la función con precaución, ya que estamos trabajando con punteros y
@@ -194,7 +194,7 @@ pub fn memoria_heap() {
 }
 
 //***************************************************************************** Manejo Punteros
-/*
+/* Notas:   
     Este código muestra cómo acceder a la memoria de un arreglo y como imprimir los
     valores en hexadecimal. El arreglo data es un arreglo de u8 con 10 elementos, que
     se utiliza para mostrar un ejemplo de inspección de memoria. Se obtiene un puntero
@@ -264,3 +264,49 @@ pub fn memoria_prt1() {
 }
 
 //*****************************************************************************
+/* Notas:   
+Ejemplo de cómo manipular y reconstruir un Vec sin ejecutar su destructor para
+tener el control completo de la asignación de memoria.
+
+Primero, se crea un Vec con los elementos [1, 2, 3]. Luego, se usa mem::ManuallyDrop
+para evitar que se ejecute el destructor de var_vector, lo que permite que el código
+tenga control total sobre la asignación de memoria.
+
+A continuación, se extraen el puntero, la longitud y la capacidad de var_vector.
+Luego, se utiliza un bucle for y la función ptr::write para sobrescribir la memoria
+con los valores [4, 5, 6].
+
+Por último, se utiliza la función Vec::from_raw_parts para reconstruir el Vec original
+a partir de los elementos sobrescritos. Se realiza una comprobación assert para
+asegurarse de que el Vec reconstruido tenga los valores correctos [4, 5, 6].
+*/
+#[allow(unused)]
+pub fn memoria_manuallydrop() {
+    use std::ptr;
+    use std::mem;
+
+    let var_vector = vec![1, 2, 3];
+    println!("{:?}", var_vector);
+
+    // Evite ejecutar el destructor de `v` para que tengamos el control completo
+    // de la asignación.
+    let mut var_vector = mem::ManuallyDrop::new(var_vector);
+
+    // Extraiga las diversas piezas importantes de información sobre `v`
+    let p = var_vector.as_mut_ptr();
+    let len = var_vector.len();
+    let cap = var_vector.capacity();
+
+    unsafe {
+        // Sobrescribir la memoria con 4, 5, 6
+        for i in 0..len {
+            ptr::write(p.add(i), 4 + i);
+        }
+
+        // Pon todo de nuevo junto en un Vec
+        let rebuilt = Vec::from_raw_parts(p, len, cap);
+        assert_eq!(rebuilt, [4, 5, 6]);
+        println!("{:?}", var_vector);
+    }
+    println!("{:?}", var_vector);
+}

@@ -69,6 +69,10 @@ mod cap13;
     }
 */
 
+
+
+
+
 //*****************************************************************************
 /* Características básicas                      
     ejer_rust_en_sp::ejer_basicos::var_y_tipos();
@@ -146,6 +150,7 @@ mod cap13;
     lib_memoria::memoria_heap();
     lib_memoria::memoria_ptr0();
     lib_memoria::memoria_prt1();
+    lib_memoria::memoria_manuallydrop();
     
 
     poo::poo();
