@@ -69,10 +69,6 @@ mod cap13;
     }
 */
 
-    ejer_rust_en_sp::ejer_gestion_errores::fn_interrogante();
-    ejer_rust_en_sp::ejer_gestion_errores::fn_unwrap_0();
-    ejer_rust_en_sp::ejer_gestion_errores::fn_unwrap_1();
-
 //*****************************************************************************
 /* Características básicas                      
     ejer_rust_en_sp::ejer_basicos::var_y_tipos();
@@ -128,8 +124,8 @@ mod cap13;
     ejer_rust_en_sp::ejer_gestion_errores::fn_interrogante();
     ejer_rust_en_sp::ejer_gestion_errores::fn_unwrap_0();
     ejer_rust_en_sp::ejer_gestion_errores::fn_unwrap_1();
-
-
+    ejer_rust_en_sp::ejer_gestion_errores::fn_expect_0();
+    ejer_rust_en_sp::ejer_gestion_errores::fn_assent();
 */
 
 

@@ -88,6 +88,7 @@ unwrap con un valor None o un Err, producirá un error en tiempo de ejecución.
 Teniendo una variable numero de tipo Option<i32> que sabemos que tiene un
 valor, podemos utilizar unwrap para obtener el valor subyacente:
 */
+#[allow(dead_code)]
 pub fn fn_unwrap_0() {
     let titulo = String::from(" unwrap 0 ");
     imprime_titulo(&titulo);
@@ -121,29 +122,50 @@ fn identificador0(id:u8) -> String{
     
 }
 
-
-
-
 //***************************************************************************** expect
 /* Nota:        
-Por otro lado, el método expect se utiliza de manera similar a unwrap, pero nos
-permite proporcionar un mensaje de error personalizado en caso de que el valor
-sea None o Err. El mensaje de error personalizado se pasa como argumento a expect.
+El método expect se utiliza de manera similar a unwrap, permite proporcionar un
+mensaje de error personalizado en caso de que el valor sea None o Err.
+El mensaje de error personalizado se pasa como argumento a expect.
 
-Por ejemplo, si tenemos una variable resultado de tipo Result<i32, &str> que podría
-ser un valor Ok o Err, podemos utilizar expect para manejar el caso en el que sea Err
-y proporcionar un mensaje de error personalizado:
-
-
-let resultado: Result<i32, &str> = Err("No se pudo obtener el valor");
-let valor = resultado.expect("Error al obtener el valor");
-
-En este caso, si resultado es Err, el programa terminará y se imprimirá el mensaje de
-error personalizado que hemos proporcionado en expect. Si resultado es Ok, se devolverá
-el valor subyacente como en el caso de unwrap.
-
-En general, es recomendable utilizar expect en lugar de unwrap en situaciones en las que
-se espera que el valor subyacente sea None o Err, ya que nos permite proporcionar
-información útil sobre el error que se ha producido.
+Es recomendable utilizar expect en lugar de unwrap en situaciones en las que
+se espera que el valor subyacente sea None o Err.
 */
+#[allow(dead_code)]
+pub fn fn_expect_0() {
+    let titulo = String::from(" expect ");
+    imprime_titulo(&titulo);
+
+    let resultado = dividir(10, 0);
+    let valor = resultado.expect("Error al dividir");
+    println!("El resultado es: {}", valor);
+}
+
+fn dividir(a: i32, b: i32) -> Result<i32, String> {
+    if b == 0 { return Err(String::from("No se puede dividir por cero")); }
+    
+    Ok(a / b)
+}
+
+//*****************************************************************************
+/* Nota:        
+La macro "assert" toma una expresión como argumento y comprueba si la expresión
+es verdadera o falsa. Si la expresión es verdadera, el programa continúa su ejecución
+normalmente. Si la expresión es falsa, el programa finaliza inmediatamente y se muestra
+un mensaje de error que indica la ubicación del error y la expresión que falló.
+*/
+#[allow(dead_code)]
+pub fn fn_assent() {
+    let titulo = String::from(" assent / assent_eq / assent_ne ");
+    imprime_titulo(&titulo);
+
+    let var_cadena = "Cadena 0";
+
+    assert!( var_cadena == "Cadena 0", "{} debiera ser Cadena 0", var_cadena );
+    assert_eq!( var_cadena, "Cadena 0", "{} var_cadena y deberían ser iguales", var_cadena );
+    assert_ne!( var_cadena, "Cadena 1", "Introduciste {}. La entrada no debe ser igual a cadena 1", var_cadena );
+
+    println!("Si ejecuto este println, se cumplieron todos los assent");
+}
+
 //*****************************************************************************
