@@ -27,8 +27,9 @@
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo);
 }
+
 //***************************************************************************** Array
-/* Nota:
+/* Nota:    
 Los Arrays:
 - No pueden cambiar de tamaño.
 - Tienen datos del mismo tipo.
@@ -87,6 +88,28 @@ pub fn arreglos(num: u8) {
     );
 }
 
+//***************************************************************************** Slice y Rangos
+/* Nota:    
+
+*/
+#[allow(dead_code)]
+pub fn slice(){
+    let titulo = String::from(" Slice ");
+    imprime_titulo(&titulo);
+
+    let mi_slice = &[1, 2, 3, 4, 5, 6];
+    let mi_slice_len = mi_slice.len();
+    println!("mi_slice contiene {} elementos.", mi_slice_len);
+    println!("Ubicación de variable mi:slice_len (Stack): {:p}", &mi_slice_len);
+    println!("Ubicación del puntero a los datos         : {:p}", &mi_slice);    
+    println!("mi_slice de números ocupa {} bytes", std::mem::size_of_val(&mi_slice));
+    println!("Dirección primer elemento mi_slice (Heap) : {:p}", &mi_slice[0]);
+    println!("Dirección último elemento mi_slice (Heap) : {:p}", &mi_slice[5]);
+    println!("Elementos contenidos en posiciones [..2]: {:?}", &mi_slice[..2]);
+    println!("Elementos contenidos en posiciones [2..5]: {:?}", &mi_slice[2..5]);
+    println!("Elementos contenidos en posiciones [2..]: {:?}", &mi_slice[2..]);
+    println!("Elementos contenidos en posiciones [..]: {:?}", &mi_slice[..]);
+}
 //***************************************************************************** Vector
 /* Nota:    
 Los Vec siempre contienen valores y para eso sirven <> (paréntesis angulares).

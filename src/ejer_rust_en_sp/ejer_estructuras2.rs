@@ -191,9 +191,6 @@ let claves = vec!["Llave 1", "Llave 2", "Llave 3", "Llave 4", "Llave 5", "Llave 
     println!("Mi Map: {:?}", mi_map);
 }
 
-
-
-
 //***************************************************************************** Algunos métodos asociados
 #[allow(dead_code)]
 pub fn metodos_1() {
