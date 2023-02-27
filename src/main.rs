@@ -44,7 +44,6 @@ mod ejer_rust_en_sp;
 mod proyectos;
 mod rust_standard_library;
 mod poo;
-mod lib_memoria;
 mod lib_closure;
 mod lib_flujos;
 mod cap13;
@@ -131,7 +130,15 @@ mod cap13;
     ejer_rust_en_sp::ejer_gestion_errores::fn_expect_0();
     ejer_rust_en_sp::ejer_gestion_errores::fn_assent();
 */
-
+/* Manejo de memoria 0                          
+    ejer_rust_en_sp::ejer_memoria::memoria_deref();
+    ejer_rust_en_sp::ejer_memoria::memoria_alloc_0();
+    ejer_rust_en_sp::ejer_memoria::memoria_alloc_1();
+    ejer_rust_en_sp::ejer_memoria::memoria_heap();
+    ejer_rust_en_sp::ejer_memoria::memoria_ptr0();
+    ejer_rust_en_sp::ejer_memoria::memoria_prt1();
+    ejer_rust_en_sp::ejer_memoria::memoria_manuallydrop();
+*/
 
 /* Revisar                  
     lib_closure::closure_0();
@@ -144,13 +151,6 @@ mod cap13;
     lib_flujos::flujos();
 
 
-    lib_memoria::memoria_deref();
-    lib_memoria::memoria_alloc_0();
-    lib_memoria::memoria_alloc_1();
-    lib_memoria::memoria_heap();
-    lib_memoria::memoria_ptr0();
-    lib_memoria::memoria_prt1();
-    lib_memoria::memoria_manuallydrop();
     
 
     poo::poo();

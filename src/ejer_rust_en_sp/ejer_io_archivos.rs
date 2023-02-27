@@ -36,7 +36,7 @@ o devuelve el valor envuelto en Ok si Result es correcto.
 */
 
 #[allow(dead_code)]
-pub fn gestion_error(){
+pub fn archivo_0(){
 
 
 //********************************* "panic" si el fichero no existe

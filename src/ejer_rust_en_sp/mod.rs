@@ -30,3 +30,4 @@ pub mod ejer_estructuras2;
 pub mod ejer_genericos_option_result;
 pub mod ejer_gestion_errores;
 pub mod ejer_io_archivos;
+pub mod ejer_memoria0;
