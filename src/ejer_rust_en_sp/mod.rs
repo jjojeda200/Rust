@@ -21,6 +21,7 @@
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
 ***************************************************************************************/
+
 // Archivos de módulos
 pub mod ejer_basicos;
 pub mod ejer_estructuras_de_control;
@@ -31,3 +32,4 @@ pub mod ejer_genericos_option_result;
 pub mod ejer_gestion_errores;
 pub mod ejer_io_archivos;
 pub mod ejer_memoria0;
+pub mod ejer_trait_rasgos;

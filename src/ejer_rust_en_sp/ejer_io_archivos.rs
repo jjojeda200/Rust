@@ -1,8 +1,8 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          12-02-2023
+    Fecha:          26-02-2023
     Titulo:         introducción a RUST
-    Descripción:    Funciones de prueba de control de errores, result, option, match de Rust
+    Descripción:    Funciones de acceso a FS
     Referencias:
     Rust Programming Language
                 https://doc.rust-lang.org/stable/book/

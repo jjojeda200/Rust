@@ -8,6 +8,11 @@ edition = "2021"
 [dependencies]
 hexdump = "0.1.1"
 
+
+#---------------------------------------------------
+# Requeridos ejer_trait_rasgos
+itertools = "0.10.5"
+
 #---------------------------------------------------
 # Requeridos por firebase, descomentar para usar
 #firebase-rs = "2.0.6"

@@ -66,6 +66,9 @@ La función principal (main) realiza las siguientes operaciones:
 */
 #[allow(dead_code)]
 pub fn fn_interrogante() {
+    let titulo = String::from(" --> ? <-- ");
+    imprime_titulo(&titulo);
+    
 
     let claves = vec!["Llave 1", "Llave 2", "Llave 3", "Llave 4", "Llave 5", "Llave 6"];
 

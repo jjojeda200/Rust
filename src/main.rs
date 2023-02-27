@@ -70,6 +70,8 @@ mod cap13;
 
 
 
+    ejer_rust_en_sp::ejer_trait_rasgos::fn_windows();
+    ejer_rust_en_sp::ejer_trait_rasgos::fn_trait();
 
 
 //*****************************************************************************
@@ -90,6 +92,7 @@ mod cap13;
 */
 /* Estructuras 0                                
     ejer_rust_en_sp::ejer_estructuras0::arreglos(4);
+    ejer_rust_en_sp::ejer_estructuras0::slice();
     ejer_rust_en_sp::ejer_estructuras0::vector();
     ejer_rust_en_sp::ejer_estructuras0::tupla();
     ejer_rust_en_sp::ejer_estructuras0::estructura();
@@ -139,6 +142,10 @@ mod cap13;
     ejer_rust_en_sp::ejer_memoria::memoria_prt1();
     ejer_rust_en_sp::ejer_memoria::memoria_manuallydrop();
 */
+/* Trait (Rasgos)                               
+*/
+
+
 
 /* Revisar                  
     lib_closure::closure_0();
@@ -149,9 +156,7 @@ mod cap13;
 
     
     lib_flujos::flujos();
-
-
-    
+        
 
     poo::poo();
 

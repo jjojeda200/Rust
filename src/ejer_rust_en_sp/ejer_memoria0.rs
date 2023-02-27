@@ -22,23 +22,22 @@
                 https://doc.rust-lang.org/std/index.html
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
-    Dependencias:
-
-    Compilar:
-
-    Licencia:
-
 ***************************************************************************************/
 use hexdump::{hexdump};
 use std::alloc::{alloc, dealloc, Layout};
 
+fn imprime_titulo(titulo: &String) {
+    println!("\n{:*^80}", titulo);
+}
 
 //***************************************************************************** Deref y size_of
 use std::ops::Deref;
 
 #[allow(dead_code)]
 pub fn memoria_deref() {
-    println!("*************************************** Deref");
+    let titulo = String::from(" Deref (des referenciar) ");
+    imprime_titulo(&titulo);
+
     let number = 5;
     let number_pointer = &number;
 
@@ -62,15 +61,17 @@ pub fn memoria_deref() {
 
 //***************************************************************************** Manejo alloc y dealloc
 /* Notas:   
-    Es importante tener en cuenta que la función malloc no está disponible por defecto
-    en Rust, por lo que debemos importar la biblioteca std::alloc. Además, debemos
-    usar la función con precaución, ya que estamos trabajando con punteros y
-    operaciones unsafe.
+Es importante tener en cuenta que la función malloc no está disponible por defecto
+en Rust, por lo que debemos importar la biblioteca std::alloc. Además, debemos
+usar la función con precaución, ya que estamos trabajando con punteros y
+operaciones unsafe.
 */
 
 #[allow(dead_code)]
 pub fn memoria_alloc_0() {
-    println!("*************************************** Manejo alloc y dealloc");
+    let titulo = String::from(" Manejo alloc y dealloc 0 ");
+    imprime_titulo(&titulo);
+
     // Asignar un bloque de memoria de 10 bytes
     let size = 16;
     let ptr = malloc(size);
@@ -115,7 +116,9 @@ fn free(ptr: *mut u8) {
 //***************************************************************************** Manejo alloc y dealloc
 #[allow(dead_code)]
 pub fn memoria_alloc_1() {
-    println!("*************************************** Manejo alloc y dealloc");
+    let titulo = String::from(" Manejo alloc y dealloc 1 ");
+    imprime_titulo(&titulo);
+
     // Tamaño en bytes que queremos reservar de memoria
     let size = 10;
     println!("Tamaño de la reserva {} Bit, {} Bytes", (64 * size/8), size);
@@ -155,7 +158,9 @@ pub fn memoria_alloc_1() {
 use std::collections::BinaryHeap;
 #[allow(dead_code)]
 pub fn memoria_heap() {
-    println!("*************************************** Manejo HEAP");
+    let titulo = String::from(" Manejo HEAP ");
+    imprime_titulo(&titulo);
+
     // let mut heap = BinaryHeap::new();
     let mut heap = BinaryHeap::with_capacity(6);
 
@@ -195,19 +200,21 @@ pub fn memoria_heap() {
 
 //***************************************************************************** Manejo Punteros
 /* Notas:   
-    Este código muestra cómo acceder a la memoria de un arreglo y como imprimir los
-    valores en hexadecimal. El arreglo data es un arreglo de u8 con 10 elementos, que
-    se utiliza para mostrar un ejemplo de inspección de memoria. Se obtiene un puntero
-    al inicio del arreglo usando as_ptr() y un puntero al final del arreglo usando la
-    función unsafe add(). Luego, se itera sobre el rango de memoria utilizando un bucle
-    for y se accede a los valores de la memoria usando unsafe *. Finalmente, se imprimen
-    los valores en hexadecimal usando la dirección de memoria y el valor.  -->
+Este código muestra cómo acceder a la memoria de un arreglo y como imprimir los
+valores en hexadecimal. El arreglo data es un arreglo de u8 con 10 elementos, que
+se utiliza para mostrar un ejemplo de inspección de memoria. Se obtiene un puntero
+al inicio del arreglo usando as_ptr() y un puntero al final del arreglo usando la
+función unsafe add(). Luego, se itera sobre el rango de memoria utilizando un bucle
+for y se accede a los valores de la memoria usando unsafe *. Finalmente, se imprimen
+los valores en hexadecimal usando la dirección de memoria y el valor.  -->
 */
 //use std::ptr;
 
 #[allow(dead_code)]
 pub fn memoria_ptr0() {
-    println!("*************************************** Manejo Punteros");
+    let titulo = String::from(" Manejo Punteros ");
+    imprime_titulo(&titulo);
+
     let data: [u8; 10] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     let start_ptr = data.as_ptr();
     let end_ptr: *const u8 = unsafe { start_ptr.add(data.len()) };
@@ -223,16 +230,18 @@ pub fn memoria_ptr0() {
 }
 
 //***************************************************************************** Manejo Punteros
-use std::mem;
-/*
+/* Notas:   
 Este código convierte un slice de bytes en un vector de bytes y luego obtiene y muestra la
 dirección de memoria en la pila y en la heap en formato hexadecimal, así como el tamaño en
  bytes de los datos en la pila y en la heap.
 */
+use std::mem;
 
 #[allow(dead_code)]
 pub fn memoria_prt1() {
-    println!("*************************************** Manejo Punteros");
+    let titulo = String::from(" Manejo Punteros ");
+    imprime_titulo(&titulo);
+
     let data = b"Memoria";
 
     // Convertir un slice de bytes en un vector de bytes
@@ -263,7 +272,7 @@ pub fn memoria_prt1() {
     println!("Los datos en el heap son {} bytes", heap_size);
 }
 
-//*****************************************************************************
+//***************************************************************************** ManuallyDrop
 /* Notas:   
 Ejemplo de cómo manipular y reconstruir un Vec sin ejecutar su destructor para
 tener el control completo de la asignación de memoria.
@@ -282,6 +291,9 @@ asegurarse de que el Vec reconstruido tenga los valores correctos [4, 5, 6].
 */
 #[allow(unused)]
 pub fn memoria_manuallydrop() {
+    let titulo = String::from(" ManuallyDrop ");
+    imprime_titulo(&titulo);
+
     use std::ptr;
     use std::mem;
 
