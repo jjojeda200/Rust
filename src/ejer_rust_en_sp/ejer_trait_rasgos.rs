@@ -64,11 +64,27 @@ pub fn fn_windows() {
 
 //***************************************************************************** Método windows
 /* Notas:   
-
+Este es un ejemplo de código en Rust que utiliza el crate (paquete) itertools y
+define un trait (rasgo) personalizado llamado "Prefix". El trait proporciona un
+método "has_prefix" que verifica si una secuencia comienza con una sub-secuencia
+dada.
+El método utiliza los métodos "iter" y "positions" del tipo de referencia "&[T]"
+para encontrar la posición del primer elemento de la sub-secuencia en la secuencia
+y luego utiliza la función "find" para verificar si la sub-secuencia completa
+comienza en esa posición. El método devuelve true si la sub-secuencia se encuentra
+al principio de la secuencia y false en caso contrario. El programa principal
+define dos vectores de diferentes tipos de datos (enteros y flotantes) y llama al
+método "has_prefix" para verificar si la sub-secuencia [3, 4, 5] está presente al
+principio del vector de enteros y si la sub-secuencia [4.20, 5.0] está presente al
+principio del vector de flotantes. El resultado de cada llamada se imprime mediante
+la función "dbg".
 */
 use itertools::Itertools;
 
 pub fn fn_trait() {
+    let titulo = String::from(" Crate Itertools + Trait ");
+    imprime_titulo(&titulo);
+    
     let integers = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     let i_slice = &integers[..];
     let integer_result = i_slice.has_prefix(&[3, 4, 5]);

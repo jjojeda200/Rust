@@ -90,7 +90,28 @@ pub fn arreglos(num: u8) {
 
 //***************************************************************************** Slice y Rangos
 /* Nota:    
+Un "slice" es una vista en un bloque contiguo de memoria que se puede utilizar
+para acceder a un subconjunto de elementos de una colección (como un vector o
+un array). Un slice se representa mediante un tipo de referencia "&[T]", donde
+"T" es el tipo de los elementos de la colección.
 
+Un slice puede ser de longitud fija o dinámica. Los slices de longitud fija se
+definen utilizando la sintaxis [T; n], donde "T" es el tipo de los elementos y
+"n" es el número de elementos en el slice. Los slices dinámicos se definen
+utilizando la sintaxis &[T] y su longitud puede variar en tiempo de ejecución.
+
+Un slice proporciona varios métodos útiles, como "len" para obtener la longitud
+del slice, "is_empty" para verificar si el slice está vacío, "first" y "last"
+para obtener el primer y último elemento del slice, respectivamente, y "iter"
+y "iter_mut" para iterar sobre los elementos del slice de forma inmutable o
+mutable, respectivamente.
+
+Además, los slices son compatibles con el polimorfismo en Rust, lo que significa
+que se pueden utilizar para referirse a cualquier tipo de colección que implemente
+el trait "Deref<Target=[T]>", que proporciona una forma de convertir implícitamente
+un tipo de referencia "&T" en un slice "&[T]". Esto significa que se pueden escribir
+funciones y métodos genéricos que acepten cualquier tipo de colección que se pueda
+convertir a un slice.
 */
 #[allow(dead_code)]
 pub fn slice(){
