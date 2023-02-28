@@ -114,7 +114,7 @@ funciones y métodos genéricos que acepten cualquier tipo de colección que se 
 convertir a un slice.
 */
 #[allow(dead_code)]
-pub fn slice(){
+pub fn rangos_slice(){
     let titulo = String::from(" Slice ");
     imprime_titulo(&titulo);
 
@@ -130,6 +130,79 @@ pub fn slice(){
     println!("Elementos contenidos en posiciones [2..5]: {:?}", &mi_slice[2..5]);
     println!("Elementos contenidos en posiciones [2..]: {:?}", &mi_slice[2..]);
     println!("Elementos contenidos en posiciones [..]: {:?}", &mi_slice[..]);
+}
+//***************************************************************************** String
+/* Nota:   
+Hay 2 tipos de cadenas
+1. String : Vector de bytes que se pueden cambiar
+2. &str : Apunta a la cadena y permite ver
+*/
+#[allow(dead_code)]
+pub fn cadenas_string(){
+    let titulo = String::from(" String ");
+    imprime_titulo(&titulo);
+
+// Crear una cadena ampliable vacía, Insertar un caracter e inserta una cadena al final
+    let mut st1 = String::new();
+    st1.push('A');
+    st1.push_str(" Mundo");
+
+//  Iterar a través de palabras dividiendo en espacios en blanco
+    for word in st1.split_whitespace() { println!("{}", word); }
+
+// Reemplazar una cadena (Use "" para eliminar)
+    let st2 = st1.replace("A", "Otro");
+    println!("{}", st2);
+
+// Crear cadena de caracteres
+    let st3 = String::from("x r t b h k k a m c");
+
+// Convertir a un vector, ordenar los caracteres y eliminar duplicados
+    let mut v1: Vec<char> = st3.chars().collect();
+    v1.sort();
+    v1.dedup();
+
+// Ciclo a través del vector
+    for char in v1 { print!(" {}", char); }
+
+// Crear un literal de cadena
+    let st4: &str = "Cadena aleatoria";
+
+// Convertir a cadena asignada de almacenamiento dinámico
+    let mut st5: String = st4.to_string();
+    println!("\n{}", st5);
+
+// Convertir cadena en una matriz de bytes
+    let _byte_arr1 = st5.as_bytes();
+
+// Obtener una porción de la cadena del índice 0 al 5
+    let st6 = &st5[0..6];
+    println!("{}", st6);
+
+// Obtener la longitud de la cadena
+    println!("Longitud de la cadena: {}", st6.len());
+
+// Eliminar valores en la cadena si es mutable
+    st5.clear();
+
+// Combinar cadenas
+    let st6 = String::from("Solo pocas ");
+    let st7 = String::from("palabras");
+
+// st6 ya no se puede usar
+// Solo puede agregar una referencia de una cadena a otra
+    let st8 = st6 + &st7;
+
+// Recorrer las letras de una cadena e imprimir unicode
+    for char in st8.bytes() {
+        print!(" {}", char);
+    }
+    println!("");
+
+// Recorrer las letras de una cadena e imprimir caracteres
+    for char in st8.chars() { print!(" {}", char); }
+    println!("");
+
 }
 //***************************************************************************** Vector
 /* Nota:    

@@ -23,6 +23,7 @@
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
 ***************************************************************************************/
+#[allow(unused_variables)]
 
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo);
@@ -34,6 +35,7 @@ fn imprime_titulo(titulo: &String) {
 
 //***************************************************************************** Método windows
 /* Notas:   
+https://www.youtube.com/watch?v=ykQbsTHqKFo&t=42s
 Fragmento de código que utiliza el método windows() en un vector valores.
 El método windows() devuelve un iterador sobre ventanas de tamaño fijo que se
 mueven a lo largo del vector. En este caso, se está iterando sobre ventanas de
@@ -49,7 +51,7 @@ de lo contrario tendrá un valor de false.
 
 La función dbg!() se utiliza para imprimir el valor de result en la consola.
 */
-
+#[allow(dead_code)]
 pub fn fn_windows() {
     let titulo = String::from(" Método windows ");
     imprime_titulo(&titulo);
@@ -64,6 +66,7 @@ pub fn fn_windows() {
 
 //***************************************************************************** Método windows
 /* Notas:   
+https://www.youtube.com/watch?v=ykQbsTHqKFo&t=42s
 Este es un ejemplo de código en Rust que utiliza el crate (paquete) itertools y
 define un trait (rasgo) personalizado llamado "Prefix". El trait proporciona un
 método "has_prefix" que verifica si una secuencia comienza con una sub-secuencia
@@ -81,6 +84,7 @@ la función "dbg".
 */
 use itertools::Itertools;
 
+#[allow(dead_code)]
 pub fn fn_trait() {
     let titulo = String::from(" Crate Itertools + Trait ");
     imprime_titulo(&titulo);

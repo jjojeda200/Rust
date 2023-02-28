@@ -70,8 +70,7 @@ mod cap13;
 
 
 
-    ejer_rust_en_sp::ejer_trait_rasgos::fn_windows();
-    ejer_rust_en_sp::ejer_trait_rasgos::fn_trait();
+ejer_rust_en_sp::ejer_estructuras0::cadenas_string();
 
 
 //*****************************************************************************
@@ -92,7 +91,8 @@ mod cap13;
 */
 /* Estructuras 0                                
     ejer_rust_en_sp::ejer_estructuras0::arreglos(4);
-    ejer_rust_en_sp::ejer_estructuras0::slice();
+    ejer_rust_en_sp::ejer_estructuras0::rangos_slice();
+
     ejer_rust_en_sp::ejer_estructuras0::vector();
     ejer_rust_en_sp::ejer_estructuras0::tupla();
     ejer_rust_en_sp::ejer_estructuras0::estructura();
@@ -143,6 +143,10 @@ mod cap13;
     ejer_rust_en_sp::ejer_memoria::memoria_manuallydrop();
 */
 /* Trait (Rasgos)                               
+
+
+    ejer_rust_en_sp::ejer_trait_rasgos::fn_windows();
+    ejer_rust_en_sp::ejer_trait_rasgos::fn_trait();
 */
 
 
