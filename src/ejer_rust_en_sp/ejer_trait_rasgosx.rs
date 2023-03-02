@@ -64,7 +64,7 @@ pub fn fn_windows() {
     dbg!(result);
 }
 
-//***************************************************************************** Método windows
+//***************************************************************************** Método Crate Itertools
 /* Notas:   
 https://www.youtube.com/watch?v=ykQbsTHqKFo&t=42s
 Este es un ejemplo de código en Rust que utiliza el crate (paquete) itertools y

@@ -30,6 +30,15 @@
 
 ***************************************************************************************/
 
+fn imprime_titulo(titulo: &String) {
+      println!("\n{:*^80}", titulo);
+  }
+  
+/*
+
+*/
+
+
 // Objeto(Clase) y sus Atributos
 struct Triangulo
 {
@@ -66,8 +75,10 @@ trait Figura {
 }
 
 #[allow(dead_code)]
-pub fn poo()
-{
+pub fn poo() {
+      let titulo = String::from(" Ejemplo de POO ");
+      imprime_titulo(&titulo);
+
       // Instanciar objeto
       let mut tri = Triangulo
       {

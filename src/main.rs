@@ -43,7 +43,6 @@ mod ejer_lets_get_rusty;
 mod ejer_rust_en_sp;
 mod proyectos;
 mod rust_standard_library;
-mod poo;
 mod lib_closure;
 mod lib_flujos;
 mod cap13;
@@ -70,7 +69,11 @@ mod cap13;
 
 
 
-ejer_rust_en_sp::ejer_estructuras0::cadenas_string();
+ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_0();
+ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_1();
+ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_0();
+ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_1();
+
 
 
 //*****************************************************************************
@@ -92,7 +95,7 @@ ejer_rust_en_sp::ejer_estructuras0::cadenas_string();
 /* Estructuras 0                                
     ejer_rust_en_sp::ejer_estructuras0::arreglos(4);
     ejer_rust_en_sp::ejer_estructuras0::rangos_slice();
-
+    ejer_rust_en_sp::ejer_estructuras0::cadenas_string();
     ejer_rust_en_sp::ejer_estructuras0::vector();
     ejer_rust_en_sp::ejer_estructuras0::tupla();
     ejer_rust_en_sp::ejer_estructuras0::estructura();
@@ -142,13 +145,19 @@ ejer_rust_en_sp::ejer_estructuras0::cadenas_string();
     ejer_rust_en_sp::ejer_memoria::memoria_prt1();
     ejer_rust_en_sp::ejer_memoria::memoria_manuallydrop();
 */
-/* Trait (Rasgos)                               
+/* Trait 0 (Métodos de instancia y estaticos)   
+ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_0();
+ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_1();
+ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_0();
+ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_1();
 
-
-    ejer_rust_en_sp::ejer_trait_rasgos::fn_windows();
-    ejer_rust_en_sp::ejer_trait_rasgos::fn_trait();
 */
+/* Trait x (Rasgos)                             
 
+
+    ejer_rust_en_sp::ejer_trait_rasgosx::fn_windows();
+    ejer_rust_en_sp::ejer_trait_rasgosx::fn_trait();
+*/
 
 
 /* Revisar                  
@@ -161,9 +170,6 @@ ejer_rust_en_sp::ejer_estructuras0::cadenas_string();
     
     lib_flujos::flujos();
         
-
-    poo::poo();
-
     //-----------------------------
     cap13::sorteo();
     
