@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          31-01-2023
+    Fecha:          02-03-2023
     Titulo:         introducción a RUST
     Descripción:    Ejemplo básico de implementación de objeto en Rust
     Referencias:
@@ -90,6 +90,7 @@ impl Persona {
     }
 }
 
+#[allow(dead_code)]
 pub fn ejemplo_instancia_0() {
       let titulo = String::from(" Ejemplo método de instancia 0 ");
       imprime_titulo(&titulo);
@@ -116,6 +117,7 @@ impl Rectangle {
       }
 }
 
+#[allow(dead_code)]
 pub fn ejemplo_instancia_1() {
       let titulo = String::from(" Ejemplo método de instancia 1 ");
       imprime_titulo(&titulo);
@@ -126,7 +128,7 @@ pub fn ejemplo_instancia_1() {
   
 
 //*****************************************************************************
-/* Ejemplos métodos estáticos:       
+/* Ejemplos métodos estáticos:            
 Los métodos estáticos se definen usando la palabra clave "impl" seguida del nombre
 de la estructura o tipo de datos y luego la palabra clave "fn" con el nombre del
 método.
@@ -144,6 +146,7 @@ impl Calculadora {
     }
 }
 
+#[allow(dead_code)]
 pub fn ejemplo_estatico_0() {
       let titulo = String::from(" Ejemplo método estático 0 ");
       imprime_titulo(&titulo);
@@ -172,10 +175,12 @@ struct Circle {
       }
   }
   
+#[allow(dead_code)]
   pub fn ejemplo_estatico_1() {
       let titulo = String::from(" Ejemplo método estático 1 ");
       imprime_titulo(&titulo);
 
       let circle = Circle { radius: 10.0 };
       println!("Area: {}", circle.area());
-  }
+}
+

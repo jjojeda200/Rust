@@ -47,8 +47,22 @@ mod lib_closure;
 mod lib_flujos;
 mod cap13;
 
- fn main() {
+
+/* función imprime_titulo   
+La función imprime_titulo(titulo: &String) recibe como parámetro un puntero a
+una cadena de texto String y utiliza la macro println!() para imprimir el valor
+de la cadena de texto centrado en 80 caracteres y rodeado por asteriscos.
+*/
+fn imprime_titulo(titulo: &String) {
+    println!("\n{:*^80}", titulo);
+}
+
+
+
+fn main() {
 // $env:RUST_BACKTRACE=0
+    let titulo = String::from(" Función main, punto principal de entrada al programa ");
+    imprime_titulo(&titulo);
     
     // let _result = std::process::Command::new("clear").status().unwrap();
     
@@ -68,11 +82,8 @@ mod cap13;
 */
 
 
-
-ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_0();
-ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_1();
-ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_0();
-ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_1();
+ 
+    ejer_rust_en_sp::ejer_memoriax::memoria();
 
 
 
@@ -137,24 +148,24 @@ ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_1();
     ejer_rust_en_sp::ejer_gestion_errores::fn_assent();
 */
 /* Manejo de memoria 0                          
-    ejer_rust_en_sp::ejer_memoria::memoria_deref();
-    ejer_rust_en_sp::ejer_memoria::memoria_alloc_0();
-    ejer_rust_en_sp::ejer_memoria::memoria_alloc_1();
-    ejer_rust_en_sp::ejer_memoria::memoria_heap();
-    ejer_rust_en_sp::ejer_memoria::memoria_ptr0();
-    ejer_rust_en_sp::ejer_memoria::memoria_prt1();
-    ejer_rust_en_sp::ejer_memoria::memoria_manuallydrop();
+    ejer_rust_en_sp::ejer_memoria0::memoria_deref();
+    ejer_rust_en_sp::ejer_memoria0::memoria_alloc_0();
+    ejer_rust_en_sp::ejer_memoria0::memoria_alloc_1();
+    ejer_rust_en_sp::ejer_memoria0::memoria_heap();
+    ejer_rust_en_sp::ejer_memoria0::memoria_ptr0();
+    ejer_rust_en_sp::ejer_memoria0::memoria_prt1();
+    ejer_rust_en_sp::ejer_memoria0::memoria_manuallydrop();
+*/
+/* Manejo de memoria x                          
+    ejer_rust_en_sp::ejer_memoriax::memoria();
 */
 /* Trait 0 (Métodos de instancia y estaticos)   
 ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_0();
 ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_1();
 ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_0();
 ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_1();
-
 */
 /* Trait x (Rasgos)                             
-
-
     ejer_rust_en_sp::ejer_trait_rasgosx::fn_windows();
     ejer_rust_en_sp::ejer_trait_rasgosx::fn_trait();
 */
