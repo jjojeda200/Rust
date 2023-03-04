@@ -82,10 +82,11 @@ fn main() {
 */
 
 
- 
 
-ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_generico_0();
-ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_generico_memoria();
+
+ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_poo_0();
+ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_poo_1();
+
 
 
 //*****************************************************************************
@@ -166,12 +167,16 @@ ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_1();
 ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_0();
 ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_1();
 */
-/* Trait 1 (Programación Orientada a Objetos)   
+/* Trait 1 (Programación Orientada a Objetos 1) 
 ejer_rust_en_sp::ejer_trait_rasgos1::ejemplo_poo_0();
 */
-/* Trait 2 (Genéricos y manejo de memoria)      
-ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_generico_0();
-ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_generico_memoria();
+/* Trait 2 (Programación Orientada a Objetos 2) 
+ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_poo_0();
+ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_poo_1();
+*/
+/* Trait 3 (Genéricos y manejo de memoria)      
+ejer_rust_en_sp::ejer_trait_rasgos3::ejemplo_generico_0();
+ejer_rust_en_sp::ejer_trait_rasgos3::ejemplo_generico_memoria();
 */
 /* Trait x (Rasgos)                             
     ejer_rust_en_sp::ejer_trait_rasgosx::fn_windows();

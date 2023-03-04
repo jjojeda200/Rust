@@ -29,7 +29,7 @@ fn imprime_titulo(titulo: &String){
 }
 //***************************************************************************** Variables y tipos de datos
 /*  Notas:      
-Type  permite definir un alias para un tipo de datos:
+Type permite definir un alias para un tipo de datos:
 type Entero = i32
 type Byte = u8
 */
@@ -171,7 +171,7 @@ Por lo tanto, use el mismo nombre de duración, por ejemplo: 'dur o cualquier ot
 */
 #[allow(dead_code)]
 pub fn duración_funciones() {
-    let titulo = String::from(" Tiempos de vida en funcioness ");
+    let titulo = String::from(" Tiempos de vida en funciones ");
     imprime_titulo(&titulo);
 
     let magic1 = String::from("¡abracadabra!");

@@ -27,12 +27,8 @@
 fn imprime_titulo(titulo: &String) {
       println!("\n{:*^80}", titulo);
   }
-  
-/*
 
-*/
-
-
+//***************************************************************************** 
 // Objeto(Clase) y sus Atributos
 struct Triangulo
 {
@@ -89,3 +85,4 @@ pub fn ejemplo_poo_0() {
       tri.set_altura(30.0);
       println!("El área nueva del triangulo es = {}", tri.area());
 }
+//***************************************************************************** 

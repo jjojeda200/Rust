@@ -2,7 +2,7 @@
     José Juan Ojeda Granados
     Fecha:          04-03-2023
     Titulo:         introducción a RUST
-    Descripción:    Ejemplo avanzado de un trait que usa genéricos y manejo de memoria
+    Descripción:    Ejemplo básico de implementación de objeto en Rust
     Referencias:
     Rust Programming Language
                 https://doc.rust-lang.org/stable/book/
@@ -25,162 +25,195 @@
 ***************************************************************************************/
 
 fn imprime_titulo(titulo: &String) {
-      println!("\n{:*^80}", titulo);
-  }
+    println!("\n{:*^80}", titulo);
+}
 
-//***************************************************************************** Trait con genéricos <T>
-/* Descripción: trait Search              
-Este código en Rust define un trait llamado Search con un parámetro genérico T
-que describe la capacidad de buscar un valor de tipo T en algún conjunto de datos.
-Luego define una estructura llamada LinearSearcher que implementa el trait Search
-para realizar una búsqueda lineal en una lista de elementos de tipo T.
-En resumen define un método search que toma una referencia a un valor de tipo T
-y devuelve una opción que representa la posición del valor en algún tipo de
-estructura de datos.
+//*****************************************************************************
+/* Descripción:
+Este código de Rust define tres estructuras: Monstruo, Mago y Cazador. Además,
+define dos rasgos (traits) de lucha: LuchaCercana y LuchaADistancia.
+
+La estructura Monstruo tiene un solo campo, salud, que es un número entero con
+signo de 32 bits (i32). Las estructuras Mago y Cazador también tienen un campo
+de salud, pero no tienen más campos.
 */
-trait Search<T> {
-	fn search(&self, value: &T) -> Option<usize>;
+struct Monstruo {
+    salud: i32,
+}
+#[allow(dead_code)]
+#[derive(Debug)]
+struct Mago {
+    salud: i32,
+}
+#[allow(dead_code)]
+#[derive(Debug)]
+struct Cazador {
+    salud: i32,
 }
 
-struct LinearSearcher<T> {
-	data: Vec<T>,
-}
-
-/* Descripción: trait Search                
-La implementación del trait Search para un LinearSearcher, que es una estructura
-que contiene un vector de valores de tipo T. La implementación de search utiliza
-un ciclo for para iterar sobre el vector y encontrar la posición del valor dado.
-
-En resumen se busca el valor de entrada value en la lista de elementos data y se
-devuelve el índice de la primera aparición del valor si se encuentra, o None si
-no se encuentra.
+/* Descripción: LuchaCercana              
+El rasgo LuchaCercana define dos métodos: atacar_con_espada y atacar_con_la_mano.
+Ambos métodos toman una referencia mutable a un Monstruo como parámetro y reducen
+su salud en una cantidad específica. Además, ambos métodos imprimen un mensaje por
+la consola que indica el resultado del ataque.
 */
-impl<T: PartialEq> Search<T> for LinearSearcher<T> {
-	fn search(&self, value: &T) -> Option<usize> {
-    	for (i, v) in self.data.iter().enumerate() {
-        	if v == value {
-            	return Some(i);
-        	}
-    	}
-    	None
-	}
+trait LuchaCercana: std::fmt::Debug {
+    // Ahora el tipo necesita tener Debug para poder implementar LuchaCercana
+    fn atacar_con_espada(&self, oponente: &mut Monstruo) {
+        oponente.salud -= 10;
+        println!(
+            "Atacaste con espada. Tu oponente tiene ahora {} de salud. Ahora tienes {:?}",
+            // se puede usar {:?} porque se dispone de Debug
+            oponente.salud,
+            &self
+        );
+    }
+    fn atacar_con_la_mano(&self, oponente: &mut Monstruo) {
+        oponente.salud -= 2;
+        println!(
+            "Atacaste con la mano. tu oponente tiene ahora {} de salud. Ahora tienes {:?}",
+            oponente.salud, &self
+        );
+    }
 }
+impl LuchaCercana for Mago {}
+impl LuchaCercana for Cazador {}
 
-/* Descripción: ejemplo_generico_0        
-La función ejemplo_generico_0 crea una instancia de LinearSearcher con una lista
-de enteros del 1 al 5, y luego realiza una búsqueda en esa instancia de un valor
-de 3. Si se encuentra, se imprime el índice de la primera aparición del valor en
-la lista. En este caso, debería imprimir "Index of 3: 2".
+/* Descripción: LuchaADistancia           
+El rasgo LuchaADistancia define dos métodos: atacar_con_arco y atacar con_piedra.
+Ambos métodos toman una referencia mutable a un Monstruo y un número entero sin
+signo (u32) que representa la distancia entre el cazador y el monstruo. Si la
+distancia es menor que un valor específico, el método reduce la salud del monstruo
+y emite un mensaje en la consola.
+*/
+trait LuchaADistancia: std::fmt::Debug {
+    // también se podría haber escrito LuchaADistancia: LuchaCercana
+    // porque LuchaCercana implementa ya Debug
+    fn atacar_con_arco(&self, oponente: &mut Monstruo, distancia: u32) {
+        if distancia < 10 {
+            oponente.salud -= 10;
+            println!(
+                "Atacaste con el arco. Tu oponente tiene ahora {} de salud. Ahora tienes {:?}",
+                oponente.salud, &self
+            );
+        }
+    }
+    fn atacar_con_piedra(&self, oponente: &mut Monstruo, distancia: u32) {
+        if distancia < 3 {
+            oponente.salud -= 4;
+        }
+        println!(
+            "Atacaste con una piedra. Tu oponente tiene ahora {} de salud. Ahora tienes {:?}",
+            oponente.salud, &self
+        );
+    }
+}
+impl LuchaADistancia for Cazador {}
 
-Es importante destacar que Rust utiliza el concepto de ownership y borrowing
-para gestionar la memoria. En este ejemplo, la propiedad del vector se pasa al
-LinearSearcher en la definición de la estructura. Luego, el método search toma
-una referencia al valor que se está buscando en el vector. De esta manera, Rust
-asegura que la memoria se maneje de forma segura y eficiente en todo momento.
+/* Descripción: ejemplo_poo_0()           
+Crea un Mago y un Cazador con una cierta cantidad de salud y un Monstruo con
+una cantidad inicial de salud. La función main llama a los métodos de lucha
+en los objetos Mago y Cazador y pasa el objeto Monstruo como parámetro.
 */
 #[allow(dead_code)]
-pub fn ejemplo_generico_0() {
-      let titulo = String::from(" Trait con genéricos 0 ");
-      imprime_titulo(&titulo);
+pub fn ejemplo_poo_0() {
+    let titulo = String::from(" Ejemplo de POO 0 ");
+    imprime_titulo(&titulo);
 
-	let searcher = LinearSearcher { data: vec![1, 2, 3, 4, 5] };
+    let radagast = Mago { salud: 60 };
+    let aragorn = Cazador { salud: 80 };
+    let mut uruk_hai = Monstruo { salud: 40 };
 
-      let buscar: LinearSearcher<u8> = LinearSearcher {data: vec![1, 2, 4, 8, 16, 32, 64, 128]};
-      /* let buscar: LinearSearcher<u8>
-      Define una variable llamada buscar que es una instancia de la estructura
-      LinearSearcher con el tipo de datos u8, lo que significa que la lista de
-      elementos data dentro de LinearSearcher es una lista de números enteros
-      sin signo de 8 bits.
-      La lista de elementos data en buscar contiene los números 1, 2, 4, 8, 16,
-      32, 64 y 128. Esto significa que se puede buscar cualquier valor dentro de
-      esta lista utilizando el método search definido en la implementación de
-      Search para LinearSearcher.
-      Por ejemplo, se podría llamar a buscar.search(&4) para buscar el valor 4 en
-      la lista. Si se encuentra, search devolverá Some(2), lo que indica que 4 se
-      encuentra en la posición 2 de la lista. Si el valor buscado no se encuentra
-      en la lista, search devolverá None.
-      */
-	let mut index = searcher.search(&3).unwrap();
-	println!("Index of 3: {}", index);
-	index = buscar.search(&8).unwrap();
-	println!("Index of 8: {}", index);
+    radagast.atacar_con_espada(&mut uruk_hai);
+    aragorn.atacar_con_arco(&mut uruk_hai, 8);
 }
 
-//***************************************************************************** Trait con genéricos y memoria
-/* Descripción: trait MyTrait             
-El trait MyTrait tiene un parámetro de tipo genérico T. El método do_something
-toma una referencia de T y devuelve un valor booleano.
+//*****************************************************************************
+
+use std::fmt::Debug;    // para no tener que escribir todo el camino al rasgo
+
+struct Monstruo1 {
+    salud: i32,
+}
+#[allow(dead_code)]
+#[derive(Debug)]
+struct Mago1 {
+    salud: i32,
+}
+#[allow(dead_code)]
+#[derive(Debug)]
+struct Cazador1 {
+    salud: i32,
+}
+
+trait Magia1{}         // todos los traits sin métodos. Son límites de rasgo
+
+trait LuchaCercana1 {}
+trait LuchaADistancia1 {}
+
+impl LuchaCercana1 for Cazador1{}       // Cada tipo tiene LuchaCercana,
+impl LuchaCercana1 for Mago1 {}
+impl LuchaADistancia1 for Cazador1{}    // Pero solo el cazador lucha a distancia
+impl Magia1 for Mago1{}                 // y solo el mago hace magia
+
+/* Descripción: atacar_con_flecha         
+La función atacar_con_flecha acepta un tipo de personaje que implementa el rasgo
+LuchaADistancia y tiene una distancia de ataque menor a 10. Esta función reduce la
+salud del oponente en 10 y muestra un mensaje indicando la salud del oponente y el
+personaje que realizó el ataque.
 */
-trait MyTrait<T> {
-      fn do_something(&self, data: &T) -> bool;
+fn atacar_con_flecha1<T: LuchaADistancia1 + Debug>(personaje: &T, oponente: &mut Monstruo1, distancia: u32) {
+    if distancia < 10 {
+        oponente.salud -= 10;
+        println!(
+            "Atacaste con el arco. Tu oponente tiene ahora {} de salud. Ahora tienes {:?}",
+            oponente.salud, personaje
+        );
+    }
 }
 
-/* Descripción: struct MyStruct<'a>       
-La estructura MyStruct tiene un campo de referencia de cadena (&str). También se
-usa el manejo de memoria de Rust a través de la declaración de una duración de vida
-('a) para el campo de referencia data en la estructura MyStruct. Esto indica que la
-referencia debe tener una duración de vida al menos igual a la de la estructura.
+/* Descripción: atacar_con_espada         
+La función atacar_con_espada acepta un tipo de personaje que implementa el rasgo
+LuchaCercana. Esta función reduce la salud del oponente en 10 y muestra un mensaje
+indicando la salud del oponente y el personaje que realizó el ataque.
 */
-struct MyStruct<'a> {
-      data: &'a str,      
+fn atacar_con_espada1<T: LuchaCercana1 + Debug>(personaje: &T, oponente: &mut Monstruo1) {
+    oponente.salud -= 10;
+    println!(
+        "Atacaste con la espada. Tu oponente tiene ahora {} de salud. Ahora tienes {:?}",
+        oponente.salud, personaje
+    );
 }
 
-/* Descripción: impl<'a> MyTrait<&'a str> 
-La declaración impl<'a> MyTrait<&'a str> for MyStruct<'a> define una implementación
-genérica del trait MyTrait para una estructura MyStruct que tiene un lifetime 'a.
-La cláusula 'a en la definición de impl indica que esta implementación es genérica
-sobre un lifetime arbitrario, lo que significa que el lifetime de la referencia &'a
-str que se utiliza en la definición de MyTrait puede ser diferente para cada instancia
-de MyStruct. Esta flexibilidad es útil cuando se trabaja con tipos que tienen referencias
-a datos con diferentes vidas útiles.
-La función do_something implementa el método requerido por el trait MyTrait. Toma una
-referencia a una referencia de &'a str como argumento, que es una forma de indicar que
-la referencia interna tiene un lifetime igual al lifetime de MyStruct. La función
-compara self.data (que es una referencia a &'a str almacenada en MyStruct) con la
-referencia que se pasa como argumento (*data). Devuelve true si las dos referencias
-apuntan a la misma ubicación de memoria, lo que significa que contienen el mismo valor.
-En resumen, esta implementación genérica del trait MyTrait para MyStruct permite trabajar
-con referencias a datos con diferentes vidas útiles y define un método do_something que
-compara dos referencias de &'a str.
+/* Descripción: atacar_con_bola_de_fuego  
+La función atacar_con_bola_de_fuego acepta un tipo de personaje que implementa el
+rasgo Magia y tiene una distancia de ataque menor a 15. Esta función reduce la salud
+del oponente en 20 y muestra un mensaje indicando la salud del oponente y el personaje
+que realizó el ataque.
 */
-impl<'a> MyTrait<&'a str> for MyStruct<'a> {
-      /*
-      En Rust, una referencia a un valor se denota con el símbolo &, y un tipo de
-      referencia a un valor de tipo T se escribe como &T. Además, se pueden tener
-      referencias a otras referencias, lo que se conoce como referencias anidadas
-      o punteros dobles.
-      En la declaración fn do_something(&self, data: &&'a str) -> bool, el parámetro
-      data es una referencia anidada a un &'a str. Esto significa que data es una
-      referencia que apunta a otra referencia que apunta a un valor de tipo str, y el
-      lifetime de la referencia más interna (la referencia a str) está especificado
-      por el lifetime 'a.
-      El propósito de la referencia doble es permitir que la función compare la referencia
-      interna con otra referencia externa que tenga el mismo lifetime, como la referencia
-      self.data de MyStruct. En otras palabras, data es una referencia que apunta a la misma
-      ubicación de memoria que self.data, pero con un nivel de indirección adicional.
-      */
-      fn do_something(&self, data: &&'a str) -> bool {
-            self.data == *data
-      }
+fn atacar_con_bola_de_fuego1<T: Magia1 + Debug>(personaje: &T, oponente: &mut Monstruo1, distancia: u32) {
+    if distancia < 15 {
+        oponente.salud -= 20;
+        println!("¡Levantas las manos y conjuras una bola de fuego! Tu oponente tiene ahora {} de salud. Ahora tienes: {:?}",
+    oponente.salud, personaje);
+    }
 }
-
-/* Descripción: ejemplo_generico_memoria  
-En la función ejemplo_generico_memoria, se crean dos cadenas s1 y s2, y se crea una
-instancia de MyStruct que tiene s1 como su campo data. Luego se realizan dos
-comprobaciones usando el método do_something de MyTrait: la primera con una referencia
-a s1 y la segunda con una referencia a s2. La primera comprobación devuelve true,
-mientras que la segunda devuelve false.
+/* Resumen:                               
+Cada función tiene un rasgo diferente como límite de tipo y/o una distancia de ataque
+diferente, lo que les permite aceptar diferentes tipos de personajes y realizar
+diferentes tipos de ataques.
 */
-pub fn ejemplo_generico_memoria() {
-      let titulo = String::from(" Trait con genéricos y acceso a memoria ");
-      imprime_titulo(&titulo);
 
-      let s1 = "hello";
-      let s2 = "world";
-      let my_struct = MyStruct { data: s1 };
-      println!("{}", my_struct.do_something(&s1));
-      assert!(my_struct.do_something(&s1));
-      println!("{}", my_struct.do_something(&s2));
-      assert!(!my_struct.do_something(&s2));
+pub fn ejemplo_poo_1() {
+    let titulo = String::from(" Ejemplo de POO 1 ");
+    imprime_titulo(&titulo);
+
+    let radagast = Mago1 { salud: 60 };
+    let aragorn = Cazador1 { salud: 80 };
+
+    let mut uruk_hai = Monstruo1 { salud: 40 };
+
+    atacar_con_espada1(&radagast, &mut uruk_hai);
+    atacar_con_flecha1(&aragorn, &mut uruk_hai, 8);
+    atacar_con_bola_de_fuego1(&radagast, &mut uruk_hai, 8);
 }
-
