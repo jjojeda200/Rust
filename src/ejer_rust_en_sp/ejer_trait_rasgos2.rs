@@ -28,6 +28,7 @@ fn imprime_titulo(titulo: &String) {
       println!("\n{:*^80}", titulo);
   }
 
+//***************************************************************************** Trait con genéricos <T>
 /* Descripción: trait Search              
 Este código en Rust define un trait llamado Search con un parámetro genérico T
 que describe la capacidad de buscar un valor de tipo T en algún conjunto de datos.
@@ -104,3 +105,82 @@ pub fn ejemplo_generico_0() {
 	index = buscar.search(&8).unwrap();
 	println!("Index of 8: {}", index);
 }
+
+//***************************************************************************** Trait con genéricos y memoria
+/* Descripción: trait MyTrait             
+El trait MyTrait tiene un parámetro de tipo genérico T. El método do_something
+toma una referencia de T y devuelve un valor booleano.
+*/
+trait MyTrait<T> {
+      fn do_something(&self, data: &T) -> bool;
+}
+
+/* Descripción: struct MyStruct<'a>       
+La estructura MyStruct tiene un campo de referencia de cadena (&str). También se
+usa el manejo de memoria de Rust a través de la declaración de una duración de vida
+('a) para el campo de referencia data en la estructura MyStruct. Esto indica que la
+referencia debe tener una duración de vida al menos igual a la de la estructura.
+*/
+struct MyStruct<'a> {
+      data: &'a str,      
+}
+
+/* Descripción: impl<'a> MyTrait<&'a str> 
+La declaración impl<'a> MyTrait<&'a str> for MyStruct<'a> define una implementación
+genérica del trait MyTrait para una estructura MyStruct que tiene un lifetime 'a.
+La cláusula 'a en la definición de impl indica que esta implementación es genérica
+sobre un lifetime arbitrario, lo que significa que el lifetime de la referencia &'a
+str que se utiliza en la definición de MyTrait puede ser diferente para cada instancia
+de MyStruct. Esta flexibilidad es útil cuando se trabaja con tipos que tienen referencias
+a datos con diferentes vidas útiles.
+La función do_something implementa el método requerido por el trait MyTrait. Toma una
+referencia a una referencia de &'a str como argumento, que es una forma de indicar que
+la referencia interna tiene un lifetime igual al lifetime de MyStruct. La función
+compara self.data (que es una referencia a &'a str almacenada en MyStruct) con la
+referencia que se pasa como argumento (*data). Devuelve true si las dos referencias
+apuntan a la misma ubicación de memoria, lo que significa que contienen el mismo valor.
+En resumen, esta implementación genérica del trait MyTrait para MyStruct permite trabajar
+con referencias a datos con diferentes vidas útiles y define un método do_something que
+compara dos referencias de &'a str.
+*/
+impl<'a> MyTrait<&'a str> for MyStruct<'a> {
+      /*
+      En Rust, una referencia a un valor se denota con el símbolo &, y un tipo de
+      referencia a un valor de tipo T se escribe como &T. Además, se pueden tener
+      referencias a otras referencias, lo que se conoce como referencias anidadas
+      o punteros dobles.
+      En la declaración fn do_something(&self, data: &&'a str) -> bool, el parámetro
+      data es una referencia anidada a un &'a str. Esto significa que data es una
+      referencia que apunta a otra referencia que apunta a un valor de tipo str, y el
+      lifetime de la referencia más interna (la referencia a str) está especificado
+      por el lifetime 'a.
+      El propósito de la referencia doble es permitir que la función compare la referencia
+      interna con otra referencia externa que tenga el mismo lifetime, como la referencia
+      self.data de MyStruct. En otras palabras, data es una referencia que apunta a la misma
+      ubicación de memoria que self.data, pero con un nivel de indirección adicional.
+      */
+      fn do_something(&self, data: &&'a str) -> bool {
+            self.data == *data
+      }
+}
+
+/* Descripción: ejemplo_generico_memoria  
+En la función ejemplo_generico_memoria, se crean dos cadenas s1 y s2, y se crea una
+instancia de MyStruct que tiene s1 como su campo data. Luego se realizan dos
+comprobaciones usando el método do_something de MyTrait: la primera con una referencia
+a s1 y la segunda con una referencia a s2. La primera comprobación devuelve true,
+mientras que la segunda devuelve false.
+*/
+pub fn ejemplo_generico_memoria() {
+      let titulo = String::from(" Trait con genéricos y acceso a memoria ");
+      imprime_titulo(&titulo);
+
+      let s1 = "hello";
+      let s2 = "world";
+      let my_struct = MyStruct { data: s1 };
+      println!("{}", my_struct.do_something(&s1));
+      assert!(my_struct.do_something(&s1));
+      println!("{}", my_struct.do_something(&s2));
+      assert!(!my_struct.do_something(&s2));
+}
+

@@ -151,7 +151,18 @@ fn su_re(a:u8,b:u8) -> (u8,u8){
 }
 
 //*****************************************************************************
-/* Nota: Tiempos de vida en funciones
+/* Nota: Tiempos de vida en funciones     
+En Rust, los lifetimes se utilizan para garantizar que las referencias a los datos
+sean válidas y no se acceda a datos que ya no existen. Un lifetime es un concepto
+que describe la duración de una referencia a un objeto en la memoria, es decir, el
+tiempo que un objeto es válido y accesible a través de una referencia.
+En la mayoría de los casos, los lifetimes son inferidos automáticamente por el
+compilador. Sin embargo, hay situaciones en las que es necesario especificar
+manualmente el lifetime de una referencia. Por ejemplo, cuando se define una función
+que toma una referencia como argumento y devuelve otra referencia a los mismos datos,
+es necesario especificar el lifetime de ambas referencias para que el compilador
+pueda garantizar que ambas referencias sean válidas durante el tiempo necesario.
+
 https://github.com/goyox86/elpr-sources/blob/gh-pages/lifetimes.md#tiempos-de-vida
 Declarar parámetros de duración genéricos entre corchetes angulares <> y agregar
 la declaración entre la lista de parámetros y el nombre de la función, en valor
@@ -175,7 +186,10 @@ fn longest_word<'dur>(x: &'dur String, y: &'dur String) -> &'dur String {
 }
 
 //*****************************************************************************
-/* Nota: Tiempos de vida en estructuras
+/* Nota: Tiempos de vida en estructuras   
+Esto indica que la referencia debe tener una duración de vida al menos igual a
+la de la estructura.
+
 https://github.com/goyox86/elpr-sources/blob/gh-pages/lifetimes.md#en-structs
 Cada vez que un struct o una enumeración contienen una referencia en uno de sus campos,
 se debe anotar esa definición de tipo con la duración de cada referencia que lleve a
