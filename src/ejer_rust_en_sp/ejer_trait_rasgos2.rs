@@ -24,6 +24,8 @@
 
 ***************************************************************************************/
 
+#![allow(dead_code)]
+
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo);
 }
@@ -40,12 +42,10 @@ de salud, pero no tienen más campos.
 struct Monstruo {
     salud: i32,
 }
-#[allow(dead_code)]
 #[derive(Debug)]
 struct Mago {
     salud: i32,
 }
-#[allow(dead_code)]
 #[derive(Debug)]
 struct Cazador {
     salud: i32,
@@ -115,7 +115,6 @@ Crea un Mago y un Cazador con una cierta cantidad de salud y un Monstruo con
 una cantidad inicial de salud. La función main llama a los métodos de lucha
 en los objetos Mago y Cazador y pasa el objeto Monstruo como parámetro.
 */
-#[allow(dead_code)]
 pub fn ejemplo_poo_0() {
     let titulo = String::from(" Ejemplo de POO 0 ");
     imprime_titulo(&titulo);
@@ -129,18 +128,15 @@ pub fn ejemplo_poo_0() {
 }
 
 //*****************************************************************************
-
 use std::fmt::Debug;    // para no tener que escribir todo el camino al rasgo
 
 struct Monstruo1 {
     salud: i32,
 }
-#[allow(dead_code)]
 #[derive(Debug)]
 struct Mago1 {
     salud: i32,
 }
-#[allow(dead_code)]
 #[derive(Debug)]
 struct Cazador1 {
     salud: i32,
@@ -217,3 +213,4 @@ pub fn ejemplo_poo_1() {
     atacar_con_flecha1(&aragorn, &mut uruk_hai, 8);
     atacar_con_bola_de_fuego1(&radagast, &mut uruk_hai, 8);
 }
+//*****************************************************************************

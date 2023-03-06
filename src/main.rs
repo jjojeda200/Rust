@@ -47,7 +47,6 @@ mod lib_closure;
 mod lib_flujos;
 mod cap13;
 
-
 /* función imprime_titulo   
 La función imprime_titulo(titulo: &String) recibe como parámetro un puntero a
 una cadena de texto String y utiliza la macro println!() para imprimir el valor
@@ -56,7 +55,6 @@ de la cadena de texto centrado en 80 caracteres y rodeado por asteriscos.
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo);
 }
-
 
 
 fn main() {
@@ -82,10 +80,8 @@ fn main() {
 */
 
 
+    ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_0();
 
-
-ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_poo_0();
-ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_poo_1();
 
 
 
@@ -127,6 +123,9 @@ ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_poo_1();
     ejer_rust_en_sp::ejer_estructuras2::metodos_0();
     ejer_rust_en_sp::ejer_estructuras2::metodos_1();
     ejer_rust_en_sp::ejer_estructuras2::hashmap_vectores();
+*/
+/* Estructuras 3 iter                           
+    ejer_rust_en_sp::ejer_estructuras3_iter::
 */
 /* Genéricos/Option/Result                      
     ejer_rust_en_sp::ejer_genericos_option_result::genericos_0();

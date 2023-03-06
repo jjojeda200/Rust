@@ -28,6 +28,7 @@ pub mod ejer_estructuras_de_control;
 pub mod ejer_estructuras0;
 pub mod ejer_estructuras1;
 pub mod ejer_estructuras2;
+pub mod ejer_estructuras3_iter;
 pub mod ejer_genericos_option_result;
 pub mod ejer_gestion_errores;
 pub mod ejer_io_archivos;
