@@ -80,7 +80,7 @@ fn main() {
 */
 
 
-    ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_0();
+    ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_1();
 
 
 
@@ -125,7 +125,8 @@ fn main() {
     ejer_rust_en_sp::ejer_estructuras2::hashmap_vectores();
 */
 /* Estructuras 3 iter                           
-    ejer_rust_en_sp::ejer_estructuras3_iter::
+    ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_0();
+    ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_1();
 */
 /* Genéricos/Option/Result                      
     ejer_rust_en_sp::ejer_genericos_option_result::genericos_0();
