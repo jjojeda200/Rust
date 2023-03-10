@@ -93,7 +93,7 @@ pub fn metodos_iter_0() {
 
     let numbers: Vec<u8> = vec![1, 2, 3, 4, 5];
     let sum = numbers.iter().fold(0, |acc, x| acc + x);
-    println!("{}", sum);
+    println!("La suma de todos los elementos {}", sum);
 
 }
 
@@ -104,7 +104,7 @@ pub fn metodos_iter_1() {
 
     let my_vec = vec![8, 9, 10];
 
-    let fourth = my_vec.get(3).unwrap_or_else(|| {  // Intenta "desenvolver". Si no funciona:
+    let valor = my_vec.get(3).unwrap_or_else(|| {  // Intenta "desenvolver". Si no funciona:
         // observa si el vector contiene algo en el índice [0]
         if my_vec.get(0).is_some() {
             &my_vec[0]      // Utiliza ese valor si existe algo.
@@ -112,29 +112,42 @@ pub fn metodos_iter_1() {
             &0              // en otro caso, usa el &0
         }
     });
-    println!("{}", fourth);
+    println!("Valor devuelto: {}", valor);
 
-    let num_vec = vec![2, 4, 6];
+//*************************************
+    let num_vec: Vec<u8> = vec![2, 4, 6, 8];
 
-    let double_vec = num_vec    // usa el vector
-        .iter()                             // para recorrerlo (iterar)
-        .map(|number| number * 2)   // para cada elemento, lo multiplica por 2
-        .collect::<Vec<i32>>();     // y crea un nuevo vector a partir de ello
-    println!("{:?}", double_vec);
+    // usa el vector para recorrerlo (iterar)
+    let double_vec = num_vec              
+        .iter()
+        // para cada elemento, lo multiplica por 2
+        .map(|number| number * 2)
+        // y crea un nuevo vector a partir de ello
+        .collect::<Vec<u8>>();
+    println!("El vector resultante: {:?}", double_vec);
 
+//*************************************
     num_vec
-        .iter()      // itera sobre num_vec
-        .enumerate() // obtiene pares de (índice, valor)
-        .for_each(|(index, number)| println!("El índice {} contiene el valor {}", index, number)); // imprime para cada elemento
+        // itera sobre num_vec
+        .iter()
+        // obtiene pares de (índice, valor)
+        .enumerate()
+        // imprime para cada elemento
+        .for_each(|(index, number)| println!("El índice {} contiene el valor {}", index, number)); 
 
 
+//*************************************
     let x =  num_vec
         .iter()
         .enumerate()
         .map(|(index, number)| println!("El índice {} contiene el valor {}", index, number));
     println!("\n{:?}", num_vec.iter());
     println!("{:?}", num_vec.iter().enumerate());
-    let y = num_vec.iter().enumerate().map(|(index ,number)|(index ,number)).collect::<Vec<_>>();
+    let y = num_vec
+        .iter()
+        .enumerate()
+        .map(|(index ,number)|(index ,number))
+        .collect::<Vec<_>>();
     println!("Valor de x: {:?}", x);
     println!("Valor de y: {:?}", y);
 }

@@ -85,9 +85,8 @@ fn main() {
 */
 
 
-    ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_0();
-    ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_1();
-    ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_string_0();
+    proyectos::sim_cpu::sim_cpu();
+
 
 
 //*****************************************************************************
