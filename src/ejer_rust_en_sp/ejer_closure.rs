@@ -23,14 +23,89 @@
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
 ***************************************************************************************/
+/* Detalles de ||                       
+- Una || que no encierra ninguna variable exterior en su interior es una función anónima.
+  No es, estrictamente, un closure.
+- Una || que sí encierra una variable exterior en su interior sí es un cierre.
+*/
+#![allow(dead_code)]
+#![allow(unused_variables)]
+
 use std::thread;
 use std::time::Duration;
 
-#[allow(dead_code)]
+fn imprime_titulo(titulo: &String) {
+    println!("\n{:*^80}", titulo);
+}
+
+//*****************************************************************************
 pub fn closure_0() {
+    let titulo = String::from(" Introducción a Closure 0 ");
+    imprime_titulo(&titulo);
+
+    // Se define una variable mutable var_n de tipo u8 y se le asigna el valor 2.
+    let mut var_n: u8 = 2;
+
+//*************************************
+    /* Se define un closure llamado mi_closure0 que toma un parámetro x de tipo u8 e
+       imprime un mensaje con el valor incluido en la llamada almacenado en x. */
+    let val_clo0 = |x: u8| println!("val_clo0: Valor de x = {}", x);
+    // Se llama al closure mi_closure0 con el valor 2 como argumento.
+    val_clo0(2);
+
+//*************************************
+    /* Se define una variable mutable val_clo1 que almacena un closure con la sintaxis
+    move, lo que significa que el closure toma propiedad de la variable var_n y no la
+    comparte con otros closures o funciones que puedan existir en el mismo ámbito. El
+    closure toma un parámetro x de tipo u8 y devuelve un valor u8. */
+    let mut val_clo1 = move | x: u8| -> u8 {
+        var_n +=2;
+        println!("val_clo1: valor de x = {}, de var_n = {}, de x*var_n = {}", x, var_n, x * var_n);
+        return var_n;
+    };
+    println!("val_clo1: 1ª llamada");
+    // OJO var_n vale 4 tras la 1ª llamada dentro del val_clo1 por el uso de move.
+    println!("val_clo1: valor devuelto para var_n por val_clo1(2): {}", val_clo1(2));
+    println!("val_clo1: 2ª llamada");
+    // OJO var_n vale 6 tras la 2ª llamada dentro del val_clo1 por el uso de move.
+    println!("val_clo1: valor devuelto para var_n por val_clo1(2): {}", val_clo1(2));
+    println!("Valor de var_n original se mantiene fuera de val_clo1: {}\n", var_n);
+    assert_eq!(var_n, 2);
+    
+//*************************************
+    /* Se define un closure llamado val_clo2 que toma un parámetro x de tipo u8 y
+    devuelve un valor u8. A diferencia de val_clo1, val_clo2 no usa la palabra
+    clave move, por lo que no toma posesión de la variable var_n dentro del closure.
+    */
+    let mut val_clo2 = | x: u8|-> u8 {
+        //let var_ref_n = &mut var_n;
+        //*var_ref_n +=2;
+        var_n +=2;
+        println!("val_clo2: valor de x = {}, de var_n = {}, de x*var_n = {}", x, var_n, x * var_n);
+        var_n
+    };
+    println!("val_clo2: 1ª llamada");
+    // OJO var_n vale 4 tras la 1ª llamada fuera del val_clo2 por el no uso de move.    
+    println!("val_clo2: valor devuelto para var_n por val_clo2(2): {}", val_clo2(2));
+    //println!("Valor de var_n original después de llamar a val_clo2: {}\n", var_n);
+    println!("val_clo2: 2ª llamada");
+    println!("val_clo2: valor devuelto para var_n por val_clo2(2): {}", val_clo2(2));
+    println!("Valor de var_n original después de llamar a val_clo2: {}\n", var_n);
+/*
+En resumen, el código muestra cómo definir y utilizar closures en Rust, y cómo el uso
+de la palabra clave move puede afectar la propiedad y la compartición de las variables
+en el ámbito del closure. También se muestra cómo se puede utilizar un closure varias
+veces con diferentes valores de entrada para generar diferentes resultados.
+*/
+}
+
+//*****************************************************************************
+pub fn closure_1() {
+    let titulo = String::from(" Introducción a Closure 1 ");
+    imprime_titulo(&titulo);
+
     let valor_i = 12;
     let valor_j = 4;
-
     rutina_aux0_closure_0(valor_i, valor_j);
 }
 
@@ -42,7 +117,7 @@ fn rutina_aux0_closure_0(var_i: u32, var_j: u32) {
     que definió fuera del cuerpo del cierre (a diferencia de las funciones en las que tiene
     que pasar parámetros). Los cierres se utilizan en subprocesos y otra programación funcional
     como características de Rust (como Map, Reduce, Filter, etc.)
-    
+
     Los closures o cierres son funciones anónimas que se pueden almacenar en una variable
     o pasar como argumentos a otras funciones, esto nos permite crearlo en un lugar y luego
     llamarla para evaluarla en un contexto diferente.
@@ -72,7 +147,6 @@ fn rutina_aux0_closure_0(var_i: u32, var_j: u32) {
 
 //*****************************************************************************
 //Hyperbolic Time Academy: https://www.youtube.com/watch?v=vsVL8CVGFkM
-#[allow(dead_code)]
 pub fn closure_hyperbolic_1() {
     /*
     Un closure move es un tipo de closure en Rust que toma propiedad de las variables que
@@ -85,7 +159,7 @@ pub fn closure_hyperbolic_1() {
     // de val_x, probar con y sin "move"
     let mut closure = move |v| {
         println!("v {}, var_x: {} ", v, var_x);
-        var_x = v;  // NOTA 1
+        var_x = v; // NOTA 1
         println!("v {}, var_x: {} ", v, var_x);
     };
     /*
@@ -94,14 +168,13 @@ pub fn closure_hyperbolic_1() {
     al closure.
     NO SE CUMPLE --> intentar acceder a val_x causará un error, ya que se han movido a closure
     */
-    closure(5);     // NOTA 1. El compilador mantendrá el primer tipo inferido
-    //closure("xx");// NOTA 1. al usar el closure
+    closure(5); // NOTA 1. El compilador mantendrá el primer tipo inferido
+                //closure("xx");// NOTA 1. al usar el closure
     println!("     var_x: {} \n", var_x);
 }
 
 //*****************************************************************************
 // Hyperbolic Time Academy: https://www.youtube.com/watch?v=vsVL8CVGFkM
-#[allow(dead_code)]
 pub fn closure_hyperbolic_2() {
     {
         // Fn Trait
@@ -116,28 +189,32 @@ pub fn closure_hyperbolic_2() {
     //*********************************
     {
         let num = 10;
-        add_0(|x|println!("Resultado = {}", num + x));
+        add_0(|x| println!("Resultado = {}", num + x));
     }
     {
         let mut num = 10;
-        add_1(|x|{
+        add_1(|x| {
             num += 5;
-            println!("Resultado = {}", num + x)});
+            println!("Resultado = {}", num + x)
+        });
     }
 }
 // Fn Trait
 fn add_0<F>(func: F)
-    where F: Fn(u8){
-        func(5)
-    }
+where
+    F: Fn(u8),
+{
+    func(5)
+}
 // FnMut Trait
 fn add_1<F>(mut func: F)
-    where F: FnMut(u8){
-        func(5)
-    }
+where
+    F: FnMut(u8),
+{
+    func(5)
+}
 //*****************************************************************************
 // Rhymu's Videos: https://www.youtube.com/watch?v=drYtaZopxgQ
-#[allow(dead_code)]
 pub fn closure_rhymu_0() {
     let numeros = [1, 2, 3];
     let numeros_on_iter = numeros.into_iter();
@@ -182,7 +259,6 @@ fn multiplicar(mut x: i32) -> impl FnMut(i32) -> i32 {
 
 //*****************************************************************************
 // Rust (Rainer Stropek): https://www.youtube.com/watch?v=bgZa9VRBhYU
-#[allow(dead_code)]
 pub fn closure_rust_list() {
     {
         let val_x = 21;
@@ -192,10 +268,14 @@ pub fn closure_rust_list() {
     //*************************************
     {
         // Función regular -->
-        fn add(x: i32, y: i32) -> i32 { return x + y; }
+        fn add(x: i32, y: i32) -> i32 {
+            return x + y;
+        }
         let _f = add;
         // Sustituimos la función regular por closure
-        let _f = |x: i32, y: i32| { return x + y; };
+        let _f = |x: i32, y: i32| {
+            return x + y;
+        };
         // Podemos ahorrar las llaves al ser una sola expresión
         let _f = |x: i32, y: i32| return x + y;
         // Closure infiere el tipo de los parámetro
@@ -209,9 +289,11 @@ pub fn closure_rust_list() {
     //*************************************
     {
         // Función regular -->
-        fn add(x: i32, y: i32) -> i32 { return x + y; }
+        fn add(x: i32, y: i32) -> i32 {
+            return x + y;
+        }
 
-        fn calc_and_print( x: i32, y: i32, calculator: fn (i32, i32) -> i32) {
+        fn calc_and_print(x: i32, y: i32, calculator: fn(i32, i32) -> i32) {
             let resultado = calculator(x, y);
             println!("Resultado sin closure       = {}\n", resultado);
         }

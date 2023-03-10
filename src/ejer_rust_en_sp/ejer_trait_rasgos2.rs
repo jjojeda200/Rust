@@ -213,4 +213,5 @@ pub fn ejemplo_poo_1() {
     atacar_con_flecha1(&aragorn, &mut uruk_hai, 8);
     atacar_con_bola_de_fuego1(&radagast, &mut uruk_hai, 8);
 }
+
 //*****************************************************************************

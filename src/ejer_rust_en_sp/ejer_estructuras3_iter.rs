@@ -98,6 +98,48 @@ pub fn metodos_iter_0() {
 }
 
 //*****************************************************************************
+pub fn metodos_iter_1() {
+    let titulo = String::from(" Introducción a Iteradores 1 ");
+    imprime_titulo(&titulo);
+
+    let my_vec = vec![8, 9, 10];
+
+    let fourth = my_vec.get(3).unwrap_or_else(|| {  // Intenta "desenvolver". Si no funciona:
+        // observa si el vector contiene algo en el índice [0]
+        if my_vec.get(0).is_some() {
+            &my_vec[0]      // Utiliza ese valor si existe algo.
+        } else {
+            &0              // en otro caso, usa el &0
+        }
+    });
+    println!("{}", fourth);
+
+    let num_vec = vec![2, 4, 6];
+
+    let double_vec = num_vec    // usa el vector
+        .iter()                             // para recorrerlo (iterar)
+        .map(|number| number * 2)   // para cada elemento, lo multiplica por 2
+        .collect::<Vec<i32>>();     // y crea un nuevo vector a partir de ello
+    println!("{:?}", double_vec);
+
+    num_vec
+        .iter()      // itera sobre num_vec
+        .enumerate() // obtiene pares de (índice, valor)
+        .for_each(|(index, number)| println!("El índice {} contiene el valor {}", index, number)); // imprime para cada elemento
+
+
+    let x =  num_vec
+        .iter()
+        .enumerate()
+        .map(|(index, number)| println!("El índice {} contiene el valor {}", index, number));
+    println!("\n{:?}", num_vec.iter());
+    println!("{:?}", num_vec.iter().enumerate());
+    let y = num_vec.iter().enumerate().map(|(index ,number)|(index ,number)).collect::<Vec<_>>();
+    println!("Valor de x: {:?}", x);
+    println!("Valor de y: {:?}", y);
+}
+
+//***************************************************************************** Iteradores 2 - String
 #[derive(Debug, Clone)]
 struct Library {
     books: Vec<String>,
@@ -161,8 +203,8 @@ impl Iterator for Library {
     }
 }
 
-pub fn metodos_iter_1() {
-    let titulo = String::from(" Introducción a Iteradores 1 ");
+pub fn metodos_iter_string_0() {
+    let titulo = String::from(" Introducción a Iteradores 2 - String ");
     imprime_titulo(&titulo);
 
     let mut my_library = Library::new();
@@ -176,3 +218,4 @@ pub fn metodos_iter_1() {
     }
 }
 
+//*****************************************************************************

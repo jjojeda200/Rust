@@ -29,6 +29,12 @@ Declaraciones y Sentencias son instrucciones que no dan lugar a ningún resultad
 */
 /* Notas:                   
 A este tipo de etiquetado con # seguido de un nombre, se le denomina en Rust atributo
+
+El atributo con admiración afecta a todo el archivo y debe situarse como primera
+instrucción
+#![allow(dead_code)]
+#![allow(unused_variables)]
+
 #derive(Debug)
 #[allow(dead_code)]
 #[allow(unused_variables)]
@@ -43,7 +49,6 @@ mod ejer_lets_get_rusty;
 mod ejer_rust_en_sp;
 mod proyectos;
 mod rust_standard_library;
-mod lib_closure;
 mod lib_flujos;
 mod cap13;
 
@@ -80,9 +85,9 @@ fn main() {
 */
 
 
+    ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_0();
     ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_1();
-
-
+    ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_string_0();
 
 
 //*****************************************************************************
@@ -92,6 +97,14 @@ fn main() {
     ejer_rust_en_sp::ejer_basicos::var_y_ret_funciones();
     ejer_rust_en_sp::ejer_basicos::duración_funciones();
     ejer_rust_en_sp::ejer_basicos::duración_tipos();
+*/
+/* Closure                                      
+    ejer_rust_en_sp::ejer_closure::closure_0();
+    ejer_rust_en_sp::ejer_closure::closure_1();
+    ejer_rust_en_sp::ejer_closure::closure_hyperbolic_1();
+    ejer_rust_en_sp::ejer_closure::closure_hyperbolic_2();
+    ejer_rust_en_sp::ejer_closure::closure_rhymu_0();
+    ejer_rust_en_sp::ejer_closure::closure_rust_list();
 */
 /* Estructuras de control                       
     ejer_rust_en_sp::ejer_estructuras_de_control::igual();
@@ -127,6 +140,7 @@ fn main() {
 /* Estructuras 3 iter                           
     ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_0();
     ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_1();
+    ejer_rust_en_sp::ejer_estructuras3_iter::metodos_iter_string_0();
 */
 /* Genéricos/Option/Result                      
     ejer_rust_en_sp::ejer_genericos_option_result::genericos_0();
@@ -162,21 +176,21 @@ fn main() {
     ejer_rust_en_sp::ejer_memoriax::memoria();
 */
 /* Trait 0 (Métodos de instancia y estáticos)   
-ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_0();
-ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_1();
-ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_0();
-ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_1();
+    ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_0();
+    ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_1();
+    ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_0();
+    ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_estatico_1();
 */
 /* Trait 1 (Programación Orientada a Objetos 1) 
-ejer_rust_en_sp::ejer_trait_rasgos1::ejemplo_poo_0();
+    ejer_rust_en_sp::ejer_trait_rasgos1::ejemplo_poo_0();
 */
 /* Trait 2 (Programación Orientada a Objetos 2) 
-ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_poo_0();
-ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_poo_1();
+    ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_poo_0();
+    ejer_rust_en_sp::ejer_trait_rasgos2::ejemplo_poo_1();
 */
 /* Trait 3 (Genéricos y manejo de memoria)      
-ejer_rust_en_sp::ejer_trait_rasgos3::ejemplo_generico_0();
-ejer_rust_en_sp::ejer_trait_rasgos3::ejemplo_generico_memoria();
+    ejer_rust_en_sp::ejer_trait_rasgos3::ejemplo_generico_0();
+    ejer_rust_en_sp::ejer_trait_rasgos3::ejemplo_generico_memoria();
 */
 /* Trait x (Rasgos)                             
     ejer_rust_en_sp::ejer_trait_rasgosx::fn_windows();
@@ -184,14 +198,8 @@ ejer_rust_en_sp::ejer_trait_rasgos3::ejemplo_generico_memoria();
 */
 
 
-/* Revisar                  
-    lib_closure::closure_0();
-    lib_closure::closure_Hyperbolic_1();
-    lib_closure::closure_Hyperbolic_2();
-    lib_closure::closure_rhymu_0();
-    lib_closure::closure_rust_list();
+/* Revisar
 
-    
     lib_flujos::flujos();
         
     //-----------------------------
