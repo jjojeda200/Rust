@@ -1,2 +1,3 @@
 /target
-/src/proyectos
+/.gitignore
+/src/proyectos/firebase.rs
