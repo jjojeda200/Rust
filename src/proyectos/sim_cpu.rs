@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          10-03-2023
+    Fecha:          13-03-2023
     Titulo:         Simulación CPU
     Descripción:    
     Referencias:
@@ -151,6 +151,8 @@ Para agregar una nueva unidad de memoria, se puede crear una nueva instancia de 
 estructura MemoryUnit y agregarla a la lista mem de la siguiente manera:En este ejemplo,
 se crea una nueva unidad de memoria de 1 KB que va desde la dirección 0x2000 hasta la
 dirección 0x2FFF.
+
+
 
 pub fn z80_sim(){
     let new_mem_unit = MemoryUnit {
@@ -308,8 +310,8 @@ impl Z80CPU {
 
 }
 
-pub fn z80_sim(){
-    let titulo = String::from(" Z80 - Simulación CPU ");
+pub fn z80_sim_0(){
+    let titulo = String::from(" Z80 - Simulación CPU - Aproximación de pruebas 0");
     imprime_titulo(&titulo);
 
     // Crear una instancia de la estructura CPU con 64 KB de memoria
@@ -367,7 +369,6 @@ siguientes operaciones en cada ciclo:
 
 
 }
-
 
 
 /*

@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          10-03-2023
+    Fecha:          13-03-2023
     Titulo:         Simulación CPU
     Descripción:    
     Referencias:
@@ -31,7 +31,9 @@
 
 use crate::proyectos::sim_cpu_struct::{self};
 
-
+fn imprime_titulo(titulo: &String) {
+    println!("\n{:*^80}", titulo);
+}
 
 // Struct para representar los registros Z80
 pub struct RegistrosZ80 {
@@ -140,11 +142,14 @@ fn ejecutar_programa() -> u8 {
     registros.a
 }
 
-pub fn mn() {
+pub fn z80_sim_1() {
+    let titulo = String::from(" Z80 - Simulación CPU - Aproximación de pruebas 1");
+    imprime_titulo(&titulo);
+
     let resultado = ejecutar_programa();
     println!("Valor de registro A después de ejecutar el programa: {:02x}", resultado);
 
-//*************************************
+//************************************* Flags
     // Para crear un struct Flags a partir de un byte:
     let flags_byte: u8 = 0b00101101;                // ejemplo
     let flags = sim_cpu_struct::Flags {
@@ -183,24 +188,49 @@ pub fn mn() {
     println!("Flags: {:08b}", flags_byte);
     println!("Flags: {:02x}", flags_byte);
 
-//************************************* Prueba manejo registros
-    // Inicializar la estructura de registros
-    let mut z80_reg = sim_cpu_struct::Z80Reg::new();
+//*************************************
+    // sim_cpu_struct::main_flags();
 
+
+//************************************* Prueba manejo registros
+    // Inicializar la estructura de registros y de flags
+    let mut z80_reg = sim_cpu_struct::Z80Reg::new();
+    let mut z80_flags = sim_cpu_struct::Flags::new_flags();
+   
+    // Registro A al inicializar
     println!("Registro A: 0x{:02x}", z80_reg.get_a());
-    println!("Registro F: 0x{:02x}", z80_reg.get_f());
-    
-    // Asignar un valor al registro
+    // Registro A modificado
     z80_reg.set_a(0x12);
     println!("Registro A: 0x{:02x}", z80_reg.get_a());
 
-    z80_reg.set_f(0b00101101);
-    println!("Registro F: 0x{:02x}", z80_reg.get_f());
 
-
+    // Registro BC al inicializar
+    println!("Registro BC: 0x{:04x}", z80_reg.get_bc());
     z80_reg.set_b(0xff);
     z80_reg.set_c(0b11111111);
+    // Registro BC modificados por separados
     println!("Registro BC: 0x{:04x}", z80_reg.get_bc());
+    // Registro BC modificados como uno solo
+    z80_reg.set_reg_bc(0b0000111111110000);
+    println!("Registro BC: 0x{:04x}", z80_reg.get_reg_bc());
+    
+
+//************************************* Prueba manejo flags
+
+    z80_flags.set_flags(0b10110101);
+
+    // Nota: bit 3 y 5 no se utilizan
+    // Actualizar los flags con un valor de 0b11111111 (true)
+    z80_flags.set_flags(0b11111111);
+
+    // Obtener el valor de los flags
+    let flags_value = z80_flags.get_flags();
+    println!("Valor de los flags: 0b{:08b}", flags_value);
+    
+
+    // Establecer el bit de signo a 0 (false)
+    z80_flags.set_bit(7, false);
+    println!("Valor de los flags: 0b{:08b}", z80_flags.get_flags());
 
 }
 

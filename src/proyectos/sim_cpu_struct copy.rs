@@ -48,7 +48,7 @@ Estas son las banderas que se utilizan en el Z80:
     establece en 0.
 */
 
-//***************************************************************************** Estructura Flags
+//***************************************************************************** Flags
 /* Implementación de Flags                  
 
 // Para crear un struct Flags a partir de un byte:
@@ -96,7 +96,7 @@ Estas son las banderas que se utilizan en el Z80:
     };
 */
 #[derive(Default)]
-pub struct Flags {
+pub struct Flags {  
     pub carry: bool,                    // Bit 0 (C):  Carry flag
     pub subtract: bool,                 // Bit 1 (N):  Add/subtract flag
     pub parity_overflow: bool,          // Bit 2 (PV): Parity/overflow flag
@@ -107,7 +107,7 @@ pub struct Flags {
     pub sign: bool,                     // Bit 7 (S):  Sign flag
 }
 
-//***************************************************************************** Estructura Registros
+//***************************************************************************** Registros
 pub struct Z80Reg {
     a: u8,      // Registro A de 8 bits
     //f: u8,    // Manejamos el registro de flags F de manera independiete
@@ -123,32 +123,67 @@ pub struct Z80Reg {
     pc: u16,    // Registro PC de 16 bits
 }
 
-//***************************************************************************** Impl Flags y Registros
+
 impl Flags {
+    pub fn new() -> Z80Reg {
+        Z80Reg { a: 0, b: 0, c: 0, d: 0, e: 0, h: 0, l: 0, ix: 0, iy: 0, sp: 0, pc: 0,}
+    }
     pub fn new_flags() -> Flags {
         Flags {
             carry: false,
-            subtract: false,
-            parity_overflow: false,
+            subtract: true,
+            parity_overflow: true,
             half_carry: false,
-            zero: false,
+            zero: true,
             sign: false,
         }
     }
 
-    // Método que devuelva un valor de 8 bits que represente los Flags:
-    pub fn get_flags(&self) -> u8 {
-        let mut resultado = 0u8;
-        if self.carry { resultado |= 0x01 };
-        if self.subtract { resultado |= 0x02 };
-        if self.parity_overflow { resultado |= 0x04 };
-        if self.half_carry { resultado |= 0x10 };
-        if self.zero { resultado |= 0x40 };
-        if self.sign { resultado |= 0x80 };
-        resultado
+//************************************* Manejo de Registros
+    pub fn get_a(&self) -> u8 { self.a }
+    pub fn set_a(&mut self, valor: u8) { self.a = valor; }
+
+    pub fn get_b(&self) -> u8 { self.b }
+    pub fn set_b(&mut self, valor: u8) { self.b = valor; }
+    pub fn get_c(&self) -> u8 { self.c }
+    pub fn set_c(&mut self, valor: u8) { self.c = valor; }
+    pub fn get_bc(&self) -> u16 { u16::from_be_bytes([self.b, self.c]) }
+    fn set_bc(&mut self, valor: u16) {
+        let bytes = valor.to_be_bytes();
+        self.b = bytes[0];
+        self.c = bytes[1];
+        /*
+        Este método permite acceder al registro BC como un valor de 16 bits, pero solo permite
+        la escritura de los 4 bits más significativos del registro:
+        self.c = bytes[1] & 0xF0;
+        */
+    }
+    //******************************** Otra forma de manejar BC
+    pub fn get_reg_bc(&self) -> u16 {
+        u16::from_be_bytes([self.get_b(), self.get_c()])
+    }
+    pub fn set_reg_bc(&mut self, valor: u16) {
+        let [b, c] = valor.to_be_bytes();
+        self.set_b(b);
+        self.set_c(c);
     }
 
-    // Método que toma un valor de 8 bits y actualiza los bits de los Flags :
+
+
+//************************************* Manejo de registro F (Flags)
+    // Método que devuelva un valor de 8 bits que represente los Flags:
+    pub fn get_flags(&self) -> u8 {
+        let mut result = 0u8;
+        if self.carry { result |= 0x01 };
+        if self.subtract { result |= 0x02 };
+        if self.parity_overflow { result |= 0x04 };
+        if self.half_carry { result |= 0x10 };
+        if self.zero { result |= 0x40 };
+        if self.sign { result |= 0x80 };
+        result
+    }
+
+// Método que toma un valor de 8 bits y actualiza los bits de los Flags :
     pub fn set_flags(&mut self, valor: u8) {
         self.carry = valor & 0x01 != 0;             // Bit 0
         self.subtract = valor & 0x02 != 0;          // Bit 1
@@ -176,15 +211,35 @@ impl Flags {
             _ => panic!("Índice de bit no válido: {}", index),
         }
     }
+    
 
 }
+
+
+
+
+
+
+
+
+
 
 impl Z80Reg {
     pub fn new() -> Z80Reg {
         Z80Reg { a: 0, b: 0, c: 0, d: 0, e: 0, h: 0, l: 0, ix: 0, iy: 0, sp: 0, pc: 0,}
     }
+    pub fn new_flags() -> Flags {
+        Flags {
+            carry: false,
+            subtract: true,
+            parity_overflow: true,
+            half_carry: false,
+            zero: true,
+            sign: false,
+        }
+    }
 
-//************************************* Manejo de Registro
+//************************************* Manejo de Registros
     pub fn get_a(&self) -> u8 { self.a }
     pub fn set_a(&mut self, valor: u8) { self.a = valor; }
 
@@ -193,7 +248,7 @@ impl Z80Reg {
     pub fn get_c(&self) -> u8 { self.c }
     pub fn set_c(&mut self, valor: u8) { self.c = valor; }
     pub fn get_bc(&self) -> u16 { u16::from_be_bytes([self.b, self.c]) }
-    pub fn set_bc(&mut self, valor: u16) {
+    fn set_bc(&mut self, valor: u16) {
         let bytes = valor.to_be_bytes();
         self.b = bytes[0];
         self.c = bytes[1];
@@ -213,51 +268,116 @@ impl Z80Reg {
         self.set_c(c);
     }
 
-    pub fn get_d(&self) -> u8 { self.d }
-    pub fn set_d(&mut self, valor: u8) { self.d = valor; }
-    pub fn get_e(&self) -> u8 { self.e }
-    pub fn set_e(&mut self, valor: u8) { self.e = valor; }
-    pub fn get_de(&self) -> u16 { u16::from_be_bytes([self.d, self.d]) }
-    pub fn set_de(&mut self, valor: u16) {
-        let bytes = valor.to_be_bytes();
-        self.d = bytes[0];
-        self.e = bytes[1];
+
+
+//************************************* Manejo de registro F (Flags)
+    // Método que devuelva un valor de 8 bits que represente los Flags:
+    pub fn get_flags(&self) -> u8 {
+        let mut result = 0u8;
+        if self.carry { result |= 0x01 };
+        if self.subtract { result |= 0x02 };
+        if self.parity_overflow { result |= 0x04 };
+        if self.half_carry { result |= 0x10 };
+        if self.zero { result |= 0x40 };
+        if self.sign { result |= 0x80 };
+        result
     }
 
-    pub fn get_h(&self) -> u8 { self.h }
-    pub fn set_h(&mut self, valor: u8) { self.h = valor; }
-    pub fn get_l(&self) -> u8 { self.c }
-    pub fn set_l(&mut self, valor: u8) { self.l = valor; }
-    pub fn get_hl(&self) -> u16 { u16::from_be_bytes([self.h, self.l]) }
-    pub fn set_hl(&mut self, valor: u16) {
-        let bytes = valor.to_be_bytes();
-        self.h = bytes[0];
-        self.e = bytes[1];
+// Método que toma un valor de 8 bits y actualiza los bits de los Flags :
+    pub fn set_flags(&mut self, valor: u8) {
+        self.carry = valor & 0x01 != 0;             // Bit 0
+        self.subtract = valor & 0x02 != 0;          // Bit 1
+        self.parity_overflow = valor & 0x04 != 0;   // Bit 2
+        self.half_carry = valor & 0x10 != 0;        // Bit 4
+        self.zero = valor & 0x40 != 0;              // Bit 6
+        /* Operación bitwise                
+        "Valor" es un valor de 8 bits (u8) y 0x80 es un valor hexadecimal que representa el
+        número 128 en decimal y su representación binaria es 10000000.
+        La operación AND se realiza bit a bit, lo que significa que cada bit del valor "valor" se
+        compara con el correspondiente bit de 0x80 y se devuelve un resultado que tiene un bit 1
+        solo si ambos bits son 1. En caso contrario, el resultado tendrá un bit 0.
+        */
+        self.sign = valor & 0x80 != 0;              // Bit 7
     }
 
+    pub fn set_bit(&mut self, index: u8, valor: bool) {
+        match index {
+            0 => self.carry = valor,
+            1 => self.subtract = valor,
+            2 => self.parity_overflow = valor,
+            4 => self.half_carry = valor,
+            6 => self.zero = valor,
+            7 => self.sign = valor,
+            _ => panic!("Índice de bit no válido: {}", index),
+        }
+    }
+    
 
 }
+
 
 
 //***************************************************************************** 
+/*
+impl Flags {
 
+    // Método que toma un valor de 8 bits y actualiza los bits de los Flags :
+    pub fn update(&mut self, value: u8) {
+        self.carry = value & 0x01 != 0;             // Bit 0
+        self.subtract = value & 0x02 != 0;          // Bit 1
+        self.parity_overflow = value & 0x04 != 0;   // Bit 2
+        self.half_carry = value & 0x10 != 0;        // Bit 4
+        self.zero = value & 0x40 != 0;              // Bit 6
+        self.sign = value & 0x80 != 0;              // Bit 7
+    }
+    // Método que devuelva un valor de 8 bits que represente los Flags:
+    pub fn value(&self) -> u8 {
+        let mut result = 0u8;
+        if self.carry { result |= 0x01 };
+        if self.subtract { result |= 0x02 };
+        if self.parity_overflow { result |= 0x04 };
+        if self.half_carry { result |= 0x10 };
+        if self.zero { result |= 0x40 };
+        if self.sign { result |= 0x80 };
+        result
+    }
+    pub fn set_bit(&mut self, index: u8, value: bool) {
+        match index {
+            0 => self.carry = value,
+            1 => self.subtract = value,
+            2 => self.parity_overflow = value,
+            4 => self.half_carry = value,
+            6 => self.zero = value,
+            7 => self.sign = value,
+            _ => panic!("Índice de bit no válido: {}", index),
+        }
+    }
+}
 pub fn main_flags() {
-    let mut z80_flags1 = Flags::new_flags();
+    let mut flags = Flags {
+        carry: false,
+        subtract: true,
+        parity_overflow: true,
+        half_carry: false,
+        zero: true,
+        sign: false,
+    };
 
-    // Actualizar los flags con un valor de 0b10111101
-    z80_flags1.set_flags(0b10111101);
+    // Actualizar los flags con un valor de 0b10110101
+    flags.update(0b10110101);
 
     // Obtener el valor de los flags
-    let flags_value = z80_flags1.get_flags();
+    let flags_value = flags.value();
 
-    println!("Valor de los flags: 0b{:08b}", flags_value);
+    println!("Valor de los flags: 0x{:08b}", flags_value);
     
 
     // Establecer el bit de signo a verdadero
-    z80_flags1.set_bit(7, false);
+    flags.set_bit(7, false);
 
-    println!("Valor de los flags: 0b{:08b}", z80_flags1.get_flags());
+    println!("Valor de los flags: 0x{:08b}", flags.value());
 }
 
+*/
 
 //*****************************************************************************

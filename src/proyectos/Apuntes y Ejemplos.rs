@@ -27,37 +27,6 @@
 #![allow(unused_variables)]
 
 
-//*****************************************************************************
-/* demo_union()
-pub fn demo_union() {
-
-    let mut z80_reg = Z80Reg { af: 0 };
-
-    // Asignar un valor al registro A
-    z80_reg.a = 0x12;
-    println!("Registro A: 0x{:02x}", unsafe{z80_reg.a});
-
-    // Asignar un valor al registro F
-    z80_reg.f = 0b00101101;
-    println!("Registro F: 0x{:02x}", unsafe{z80_reg.f});
-
-    // Asignar un valor al registro AF de 16 bits
-    z80_reg.af = 0x1234;
-    println!("Registro AF: 0x{:04x}", unsafe{z80_reg.af});
-
-    // Obtener los valores de los registros A y F por separado
-    let a = unsafe{z80_reg.a};
-    let f = unsafe{z80_reg.f};
-    println!("Registro A: 0x{:02x}, Registro F: 0x{:02x}", a, f);
-
-    // Obtener el valor del registro AF de 16 bits por separado
-    let af = unsafe{z80_reg.af};
-    let a = (af >> 8) as u8;
-    let f = (af & 0xFF) as u8;
-    println!("Registro A: 0x{:02x}, Registro F: 0x{:02x}", a, f);
-}
-*/
-
 
 //*****************************************************************************
 /*
@@ -77,7 +46,6 @@ bitflags! {
         const SIGN = 0b10000000;
     }
 }
-
 
 pub fn apuntes_ejemplos0(){
     /*
@@ -115,29 +83,116 @@ pub fn apuntes_ejemplos0(){
     let substract_bit_is_set = flags.contains(Flags::SUBTRACT);
 
     /*
-    Para modificar un bit específico en la estructura Flags, se utiliza el método set() o unset(). El método set() establece el bit especificado en true, mientras que el método unset() establece el bit en false. Ambos métodos toman un valor de bit definido en la estructura Flags.
+    Para modificar un bit específico en la estructura Flags, se utiliza el método set() o unset().
+    El método set() establece el bit especificado en true, mientras que el método unset() establece
+    el bit en false. Ambos métodos toman un valor de bit definido en la estructura Flags.
     */
     let mut flags = Flags::from_bits_truncate(flags_byte);
     flags.set(Flags::SUBTRACT, false);
 
     /*
-    Finalmente, se imprime el valor de bits modificado utilizando la función println!() con la misma cadena de formato {:08b}.
+    Finalmente, se imprime el valor de bits modificado utilizando la función println!() con la misma
+    cadena de formato {:08b}.
     */
     let new_flags_byte = flags.bits();
     println!("Flags: {:08b}", new_flags_byte);
+
     /*
-    La macro bitflags proporciona un conjunto de bits con nombres significativos, y 
+    La macro bitflags proporciona un conjunto de bits con nombres significativos. 
+    Los métodos from_bits_truncate(), bits(), contains(), set() y unset() son parte de la API de Rust
+    para el tipo de datos EnumSet. Estos métodos permiten manipular y trabajar con conjuntos de
+    valores de una enumeración de manera eficiente.
+
+    A continuación se explica brevemente cada uno de estos métodos:
+
+    -   El método from_bits_truncate() permite construir un conjunto de valores de una enumeración a
+        partir de un valor entero que representa los bits que se corresponden con los elementos del
+        conjunto. Este método descarta cualquier bit que no corresponda a un valor de la enumeración.
+
+    -   El método bits() devuelve el valor entero que representa los bits que se corresponden con los
+        elementos del conjunto.
+
+    -   El método contains() verifica si un elemento está presente en el conjunto.
+
+    -   El método set() agrega un elemento al conjunto.
+
+    -   El método unset() remueve un elemento del conjunto.
     */
 }
 
 
+//*****************************************************************************
+/*
+    from_byte: una función que toma un byte y devuelve una estructura Flags.
+    to_byte: una función que toma una estructura Flags y devuelve un byte.
+    modify_bit: una función que toma una referencia mutable a una estructura Flags, un valor de máscara de bit
+    y un valor booleano, y modifica el bit correspondiente en la estructura de acuerdo con la máscara de bit y
+    el valor booleano.
+*/
 
+pub trait FlagsOperations {
+    fn from_byte(byte: u8) -> Flags;
+    fn to_byte(&self) -> u8;
+    fn modify_bit(&mut self, bit_mask: u8, value: bool);
+}
 
+impl FlagsOperations for Flags {
+    fn from_byte(byte: u8) -> Flags {
+        Flags {
+            carry: (byte & 0b00000001) != 0,
+            subtract: (byte & 0b00000010) != 0,
+            parity_overflow: (byte & 0b00000100) != 0,
+            half_carry: (byte & 0b00010000) != 0,
+            zero: (byte & 0b01000000) != 0,
+            sign: (byte & 0b10000000) != 0,
+        }
+    }
 
+    fn to_byte(&self) -> u8 {
+        let mut byte: u8 = 0;
+        if self.carry {
+            byte |= 0b00000001;
+        }
+        if self.subtract {
+            byte |= 0b00000010;
+        }
+        if self.parity_overflow {
+            byte |= 0b00000100;
+        }
+        if self.half_carry {
+            byte |= 0b00010000;
+        }
+        if self.zero {
+            byte |= 0b01000000;
+        }
+        if self.sign {
+            byte |= 0b10000000;
+        }
+        byte
+    }
 
+    fn modify_bit(&mut self, bit_mask: u8, value: bool) {
+        match bit_mask {
+            0b00000001 => self.carry = value,
+            0b00000010 => self.subtract = value,
+            0b00000100 => self.parity_overflow = value,
+            0b00010000 => self.half_carry = value,
+            0b01000000 => self.zero = value,
+            0b10000000 => self.sign = value,
+            _ => (),
+        }
+    }
+}
 
+pub fn manxxxx() {
+    let byte = 0b10101010;
+    let mut flags = Flags::from_byte(byte);
+    //println!("Flags before modification: {}", flags);
 
+    flags.modify_bit(0b00000001, true); // Set the carry flag to true
+    flags.modify_bit(0b01000000, false); // Set the zero flag to false
 
-
-
-que proporcionan los métodos from_bits_truncate(), bits(), contains(), set() y unset() 
+    let modified_byte = flags.to_byte();
+    //println!("Modified byte: {:08b}", modified_byte);
+    //println!("Flags after modification: {:08b}", flags);
+}

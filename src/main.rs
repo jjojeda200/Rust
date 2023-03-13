@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          21-02-2023
+    Fecha:          13-03-2023
     Titulo:         introducción a RUST
     Descripción:    Inicio ;-)
     Referencias:
@@ -61,7 +61,6 @@ fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo);
 }
 
-
 fn main() {
 // $env:RUST_BACKTRACE=0
     let titulo = String::from(" Función main, punto principal de entrada al programa ");
@@ -85,9 +84,9 @@ fn main() {
 */
 
 
-    proyectos::sim_cpu::z80_sim();
+    proyectos::sim_cpu::z80_sim_0();
 
-    proyectos::sim_cpu_pruebas::mn();
+    proyectos::sim_cpu_pruebas::z80_sim_1();
 
 
 //*****************************************************************************
@@ -227,7 +226,10 @@ fn main() {
 
 /* proyectos                    
     proyectos::firebase::firebase();
-    proyectos::sim_cpu::sim_cpu();
-    proyectos::sim_cpu::z80_sim();
 
+    proyectos::sim_cpu::z80_sim_0();
+    proyectos::sim_cpu_pruebas::z80_sim_1();
+    
+    
+    proyectos::sim_cpu::z80_sim();
 */
