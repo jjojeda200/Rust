@@ -49,61 +49,6 @@ Estas son las banderas que se utilizan en el Z80:
 */
 
 //***************************************************************************** Estructura e implementación Flags
-/* Implementación de Flags                  
-Ejemplo inicial de utilización de la struct "pub struct Flags")
-
-pub fn flags_0() {
-// Para inicializar estado de los Flags a partir de un byte:
-    let mut flags_byte: u8 = 0b00000111;
-    let mut flags = sim_cpu_struct::Flags {
-        carry: (flags_byte & 0b00000001) != 0,
-        subtract: (flags_byte & 0b00000010) != 0,
-        parity_overflow: (flags_byte & 0b00000100) != 0,
-        half_carry: (flags_byte & 0b00010000) != 0,
-        zero: (flags_byte & 0b01000000) != 0,
-        sign: (flags_byte & 0b10000000) != 0,
-    };
-    println!("Flags: inicializado = {:08b}", flags_byte);
-
-// Para modificar solo un bit de los flags (ejemplo subtract)
-    // Máscara para el bit de substract
-    let substract_bit_mask: u8 = 0b00000010;
-
-    // Verificar el estado actual del bit de substract en la variable de flags
-    let substract_bit_is_set = flags_byte & substract_bit_mask != 0;
-    println!("Flags: Substract bit 1 (N) = {}", substract_bit_is_set);
-
-    // Modificar el bit de substract
-    flags_byte = if substract_bit_is_set {
-        flags_byte & !substract_bit_mask   // Borrar el bit de substract
-    } else {
-        flags_byte | substract_bit_mask    // Establecer el bit de substract
-    };
-    let substract_bit_is_set = flags_byte & substract_bit_mask != 0;
-    println!("Flags: Substract bit 1 (N) = {}", substract_bit_is_set);
-    //println!("Flags: Estado actual de la variable de flags = {:08b}", flags_byte);
-
-// Actualizar flags con el nuevo valor de flags_byte
-    flags = sim_cpu_struct::Flags {
-        carry: (flags_byte & 0b00000001) != 0,
-        subtract: (flags_byte & 0b00000010) != 0,
-        parity_overflow: (flags_byte & 0b00000100) != 0,
-        half_carry: (flags_byte & 0b00010000) != 0,
-        zero: (flags_byte & 0b01000000) != 0,
-        sign: (flags_byte & 0b10000000) != 0,
-    };
-
-// Para crear un byte a partir de los flags:
-    flags_byte = 
-        (flags.carry as u8) |
-        ((flags.subtract as u8) << 1) |
-        ((flags.parity_overflow as u8) << 2) |
-        ((flags.half_carry as u8) << 4) |
-        ((flags.zero as u8) << 6) |
-        ((flags.sign as u8) << 7);
-    println!("Flags: Estado actual de la variable de flags = {:08b}", flags_byte);
-
-*/
 #[derive(Default)]
 pub struct Flags {
     pub carry: bool,                    // Bit 0 (C):  Carry flag
@@ -258,9 +203,61 @@ impl Z80Reg {
 
 }
 
-//***************************************************************************** 
+//*****************************************************************************
+/* Implementación prueba de Flags           
+Ejemplo inicial de utilización de la struct "pub struct Flags")
 
-//***************************************************************************** 
+pub fn flags_0() {
+// Para inicializar estado de los Flags a partir de un byte:
+    let mut flags_byte: u8 = 0b00000111;
+    let mut flags = sim_cpu_struct::Flags {
+        carry: (flags_byte & 0b00000001) != 0,
+        subtract: (flags_byte & 0b00000010) != 0,
+        parity_overflow: (flags_byte & 0b00000100) != 0,
+        half_carry: (flags_byte & 0b00010000) != 0,
+        zero: (flags_byte & 0b01000000) != 0,
+        sign: (flags_byte & 0b10000000) != 0,
+    };
+    println!("Flags: inicializado = {:08b}", flags_byte);
 
+// Para modificar solo un bit de los flags (ejemplo subtract)
+    // Máscara para el bit de substract
+    let substract_bit_mask: u8 = 0b00000010;
+
+    // Verificar el estado actual del bit de substract en la variable de flags
+    let substract_bit_is_set = flags_byte & substract_bit_mask != 0;
+    println!("Flags: Substract bit 1 (N) = {}", substract_bit_is_set);
+
+    // Modificar el bit de substract
+    flags_byte = if substract_bit_is_set {
+        flags_byte & !substract_bit_mask   // Borrar el bit de substract
+    } else {
+        flags_byte | substract_bit_mask    // Establecer el bit de substract
+    };
+    let substract_bit_is_set = flags_byte & substract_bit_mask != 0;
+    println!("Flags: Substract bit 1 (N) = {}", substract_bit_is_set);
+    //println!("Flags: Estado actual de la variable de flags = {:08b}", flags_byte);
+
+// Actualizar flags con el nuevo valor de flags_byte
+    flags = sim_cpu_struct::Flags {
+        carry: (flags_byte & 0b00000001) != 0,
+        subtract: (flags_byte & 0b00000010) != 0,
+        parity_overflow: (flags_byte & 0b00000100) != 0,
+        half_carry: (flags_byte & 0b00010000) != 0,
+        zero: (flags_byte & 0b01000000) != 0,
+        sign: (flags_byte & 0b10000000) != 0,
+    };
+
+// Para crear un byte a partir de los flags:
+    flags_byte = 
+        (flags.carry as u8) |
+        ((flags.subtract as u8) << 1) |
+        ((flags.parity_overflow as u8) << 2) |
+        ((flags.half_carry as u8) << 4) |
+        ((flags.zero as u8) << 6) |
+        ((flags.sign as u8) << 7);
+    println!("Flags: Estado actual de la variable de flags = {:08b}", flags_byte);
+}
+*/
 
 //*****************************************************************************

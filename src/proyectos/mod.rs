@@ -10,3 +10,4 @@ pub mod sim_cpu;
 pub mod sim_cpu_mar_mdr;
 pub mod sim_cpu_pruebas;
 pub mod sim_cpu_registros;
+pub mod sim_cpu_memoria;

@@ -29,7 +29,7 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use crate::proyectos::sim_cpu_registros::{self};
+use crate::proyectos::{sim_cpu_registros::{self}, sim_cpu_memoria};
 
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo);
@@ -175,10 +175,8 @@ pub fn z80_sim_1() {
     // Registro BC modificados como uno solo
     z80_reg.set_reg_bc(0b0000111111110000);
     println!("Registro BC: 0x{:04x}", z80_reg.get_reg_bc());
-    
 
 //************************************* Prueba manejo flags
-
     z80_flags.set_flags(0b10110101);
 
     // Nota: bit 3 y 5 no se utilizan
@@ -188,13 +186,16 @@ pub fn z80_sim_1() {
     // Obtener el valor de los flags
     let flags_value = z80_flags.get_flags();
     println!("Valor de los flags: 0b{:08b}", flags_value);
-    
 
     // Establecer el bit de signo a 0 (false)
     z80_flags.set_bit(7, false);
     println!("Valor de los flags: 0b{:08b}", z80_flags.get_flags());
     z80_flags.set_flags(0b00000000);
     println!("Valor de los flags: 0b{:08b}", z80_flags.get_flags_b());
+
+//************************************* Prueba manejo memoria
+    println!("");
+    sim_cpu_memoria::memoria_0();
 
 }
 
