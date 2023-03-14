@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          13-03-2023
+    Fecha:          14-03-2023
     Titulo:         Simulación CPU
     Descripción:    
     Referencias:
@@ -48,12 +48,43 @@ Estas son las banderas que se utilizan en el Z80:
     establece en 0.
 */
 
-//***************************************************************************** Estructura Flags
+//***************************************************************************** Estructura e implementación Flags
 /* Implementación de Flags                  
+Ejemplo inicial de utilización de la struct "pub struct Flags")
 
-// Para crear un struct Flags a partir de un byte:
-    let flags_byte: u8 = 0b00101101;            // ejemplo
-    let flags = Flags {
+pub fn flags_0() {
+// Para inicializar estado de los Flags a partir de un byte:
+    let mut flags_byte: u8 = 0b00000111;
+    let mut flags = sim_cpu_struct::Flags {
+        carry: (flags_byte & 0b00000001) != 0,
+        subtract: (flags_byte & 0b00000010) != 0,
+        parity_overflow: (flags_byte & 0b00000100) != 0,
+        half_carry: (flags_byte & 0b00010000) != 0,
+        zero: (flags_byte & 0b01000000) != 0,
+        sign: (flags_byte & 0b10000000) != 0,
+    };
+    println!("Flags: inicializado = {:08b}", flags_byte);
+
+// Para modificar solo un bit de los flags (ejemplo subtract)
+    // Máscara para el bit de substract
+    let substract_bit_mask: u8 = 0b00000010;
+
+    // Verificar el estado actual del bit de substract en la variable de flags
+    let substract_bit_is_set = flags_byte & substract_bit_mask != 0;
+    println!("Flags: Substract bit 1 (N) = {}", substract_bit_is_set);
+
+    // Modificar el bit de substract
+    flags_byte = if substract_bit_is_set {
+        flags_byte & !substract_bit_mask   // Borrar el bit de substract
+    } else {
+        flags_byte | substract_bit_mask    // Establecer el bit de substract
+    };
+    let substract_bit_is_set = flags_byte & substract_bit_mask != 0;
+    println!("Flags: Substract bit 1 (N) = {}", substract_bit_is_set);
+    //println!("Flags: Estado actual de la variable de flags = {:08b}", flags_byte);
+
+// Actualizar flags con el nuevo valor de flags_byte
+    flags = sim_cpu_struct::Flags {
         carry: (flags_byte & 0b00000001) != 0,
         subtract: (flags_byte & 0b00000010) != 0,
         parity_overflow: (flags_byte & 0b00000100) != 0,
@@ -63,37 +94,15 @@ Estas son las banderas que se utilizan en el Z80:
     };
 
 // Para crear un byte a partir de los flags:
-    let flags_byte = 
+    flags_byte = 
         (flags.carry as u8) |
         ((flags.subtract as u8) << 1) |
         ((flags.parity_overflow as u8) << 2) |
         ((flags.half_carry as u8) << 4) |
         ((flags.zero as u8) << 6) |
         ((flags.sign as u8) << 7);
+    println!("Flags: Estado actual de la variable de flags = {:08b}", flags_byte);
 
-// Para modificar solo un bit en flags_byte
-    let flags_byte: u8 = 0b00101101;            // ejemplo
-    let substract_bit_mask: u8 = 0b00000010;    // mascara para el bit de substract
-
-    // Verificar el estado actual del bit de substract
-    let substract_bit_is_set = flags_byte & substract_bit_mask != 0;
-
-    // Modificar el bit de substract
-    let new_flags_byte = if substract_bit_is_set {
-        flags_byte & !substract_bit_mask   // borrar el bit de substract
-    } else {
-        flags_byte | substract_bit_mask    // establecer el bit de substract
-    };
-
-// Actualizar flags_byte con el nuevo valor
-    let flags = sim_cpu_struct::Flags {
-        carry: (new_flags_byte & 0b00000001) != 0,
-        subtract: (new_flags_byte & 0b00000010) != 0,
-        parity_overflow: (new_flags_byte & 0b00000100) != 0,
-        half_carry: (new_flags_byte & 0b00010000) != 0,
-        zero: (new_flags_byte & 0b01000000) != 0,
-        sign: (new_flags_byte & 0b10000000) != 0,
-    };
 */
 #[derive(Default)]
 pub struct Flags {
@@ -107,23 +116,6 @@ pub struct Flags {
     pub sign: bool,                     // Bit 7 (S):  Sign flag
 }
 
-//***************************************************************************** Estructura Registros
-pub struct Z80Reg {
-    a: u8,      // Registro A de 8 bits
-    //f: u8,    // Manejamos el registro de flags F de manera independiete
-    b: u8,      // Registro B de 8 bits
-    c: u8,      // Registro C de 8 bits
-    d: u8,      // Registro D de 8 bits
-    e: u8,      // Registro E de 8 bits
-    h: u8,      // Registro H de 8 bits
-    l: u8,      // Registro L de 8 bits
-    ix: u16,    // Registro IX de 16 bits
-    iy: u16,    // Registro IY de 16 bits
-    sp: u16,    // Registro SP de 16 bits
-    pc: u16,    // Registro PC de 16 bits
-}
-
-//***************************************************************************** Impl Flags y Registros
 impl Flags {
     pub fn new_flags() -> Flags {
         Flags {
@@ -136,7 +128,7 @@ impl Flags {
         }
     }
 
-    // Método que devuelva un valor de 8 bits que represente los Flags:
+    // Método que devuelva un valor de 8 bits que represente los Flags (bitwise con Hex):
     pub fn get_flags(&self) -> u8 {
         let mut resultado = 0u8;
         if self.carry { resultado |= 0x01 };
@@ -145,6 +137,18 @@ impl Flags {
         if self.half_carry { resultado |= 0x10 };
         if self.zero { resultado |= 0x40 };
         if self.sign { resultado |= 0x80 };
+        resultado
+    }
+
+    // Método que devuelva un valor de 8 bits que represente los Flags (bitwise con bin):
+    pub fn get_flags_b(&self) -> u8 {
+        let mut resultado = 0u8;
+        if self.carry { resultado |= 0b00000001 };
+        if self.subtract { resultado |= 0b00000010 };
+        if self.parity_overflow { resultado |= 0b00000100 };
+        if self.half_carry { resultado |= 0b00010000 };
+        if self.zero { resultado |= 0b01000000 };
+        if self.sign { resultado |= 0b10000000 };
         resultado
     }
 
@@ -177,6 +181,22 @@ impl Flags {
         }
     }
 
+}
+
+//***************************************************************************** Estructura e implementación Registros
+pub struct Z80Reg {
+    a: u8,      // Registro A de 8 bits
+    //f: u8,    // Manejamos el registro de flags F de manera independiete
+    b: u8,      // Registro B de 8 bits
+    c: u8,      // Registro C de 8 bits
+    d: u8,      // Registro D de 8 bits
+    e: u8,      // Registro E de 8 bits
+    h: u8,      // Registro H de 8 bits
+    l: u8,      // Registro L de 8 bits
+    ix: u16,    // Registro IX de 16 bits
+    iy: u16,    // Registro IY de 16 bits
+    sp: u16,    // Registro SP de 16 bits
+    pc: u16,    // Registro PC de 16 bits
 }
 
 impl Z80Reg {
@@ -238,26 +258,9 @@ impl Z80Reg {
 
 }
 
-
 //***************************************************************************** 
 
-pub fn main_flags() {
-    let mut z80_flags1 = Flags::new_flags();
-
-    // Actualizar los flags con un valor de 0b10111101
-    z80_flags1.set_flags(0b10111101);
-
-    // Obtener el valor de los flags
-    let flags_value = z80_flags1.get_flags();
-
-    println!("Valor de los flags: 0b{:08b}", flags_value);
-    
-
-    // Establecer el bit de signo a verdadero
-    z80_flags1.set_bit(7, false);
-
-    println!("Valor de los flags: 0b{:08b}", z80_flags1.get_flags());
-}
+//***************************************************************************** 
 
 
 //*****************************************************************************

@@ -29,7 +29,7 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use crate::proyectos::sim_cpu_struct::{self};
+use crate::proyectos::sim_cpu_registros::{self};
 
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo);
@@ -43,7 +43,7 @@ pub struct RegistrosZ80 {
     sp: u16,
     pc: u16,
     pub a: u8,
-    pub f: sim_cpu_struct::Flags,
+    pub f: sim_cpu_registros::Flags,
 }
 
 impl Default for RegistrosZ80 {
@@ -149,53 +149,15 @@ pub fn z80_sim_1() {
     let resultado = ejecutar_programa();
     println!("Valor de registro A después de ejecutar el programa: {:02x}", resultado);
 
-//************************************* Flags
-    // Para crear un struct Flags a partir de un byte:
-    let flags_byte: u8 = 0b00101101;                // ejemplo
-    let flags = sim_cpu_struct::Flags {
-        carry: (flags_byte & 0b00000001) != 0,
-        subtract: (flags_byte & 0b00000010) != 0,
-        parity_overflow: (flags_byte & 0b00000100) != 0,
-        half_carry: (flags_byte & 0b00010000) != 0,
-        zero: (flags_byte & 0b01000000) != 0,
-        sign: (flags_byte & 0b10000000) != 0,
-    };
-    println!("Flags: {:08b}", flags_byte);
-    println!("Flags: {:02x}", flags_byte);
-
-    // Para crear un byte a partir de los flags:
-    let flags_byte = 
-        (flags.carry as u8) |
-        ((flags.subtract as u8) << 1) |
-        ((flags.parity_overflow as u8) << 2) |
-        ((flags.half_carry as u8) << 4) |
-        ((flags.zero as u8) << 6) |
-        ((flags.sign as u8) << 7);
-
-    println!("Flags: {:08b}", flags_byte);
-
-    let substract_bit_mask: u8 = 0b00000010;    // mascara para el bit de substract
-
-    // Verificar el estado actual del bit de substract
-    let substract_bit_is_set = flags_byte & substract_bit_mask != 0;
-
-    // Modificar el bit de substract
-    let new_flags_byte = if substract_bit_is_set {
-        flags_byte & !substract_bit_mask   // borrar el bit de substract
-    } else {
-        flags_byte | substract_bit_mask    // establecer el bit de substract
-    };
-    println!("Flags: {:08b}", flags_byte);
-    println!("Flags: {:02x}", flags_byte);
-
 //*************************************
-    // sim_cpu_struct::main_flags();
+
 
 
 //************************************* Prueba manejo registros
+    println!("");
     // Inicializar la estructura de registros y de flags
-    let mut z80_reg = sim_cpu_struct::Z80Reg::new();
-    let mut z80_flags = sim_cpu_struct::Flags::new_flags();
+    let mut z80_reg = sim_cpu_registros::Z80Reg::new();
+    let mut z80_flags = sim_cpu_registros::Flags::new_flags();
    
     // Registro A al inicializar
     println!("Registro A: 0x{:02x}", z80_reg.get_a());
@@ -231,6 +193,8 @@ pub fn z80_sim_1() {
     // Establecer el bit de signo a 0 (false)
     z80_flags.set_bit(7, false);
     println!("Valor de los flags: 0b{:08b}", z80_flags.get_flags());
+    z80_flags.set_flags(0b00000000);
+    println!("Valor de los flags: 0b{:08b}", z80_flags.get_flags_b());
 
 }
 
