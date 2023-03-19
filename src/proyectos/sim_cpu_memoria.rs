@@ -25,27 +25,12 @@
 ***************************************************************************************/
 #![allow(dead_code)]
 #![allow(unused_variables)]
+#![allow(unused_assignments)]
 
 //***************************************************************************** Módulo de emulación
-/* Descripción                              
-El código define una estructura llamada "BankedMemory" que representa una memoria dividida en
-bancos. Cada banco es un vector de bytes (u8) de tamaño fijo y la estructura mantiene una pista
-del banco actualmente seleccionado.
+/*
 
-El método "new" es un constructor que toma como argumentos el número de bancos y el tamaño de
-cada banco, y crea una instancia de "BankedMemory" inicializando la estructura con un vector de
-"num_banks" bancos, cada uno con un vector de "bank_size" bytes inicializados a cero.
-
-El método "select_bank" permite cambiar el banco actualmente seleccionado a uno de los bancos
-existentes, identificado por su número de índice.
-
-Los métodos "read_byte" y "write_byte" permiten leer y escribir bytes en la memoria en la dirección
-de memoria dada por "addr". En ambos métodos, se calcula primero el desplazamiento dentro del banco
-actual en base a la dirección de memoria y el tamaño del banco. Luego, se accede al vector de bytes
-correspondiente al banco actual y se lee o escribe el byte en la posición indicada por el
-desplazamiento.
 */
-
 pub struct BancosMemoria {
     pub segmento_memoria: Vec<Vec<u8>>,
     pub banco_actual: u8,
@@ -57,8 +42,10 @@ pub struct UnidadMemoria {
     end_address: u16,                               // Dirección final de la unidad de memoria
     read_handler: Option<Box<dyn Fn(u16) -> u8>>,   // Función para leer datos de la unidad de memoria
     write_handler: Option<Box<dyn Fn(u16, u8)>>,    // Función para escribir datos en la unidad de memoria
+    endianness: Endianness,
 }
 
+// Nota importante: los índices de matrices deben ser de tipo usize.
 impl BancosMemoria {
     pub fn new() -> BancosMemoria {
         BancosMemoria {
@@ -67,7 +54,7 @@ impl BancosMemoria {
         }
     }
 
-    pub fn asignar_segmento(&mut self, longitud_del_segmento: usize) {
+    pub fn crear_segmento(&mut self, longitud_del_segmento: usize) {
         self.segmento_memoria.push(vec![0; longitud_del_segmento]);
     }
 
@@ -85,114 +72,177 @@ impl BancosMemoria {
         Ok(())
     }
     
-    
     pub fn get_banco_activo (&self) -> u8 { self.banco_actual }
 
     pub fn set_banco_activo (&mut self, num_de_banco: u8) { self.banco_actual = num_de_banco; }
 
-}
-pub struct BankedMemory {
-    pub banks: Vec<Vec<u8>>,
-    current_bank: usize,
-}
-
-impl BankedMemory {
-    pub fn new(num_banks: usize, bank_size: usize) -> BankedMemory {
-        BankedMemory {
-            banks: vec![vec![0; bank_size]; num_banks],
-            current_bank: 0,
-        }
-    }
-
-    pub fn select_bank(&mut self, bank_num: usize) {
-        self.current_bank = bank_num;
-    }
-
-    pub fn read_byte(&self, addr: u16) -> u8 {
-        let bank_offset = (self.current_bank as u16) * 0x4000;
-        self.banks[self.current_bank][(addr - bank_offset) as usize]
-    }
-
-    /*
-    */
-    pub fn read_byte_no(&self, addr: u16) -> u8 {
-        let bank_offset = (self.current_bank as u16) * 0x4000;
-        let mem_addr = addr - bank_offset;
-        if mem_addr < self.banks[self.current_bank].len() as u16 {
-            self.banks[self.current_bank][mem_addr as usize]
+    pub fn escribir_memoria(&mut self, direccion: u16, val: u8) {
+        if /*direccion < 0 ||*/ usize::from(direccion) > self.segmento_memoria[self.banco_actual as usize].len() {
+            println!("Intento de almacenar fuera del rango del segmento de memoria")
         } else {
-            panic!("Error de overflow en BankedMemory: la dirección 0x{:04X} está fuera del rango del banco actual.", addr);
+            self.segmento_memoria[self.banco_actual as usize][direccion as usize] = val;
         }
     }
 
-    pub fn write_byte(&mut self, addr: u16, val: u8) {
-        let bank_offset = (self.current_bank as u16) * 0x4000;
-        self.banks[self.current_bank][(addr - bank_offset) as usize] = val;
+    pub fn leer_memoria(&self, direccion: u16) -> u8 {
+        if /*direccion < 0 ||*/usize::from(direccion) > self.segmento_memoria[self.banco_actual as usize].len() {
+            println!("Intento de leer fuera del rango del segmento de memoria");
+            return 0;
+        } else {
+            self.segmento_memoria[self.banco_actual as usize][direccion as usize]
+        }
     }
+
 }
 
-//***************************************************************************** 
-/* 
-La estructura Memory tiene un vector mem que representa los primeros 16 KB de memoria, que no son
-conmutables, y una estructura banked_mem que representa los 4 bancos de memoria conmutables. Los
-métodos read_byte y write_byte verifican si la dirección de memoria solicitada se encuentra dentro
-de los primeros 16 KB o en los bancos de memoria conmutables, y llaman a los métodos correspondientes
-para leer y escribir en la dirección correcta. El método select_bank llama al método correspondiente
-en la estructura banked_mem para seleccionar el banco de memoria deseado.
+/* Modificaciones para añadir LittleEndian y BigEndian                              
 
-En fn memoria_0(), se crea una instancia de Memory, se selecciona el banco 0, se escribe un byte en la
-dirección 0x1234, se lee el byte de esa misma dirección y se imprime en la consola.
+pub enum Endianess {
+    LittleEndian,
+    BigEndian,
+}
+
+pub struct BancosMemoria {
+    pub segmento_memoria: Vec<Vec<u8>>,
+    pub banco_actual: u8,
+    pub endianess: Endianess,
+}
+
+impl BancosMemoria {
+    pub fn new(endianess: Endianess) -> BancosMemoria {
+        BancosMemoria {
+            segmento_memoria: vec![vec![0; 16384]; 1],
+            banco_actual: 0,
+            endianess: endianess,
+        }
+    }
+
+    // El resto de los métodos se mantienen igual...
+
+    pub fn escribir_memoria(&mut self, direccion: u16, val: u8) {
+        let val = match self.endianess {
+            Endianess::LittleEndian => val,
+            Endianess::BigEndian => val.swap_bytes(),
+        };
+        if /*direccion < 0 ||*/ usize::from(direccion) > self.segmento_memoria[self.banco_actual as usize].len() {
+            println!("Intento de almacenar fuera del rango del segmento de memoria");
+        } else {
+            self.segmento_memoria[self.banco_actual as usize][direccion as usize] = val;
+        }
+    }
+
+    pub fn leer_memoria(&self, direccion: u16) -> u8 {
+        let val = if /*direccion < 0 ||*/usize::from(direccion) > self.segmento_memoria[self.banco_actual as usize].len() {
+            println!("Intento de leer fuera del rango del segmento de memoria");
+            0
+        } else {
+            self.segmento_memoria[self.banco_actual as usize][direccion as usize]
+        };
+        match self.endianess {
+            Endianess::LittleEndian => val,
+            Endianess::BigEndian => val.swap_bytes(),
+        }
+    }
+}
 */
 
-/*
-const MEM_SIZE: usize = 0x10000; // Tamaño máximo de la memoria
-
-struct Memory {
-    mem: Vec<u8>,
-    banked_mem: BankedMemory,
-}
-
-impl Memory {
-    fn new() -> Memory {
-        Memory {
-            mem: vec![0; MEM_SIZE],
-            banked_mem: BankedMemory::new(4, 0x4000), // 4 bancos de 16 KB
+/* Implementación de unidades de memoria, sus metodos, LitteEndian y Bigendian      
+impl UnidadMemoria {
+    pub fn new(start_address: u16, end_address: u16, endianness: Endianness) -> UnidadMemoria {
+        UnidadMemoria {
+            data: vec![0; usize::from(end_address - start_address + 1)],
+            start_address,
+            end_address,
+            read_handler: None,
+            write_handler: None,
+            endianness,
         }
     }
 
-    fn read_byte(&self, addr: u16) -> u8 {
-        if addr < 0x4000 {
-            self.mem[addr as usize]
+    pub fn set_read_handler<F>(&mut self, handler: F)
+        where F: 'static + Fn(u16, Endianness) -> u8
+    {
+        self.read_handler = Some(Box::new(handler));
+    }
+
+    pub fn set_write_handler<F>(&mut self, handler: F)
+        where F: 'static + Fn(u16, u8, Endianness)
+    {
+        self.write_handler = Some(Box::new(handler));
+    }
+
+    pub fn read(&self, address: u16) -> u8 {
+        if let Some(ref handler) = self.read_handler {
+            handler(address, self.endianness)
         } else {
-            self.banked_mem.read_byte(addr)
+            self.data[usize::from(address - self.start_address)]
         }
     }
 
-    fn write_byte(&mut self, addr: u16, val: u8) {
-        if addr < 0x4000 {
-            self.mem[addr as usize] = val;
+    pub fn write(&mut self, address: u16, value: u8) {
+        if let Some(ref handler) = self.write_handler {
+            handler(address, value, self.endianness)
         } else {
-            self.banked_mem.write_byte(addr, val);
+            self.data[usize::from(address - self.start_address)] = value;
         }
     }
 
-    fn select_bank(&mut self, bank_num: usize) {
-        self.banked_mem.select_bank(bank_num);
+    pub fn read_u16(&self, address: u16) -> u16 {
+        let lo = u16::from(self.read(address));
+        let hi = u16::from(self.read(address + 1));
+        match self.endianness {
+            Endianness::BigEndian => (hi << 8) | lo,
+            Endianness::LittleEndian => (lo << 8) | hi,
+        }
+    }
+
+    pub fn write_u16(&mut self, address: u16, value: u16) {
+        let lo = value as u8;
+        let hi = (value >> 8) as u8;
+        match self.endianness {
+            Endianness::BigEndian => {
+                self.write(address, hi);
+                self.write(address + 1, lo);
+            },
+            Endianness::LittleEndian => {
+                self.write(address, lo);
+                self.write(address + 1, hi);
+            },
+        }
     }
 }
 
-pub fn memoria_0() {
-    let mut mem = Memory::new();
 
-    // Escribir y leer bytes de memoria en el banco 0
-    mem.select_bank(0);
-    mem.write_byte(0x1234, 0xAB);
-    let val = mem.read_byte(0x1234);
+*/
+//***************************************************************************** 
 
-    println!("Valor leído: {:08b}", val);
-    println!("Valor leído: {:02X}", val);
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn prueba_bancos_memoria() {
+        let mut bancos_memoria = BancosMemoria::new();
+
+        // Escribimos y leemos en la posición 0 del segmento de memoria actual
+        bancos_memoria.escribir_memoria(0, 5);
+        assert_eq!(bancos_memoria.leer_memoria(0), 5);
+
+        // Cambiamos al segundo segmento de memoria y escribimos en la posición 0
+        bancos_memoria.crear_segmento(16384);
+        bancos_memoria.set_banco_activo(1);
+        bancos_memoria.escribir_memoria(0, 10);
+
+        // Volvemos al primer segmento de memoria y comprobamos que el valor en la posición 0 no ha cambiado
+        bancos_memoria.set_banco_activo(0);
+        assert_eq!(bancos_memoria.leer_memoria(0), 5);
+
+        // Cambiamos de nuevo al segundo segmento de memoria y comprobamos que el valor en la posición 0 ha cambiado
+        bancos_memoria.set_banco_activo(1);
+        assert_eq!(bancos_memoria.leer_memoria(0), 10);
+
+        // Intentamos leer y escribir fuera del rango del segmento de memoria
+        bancos_memoria.escribir_memoria(30000, 15);
+        assert_eq!(bancos_memoria.leer_memoria(30000), 0);
+    }
 }
- */
-
-//*****************************************************************************
-

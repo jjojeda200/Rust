@@ -28,6 +28,7 @@
 */
 #![allow(dead_code)]
 #![allow(unused_variables)]
+#![allow(unused_assignments)]
 
 use crate::proyectos::{sim_cpu_registros::{self}, sim_cpu_memoria::*};
 
@@ -213,7 +214,7 @@ pub fn z80_sim_1() {
         memoria.segmento_memoria[num_banco_actual].capacity());
 
     // Crea un banco de memoria adicional de 32768 bytes (32Kb)
-    memoria.asignar_segmento(32768);
+    memoria.crear_segmento(32768);
 
     // Selecciona el nuevo banco (Banco índice 1)
     memoria.set_banco_activo(1);
@@ -231,12 +232,24 @@ pub fn z80_sim_1() {
 
 
 
+    // escribe un byte en la dirección 0x2000 del primer banco
+    memoria.escribir_memoria(0x2000, 0x55);
+    // lee el byte en la dirección 0x2000 del primer banco
+    let byte1 = memoria.leer_memoria(10);
+    println!("Byte leído en la dirección 0x2000 del primer banco: 0x{:02x}", byte1);
+
+
     println!(" {:?} ", memoria.segmento_memoria.len());
     let mut resultado = memoria.eliminar_segmento(1);
     println!(" {:?}", resultado);
     println!(" {:?} ", memoria.segmento_memoria.len());
     resultado = memoria.eliminar_segmento(1);
     println!(" {:?}", resultado);
+
+    resultado = memoria.eliminar_segmento(0);
+    println!(" {:?}", resultado);
+
+    
 /* 
     // crea una memoria con dos bancos: uno de 16K y otro de 32K
     let mut memory = BankedMemory::new(2, 16 * 1024 + 48 * 1024);
@@ -248,7 +261,7 @@ pub fn z80_sim_1() {
     // selecciona el primer banco nuevamente
     memory.select_bank(0);
 
-    // lee el byte en la dirección 0x2000 del primer banco
+
     let byte1 = memory.read_byte(0x2000);
     println!("Byte leído en la dirección 0x2000 del primer banco: {}", byte1);
 

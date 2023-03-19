@@ -371,6 +371,7 @@ siguientes operaciones en cada ciclo:
 }
 
 
+//***************************************************************************** 
 /*
 Puedes Implementar las instrucciones 
 
@@ -423,3 +424,4 @@ que implementar la decodificación de los diferentes modos de direccionamiento
 banderas de estado y otros efectos secundarios de cada instrucción.
 
 */
+
