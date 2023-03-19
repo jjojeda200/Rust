@@ -36,13 +36,17 @@ pub struct BancosMemoria {
     pub banco_actual: u8,
 }
 
-pub struct UnidadMemoria {
+
+pub enum Endianess {
+    LittleEndian,
+    BigEndian,
+}pub struct UnidadMemoria {
     data: Vec<u8>,                                  // Datos de la unidad de memoria
     start_address: u16,                             // Dirección de inicio de la unidad de memoria
     end_address: u16,                               // Dirección final de la unidad de memoria
     read_handler: Option<Box<dyn Fn(u16) -> u8>>,   // Función para leer datos de la unidad de memoria
     write_handler: Option<Box<dyn Fn(u16, u8)>>,    // Función para escribir datos en la unidad de memoria
-    endianness: Endianness,
+    endianness: Endianess,
 }
 
 // Nota importante: los índices de matrices deben ser de tipo usize.
