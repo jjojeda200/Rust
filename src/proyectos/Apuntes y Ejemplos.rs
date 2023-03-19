@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          12-03-2023
+    Fecha:          18-03-2023
     Titulo:         Simulación CPU - Apuntes y Ejemplos
     Descripción:    
     Referencias:
@@ -123,76 +123,5 @@ pub fn apuntes_ejemplos0(){
 
 //*****************************************************************************
 /*
-    from_byte: una función que toma un byte y devuelve una estructura Flags.
-    to_byte: una función que toma una estructura Flags y devuelve un byte.
-    modify_bit: una función que toma una referencia mutable a una estructura Flags, un valor de máscara de bit
-    y un valor booleano, y modifica el bit correspondiente en la estructura de acuerdo con la máscara de bit y
-    el valor booleano.
+
 */
-
-pub trait FlagsOperations {
-    fn from_byte(byte: u8) -> Flags;
-    fn to_byte(&self) -> u8;
-    fn modify_bit(&mut self, bit_mask: u8, value: bool);
-}
-
-impl FlagsOperations for Flags {
-    fn from_byte(byte: u8) -> Flags {
-        Flags {
-            carry: (byte & 0b00000001) != 0,
-            subtract: (byte & 0b00000010) != 0,
-            parity_overflow: (byte & 0b00000100) != 0,
-            half_carry: (byte & 0b00010000) != 0,
-            zero: (byte & 0b01000000) != 0,
-            sign: (byte & 0b10000000) != 0,
-        }
-    }
-
-    fn to_byte(&self) -> u8 {
-        let mut byte: u8 = 0;
-        if self.carry {
-            byte |= 0b00000001;
-        }
-        if self.subtract {
-            byte |= 0b00000010;
-        }
-        if self.parity_overflow {
-            byte |= 0b00000100;
-        }
-        if self.half_carry {
-            byte |= 0b00010000;
-        }
-        if self.zero {
-            byte |= 0b01000000;
-        }
-        if self.sign {
-            byte |= 0b10000000;
-        }
-        byte
-    }
-
-    fn modify_bit(&mut self, bit_mask: u8, value: bool) {
-        match bit_mask {
-            0b00000001 => self.carry = value,
-            0b00000010 => self.subtract = value,
-            0b00000100 => self.parity_overflow = value,
-            0b00010000 => self.half_carry = value,
-            0b01000000 => self.zero = value,
-            0b10000000 => self.sign = value,
-            _ => (),
-        }
-    }
-}
-
-pub fn manxxxx() {
-    let byte = 0b10101010;
-    let mut flags = Flags::from_byte(byte);
-    //println!("Flags before modification: {}", flags);
-
-    flags.modify_bit(0b00000001, true); // Set the carry flag to true
-    flags.modify_bit(0b01000000, false); // Set the zero flag to false
-
-    let modified_byte = flags.to_byte();
-    //println!("Modified byte: {:08b}", modified_byte);
-    //println!("Flags after modification: {:08b}", flags);
-}

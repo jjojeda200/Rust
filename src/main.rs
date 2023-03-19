@@ -66,7 +66,7 @@ fn main() {
     let titulo = String::from(" Función main, punto principal de entrada al programa ");
     imprime_titulo(&titulo);
     
-    let _result = std::process::Command::new("clear").status().unwrap();
+    //let _result = std::process::Command::new("clear").status().unwrap();
     
 /* Pasando argumentos   
     use std::env;

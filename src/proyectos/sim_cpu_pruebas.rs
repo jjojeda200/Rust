@@ -29,12 +29,13 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use crate::proyectos::{sim_cpu_registros::{self}, sim_cpu_memoria};
+use crate::proyectos::{sim_cpu_registros::{self}, sim_cpu_memoria::*};
 
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo);
 }
 
+//***************************************************************************** 
 // Struct para representar los registros Z80
 pub struct RegistrosZ80 {
     bc: u16,
@@ -195,7 +196,87 @@ pub fn z80_sim_1() {
 
 //************************************* Prueba manejo memoria
     println!("");
-    sim_cpu_memoria::memoria_0();
+    //memoria_0();
+
+/*
+*/
+    // Crea un banco de memoria por defecto de 16384 bytes (16Kb)
+    let mut memoria = BancosMemoria::new();
+    
+    // Confirma el banco activo (Banco índice 0)
+    let mut num_banco_actual = memoria.get_banco_activo() as usize;
+    // Impresión de verificación
+
+    println!("Banco de memoria Nº: {}, Tamaño del banco: {}, Capacidad del banco de memoria: {} ",
+        memoria.banco_actual,
+        memoria.segmento_memoria[num_banco_actual].len(),
+        memoria.segmento_memoria[num_banco_actual].capacity());
+
+    // Crea un banco de memoria adicional de 32768 bytes (32Kb)
+    memoria.asignar_segmento(32768);
+
+    // Selecciona el nuevo banco (Banco índice 1)
+    memoria.set_banco_activo(1);
+    num_banco_actual = memoria.get_banco_activo() as usize;
+
+    // Impresión de verificación
+    println!("Banco de memoria Nº: {}, Tamaño del banco: {}, Dirección de memoria (ptr): {:p} ",
+        memoria.banco_actual,
+        memoria.segmento_memoria[num_banco_actual].len(),
+        memoria.segmento_memoria[num_banco_actual].as_ptr());
+
+    // selecciona el primer banco (Banco índice 0)
+    memoria.set_banco_activo(0);
+    num_banco_actual = memoria.get_banco_activo() as usize;
+
+
+
+    println!(" {:?} ", memoria.segmento_memoria.len());
+    let mut resultado = memoria.eliminar_segmento(1);
+    println!(" {:?}", resultado);
+    println!(" {:?} ", memoria.segmento_memoria.len());
+    resultado = memoria.eliminar_segmento(1);
+    println!(" {:?}", resultado);
+/* 
+    // crea una memoria con dos bancos: uno de 16K y otro de 32K
+    let mut memory = BankedMemory::new(2, 16 * 1024 + 48 * 1024);
+    memory.select_bank(0); // selecciona el primer banco (índice 0)
+
+    // escribe un byte en la dirección 0x2000 del primer banco
+    memory.write_byte(0x2000, 0x55);
+
+    // selecciona el primer banco nuevamente
+    memory.select_bank(0);
+
+    // lee el byte en la dirección 0x2000 del primer banco
+    let byte1 = memory.read_byte(0x2000);
+    println!("Byte leído en la dirección 0x2000 del primer banco: {}", byte1);
+
+    // selecciona el segundo banco (índice 1)
+    memory.select_bank(1);
+
+    // escribe un byte en la dirección 0x8000 del segundo banco
+    memory.write_byte(0x8000, 0xAA);
+
+    // selecciona el segundo banco nuevamente
+    memory.select_bank(1);
+
+    // lee el byte en la dirección 0x8000 del segundo banco
+    let byte2 = memory.read_byte(0x8000);
+    println!("Byte leído en la dirección 0x8000 del segundo banco: {}", byte2);
+
+    memory.select_bank(0); // selecciona el primer banco (índice 0)
+    for bank_num in 0..memory.banks.len() {
+        memory.select_bank(bank_num);
+        println!("Banco de memoria Nº: {}, Tamaño de memoria del banco: {}", bank_num, memory.banks[bank_num].len());
+        println!("Capacidad del banco de memoria: {} ", memory.banks[bank_num].capacity());
+
+        for addr in 0..memory.banks[bank_num].len() {
+            let val = memory.read_byte((bank_num as u16) * 0x4000 + (addr as u16));
+            println!("Dirección 0x{:04X}: {}", addr, val);
+        }
+    }
+*/
 
 }
 
