@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          13-03-2023
+    Fecha:          22-03-2023
     Titulo:         introducción a RUST
     Descripción:    Inicio ;-)
     Referencias:
@@ -83,11 +83,12 @@ fn main() {
     }
 */
 
-    // proyectos::sim_cpu_generica::cpu_generica_0();
 
-    proyectos::sim_cpu::z80_sim_0();
+    proyectos::sim_cpu_generica::cpu_generica_0();
 
-    proyectos::sim_cpu_pruebas::z80_sim_1();
+    //proyectos::sim_cpu::z80_sim_0();
+
+    //proyectos::sim_cpu_pruebas::z80_sim_1();
 
 
 //*****************************************************************************
@@ -232,5 +233,7 @@ fn main() {
     proyectos::sim_cpu_pruebas::z80_sim_1();
     
     
+    proyectos::sim_cpu_generica::cpu_generica_0();
+    proyectos::sim_cpu_generica::cpu_generica_1();  // Pruebas ...
     proyectos::sim_cpu::z80_sim();
 */

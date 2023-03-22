@@ -8,6 +8,10 @@ edition = "2021"
 [dependencies]
 hexdump = "0.1.1"
 
+#---------------------------------------------------
+# Requerido pruebas de CPU Generica
+
+pancurses = "0.17.0"
 
 #---------------------------------------------------
 # Requeridos ejer_trait_rasgosx
