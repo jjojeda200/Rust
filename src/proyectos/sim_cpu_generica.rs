@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          19-03-2023
+    Fecha:          22-03-2023
     Titulo:         Simulación CPU Generica
     Descripción:    
     Referencias:
@@ -80,6 +80,27 @@ de computadora.
 Por ejemplo, si tienes un arreglo de bytes [0x78, 0x56], u16::from_le_bytes lo interpretará como el
 valor u16 0x5678, mientras que u16::from_be_bytes lo interpretará como el valor u16 0x7856.
 */
+/* Manejar los bit 3, 4 y 5 de un byte      
+    fn main() {
+        let byte: u8 = 0b11100101; // byte de ejemplo
+        
+        // Máscara con los bits 3, 4 y 5 establecidos en 1 y los demás en 0
+        let mask: u8 = 0b00111000;
+        
+        // Comprobación de los bits 3, 4 y 5
+        if byte & mask == mask {
+            println!("Los bits 3, 4 y 5 están establecidos en 1");
+        } else {
+            println!("Los bits 3, 4 y 5 no están establecidos en 1");
+        }
+        
+        // Manipulación de los bits 3, 4 y 5
+        let new_byte = (byte & !mask) | (0b010 << 3); // Establece los bits 3, 4 y 5 en 010
+        println!("Byte original: {:08b}", byte);
+        println!("Byte modificado: {:08b}", new_byte);
+    }
+*/
+
 struct CPU {
     memory: [u8; 256],
     registers: [u8; 8],
@@ -120,8 +141,7 @@ impl CPU {
         let instruction = u16::from_le_bytes([self.memory[self.program_counter], self.memory[self.program_counter + 1]]);
         */
 
-
-        // Incrementar el contador de programa para apuntar a la siguiente instrucción
+        // Incrementar el contador de programa para apuntar a la siguiente dirección de memoria
         self.program_counter += 1;
 
         // Devolver la instrucción
@@ -134,18 +154,6 @@ impl CPU {
         (opcode, operands)
     }
 
-/* Definición de los OPCODES CPU-8080 utilizados:    
-    0x00:
-    0x0A:
-    0x3E:
-
-    0x0B: Almacenar el operando en el registro 1
-    0x01: Sumar los valores de los registros 0 y 1 y almacenar el resultado en el registro 0
-    0x0C: Si el valor en el registro 0 es igual al primer operando, establecer el contador del programa en el segundo operando
-    0x0D: Establecer el contador del programa en el primer operando
-    0x02: Restar el valor del registro 1 del valor del registro 0 y almacenar el resultado en el registro 0
-    0xFF: Imprimir "Program finished" en la consola.
-*/
     fn execute_instruction(&mut self, opcode: u8, operands: [u8; 2]) {
         let titulo_ventana_opcode = String::from(" OP Codes ");
         let pos_x = 60;
@@ -153,7 +161,7 @@ impl CPU {
         opcode_window.border('|', '|', '-', '-', '+', '+', '+', '+');
         imprime_titulo(&opcode_window, &titulo_ventana_opcode);
         let pos_y = opcode_window.get_cur_y();
-        //opcode_window.mv(2, 2);
+
         match opcode {
             0x00 => { // NOP: No hace nada
                 opcode_window.mvprintw(2, 2,format!("NOP"));
@@ -161,6 +169,16 @@ impl CPU {
                 opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
                 //self.program_counter += 1;
             },
+
+            0x06 => { // MOV B,n cargar un valor de 8 bits en el registro (B)
+                opcode_window.mvprintw(2, 2,format!("MOV B,dato"));
+                opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02x}", opcode));
+                opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
+                self.registers[1] = self.memory[self.program_counter as usize];
+                opcode_window.mvprintw(5, 2,format!("B  : {:02x}", self.registers[0]));
+                opcode_window.refresh();
+                self.program_counter += 1;
+                },
 
             0x0A => { // LDAX A,(BC) cargar el valor contenido en la dirección BC bits en el acumulador (A)
                 opcode_window.mvprintw(2, 2,format!("MOV A,[BC]"));
@@ -171,7 +189,7 @@ impl CPU {
                 opcode_window.refresh();
                 },
 
-            0x3E => { // MOV r,n cargar un valor de 8 bits en el acumulador (A)
+            0x3E => { // MOV A,n cargar un valor de 8 bits en el acumulador (A)
                 opcode_window.mvprintw(2, 2,format!("MOV A,dato"));
                 opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02x}", opcode));
                 opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
@@ -179,6 +197,33 @@ impl CPU {
                 opcode_window.mvprintw(5, 2,format!("A  : {:02x}", self.registers[0]));
                 opcode_window.refresh();
                 self.program_counter += 1;
+                },
+
+            0x80 => { // ADD A,B suma el contenido del registro B al acumulador (A)
+                opcode_window.mvprintw(2, 2,format!("ADD A,B"));
+                opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02x}", opcode));
+                opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
+                self.registers[0] = self.registers[0].wrapping_add(self.registers[1]);
+                opcode_window.mvprintw(5, 2,format!("A  : {:02x}", self.registers[0]));
+                opcode_window.refresh();
+
+                /* 0x80 Sin propagación de acarreo  
+                let a: u8 = get_register_value(Register::A); // obtener el valor del registro A
+                let b: u8 = get_register_value(Register::B); // obtener el valor del registro B
+                let result = a.wrapping_add(b); // suma sin propagación de acarreo (wrapping add)
+                set_register_value(Register::A, result); // guardar el resultado en el registro A
+                */
+                /* 0x88 Con propagación de acarreo  
+                let a: u8 = get_register_value(Register::A); // obtener el valor del registro A
+                let b: u8 = get_register_value(Register::B); // obtener el valor del registro B
+                let (result, carry) = a.overflowing_add(b); // suma con propagación de acarreo (overflowing add)
+                set_register_value(Register::A, result); // guardar el resultado en el registro A
+                if carry {
+                    set_flag(Flag::C); // establecer la bandera de acarreo si se produce acarreo
+                } else {
+                    clear_flag(Flag::C); // borrar la bandera de acarreo si no se produce acarreo
+                }
+                */
                 },
 
             0xC3 => { // JMP nn marca PC con la dirección indicada por los dos siguientes bytes 
@@ -221,15 +266,17 @@ impl CPU {
     }
 
     fn run(&mut self, window: &Window) {
-        //************************************** Ventana para mostrar los registros
+    //************************************** Ventana para mostrar los registros
         let titulo_ventana_reg = String::from(" Registros ");
         let max_x = window.get_max_x();
         let reg_window = newwin(10, 16, 0, max_x);
         reg_window.border('|', '|', '-', '-', '+', '+', '+', '+');
         imprime_titulo(&reg_window, &titulo_ventana_reg);
         reg_window.refresh();
-
         let mut pos_y = 4;
+
+    //**************************************
+
         loop {
             window.mv(pos_y, 2);
             window.printw(format!("Contador: 0x{:02x}, Instruccion: {:02x}", self.program_counter, self.memory[self.program_counter as usize]));
@@ -237,13 +284,22 @@ impl CPU {
             pos_y += 1;
             if pos_y == 29 {pos_y = 4;}
             self.step();
-            window.getch();
             
+            match window.getch() {
+                Some(Input::Character(tecla)) => {
+                    if tecla == 'q' || tecla == 'Q' {
+                        return;
+                    }
+                },
+                Some(Input::KeyDC) => break,
+                Some(input) => { window.addstr(&format!("{:?}", input)); },
+                None => ()
+            }
+
             if self.memory[self.program_counter as usize] == 0xFF {
                 break;
             }
         }
-
     }
 
 }
@@ -256,13 +312,11 @@ pub fn cpu_generica_0() {
     ventana_principal.refresh();
     ventana_principal.getch();
     */
-
     ventana_principal.resize(30,60);
     ventana_principal.border('|', '|', '-', '-', '+', '+', '+', '+');
-
+    noecho();
     start_color();
     ventana_principal.refresh();
-
     imprime_titulo(&ventana_principal, &titulo);
 
     //**************************************
@@ -271,6 +325,8 @@ pub fn cpu_generica_0() {
         0x00,               // NOP
         0x3E, 0x04,         // Almacenar el valor 4 en el registro 0 (A)
         0x00,               // NOP
+        0x06, 0x04,         // Almacenar el valor 4 en el registro 0 (B)
+        0x80,               // Suma el contenido del Registro 1 (B) al registro 0 (A)
         0xC3, 0x00,         // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
 /*
         0x01,
@@ -288,8 +344,6 @@ pub fn cpu_generica_0() {
     ];
     cpu.load_program(program);
     cpu.run(&ventana_principal);
-
-    ventana_principal.getch();
 
     //**************************************
     endwin();
@@ -355,27 +409,27 @@ mod tests {
     #[test]
     fn test_decode_instruction() {
         let mut cpu = CPU::new();
-        cpu.memory[0] = 0xAB;
-        cpu.memory[1] = 0xCD;
+        cpu.memory[0] = 0x00;
+        cpu.memory[1] = 0xFF;
 
         let instruction = cpu.fetch_instruction();
         let decoded = cpu.decode_instruction(instruction);
 
-        assert_eq!(decoded.0, 0x0A);
-        assert_eq!(decoded.1, [0xB, 0xCD]);
+        assert_eq!(decoded.0, 0x00);
+        assert_eq!(decoded.1, [0x00, 0xFF]);
     }
 
     #[test]
     fn test_execute_instruction() {
         let mut cpu = CPU::new();
-        cpu.registers[0] = 42;
-        cpu.registers[1] = 23;
+        cpu.registers[0] = 0;
+        cpu.registers[1] = 0;
 
         // Ejecuta una instrucción que suma los valores en los registros 0 y 1
-        cpu.execute_instruction(0x01, [0, 0]);
+        cpu.execute_instruction(0x0A, [4,0]);
 
         // Verifica que el valor en el registro 0 se haya actualizado correctamente
-        assert_eq!(cpu.registers[0], 65);
+        assert_eq!(cpu.registers[0], 4);
     }
 /*
     0x0A: Almacenar el operando en el registro 0
