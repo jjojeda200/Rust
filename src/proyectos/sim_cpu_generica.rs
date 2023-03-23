@@ -1,26 +1,11 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          22-03-2023
-    Titulo:         Simulación CPU Generica
-    Descripción:    
-    Referencias:
-    Rust Programming Language
-                https://doc.rust-lang.org/stable/book/
-    Rust Reference
-                https://doc.rust-lang.org/reference/introduction.html
-    Rust by examples
-                https://doc.rust-lang.org/beta/rust-by-example/index.html
-    Recetas de Rust Cookbook
-                https://rust-lang-nursery.github.io/rust-cookbook/
-    El Lenguaje de Programación Rust
-                https://github.com/goyox86/elpr-sources
-    Rust en español fácil
-                https://www.jmgaguilera.com/rust_facil/actualizaciones.html
-    Tour de Rust
-                https://tourofrust.com/TOC_es.html
-    Crate std   https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/std/index.html
-                https://doc.rust-lang.org/std/index.html
-    Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
+    Fecha:          23-03-2023
+    Titulo:         Simulación CPU Genérica
+    Descripción:    CPU con direccionamiento de 8 bit (por ahora) y opcode del Intel 8080
+    Referencias:    
+    Crate bitflags  https://crates.io/crates/bitflags
+    PanCurses       https://crates.io/crates/pancurses
 
 ***************************************************************************************/
 
@@ -40,7 +25,6 @@ fn imprime_titulo(ventana: &Window, titulo: &str) {
     ventana.attrset(ColorPair(1));
     ventana.printw(&format!("{}", titulo));
     ventana.attrset(Attribute::Normal);
-    //ventana.printw(&format!("\n{:*^1$}", titulo, max_x as usize));
 }
 
 //***************************************************************************** 
@@ -135,22 +119,57 @@ impl CPU {
     }
 
     fn fetch_instruction(&mut self) -> u8 {
-        // Obtener la instrucción de la memoria en la dirección del contador de programa
+        // Obtener la instrucción de la memoria en la dirección del contador de programa (1 byte)
         let instruction = self.memory[self.program_counter as usize];
-        /* Manejo Little Endian             
+        // let instruction = u16::from_le_bytes([self.memory[self.program_counter], self.memory[self.program_counter + 1]]);
+        /* Manejo Little Endian (2 bytes) ^^
+        let instruction = self.memory[self.program_counter as usize];
+        La instrucción activa extrae un byte de la memoria en la posición actual del contador del
+        programa (self.program_counter) y lo almacena en la variable "instruction". Esta instrucción
+        asume que la memoria almacena cada opcode en un solo byte.
+        
         let instruction = u16::from_le_bytes([self.memory[self.program_counter], self.memory[self.program_counter + 1]]);
+        La segunda instrucción, en cambio, extrae dos bytes de la memoria en las posiciones actual y
+        siguiente del contador del programa (self.program_counter y self.program_counter + 1), y los
+        convierte en un valor de 16 bits en orden "little-endian" utilizando el método from_le_bytes
+        de la estructura u16. Este valor de 16 bits resultante es almacenado en la variable "instruction".
+        Esta instrucción asume que los opcodes se almacenan en dos bytes consecutivos en la memoria.
         */
 
         // Incrementar el contador de programa para apuntar a la siguiente dirección de memoria
         self.program_counter += 1;
-
-        // Devolver la instrucción
         instruction
     }
 
     fn decode_instruction(&self, instruction: u8) -> (u8, [u8; 2]) {
-        let opcode = instruction ;//>> 4;
-        let operands = [instruction & 0x0F, self.memory[self.program_counter as usize]];
+        /* let opcode = instruction >> 4;   
+        El código instruction >> 4 es una operación de desplazamiento a la derecha a nivel de bits.
+        El operador >> desplaza los bits de la variable instruction hacia la derecha en 4 posiciones.
+        El resultado de la operación se asigna luego a la variable opcode.
+        Esto asume que la variable instruction contiene un valor que representa una instrucción de en
+        formato binario, donde los primeros cuatro bits especifican el opcode.
+        Ejemplo:
+            let inst0: u8 = 0b10110100;
+            println!("El valor de inst0 es: {:b}", inst0);  // El valor de inst0 es: 10110100
+            let inst1 = inst0 >> 4;
+            println!("El valor de inst1 es: {:b}", inst1);  // El valor de inst1 es: 1011
+        */
+        let opcode = instruction;
+
+        // let operands = [instruction & 0x0F, self.memory[self.program_counter as usize]];
+        /* instruction & 0x0F             ^^
+        La instrucción que se presenta en la pregunta utiliza el operador "&" (AND binario) para
+        hacer una operación bit a bit entre la variable "instruction" y el valor hexadecimal "0x0F".
+        "0x0F" en hexadecimal representa el número 00001111 en binario. Al utilizar el operador "&"
+        entre "instruction" y "0x0F", se realiza una operación lógica AND entre los bits de cada
+        número en la misma posición, de la siguiente manera:
+            let inst0: u8 = 0b11011010;     // variable con valor binario 11011010
+            let inst1: u8 = inst0 & 0x0F;   // operación AND con 0x0F (00001111)
+            println!("Inst0: {:08b}", inst0);   // imprime Inst0: 11011010
+            println!("Inst1: {:08b}", inst1);   // imprime Inst1: 00001010
+        */
+        
+        let operands = [self.memory[self.program_counter as usize ], self.memory[(self.program_counter + 1) as usize ]];
         (opcode, operands)
     }
 
@@ -167,7 +186,10 @@ impl CPU {
                 opcode_window.mvprintw(2, 2,format!("NOP"));
                 opcode_window.mvprintw(3, 2,format!("Hex: 0x00"));
                 opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
+                opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
+                opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
                 //self.program_counter += 1;
+                info_pruebas();
             },
 
             0x06 => { // MOV B,n cargar un valor de 8 bits en el registro (B)
@@ -175,11 +197,13 @@ impl CPU {
                 opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02x}", opcode));
                 opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
                 self.registers[1] = self.memory[self.program_counter as usize];
-                opcode_window.mvprintw(5, 2,format!("B  : {:02x}", self.registers[0]));
+                opcode_window.mvprintw(5, 2,format!("B  : {:02x}", self.registers[1]));
+                opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
+                opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
                 opcode_window.refresh();
                 self.program_counter += 1;
                 },
-
+// Revisar *********************************
             0x0A => { // LDAX A,(BC) cargar el valor contenido en la dirección BC bits en el acumulador (A)
                 opcode_window.mvprintw(2, 2,format!("MOV A,[BC]"));
                 opcode_window.mvprintw(3, 2,format!("Hex: 0x0A"));
@@ -195,6 +219,8 @@ impl CPU {
                 opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
                 self.registers[0] = self.memory[self.program_counter as usize];
                 opcode_window.mvprintw(5, 2,format!("A  : {:02x}", self.registers[0]));
+                opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
+                opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
                 opcode_window.refresh();
                 self.program_counter += 1;
                 },
@@ -205,8 +231,9 @@ impl CPU {
                 opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
                 self.registers[0] = self.registers[0].wrapping_add(self.registers[1]);
                 opcode_window.mvprintw(5, 2,format!("A  : {:02x}", self.registers[0]));
+                opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
+                opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
                 opcode_window.refresh();
-
                 /* 0x80 Sin propagación de acarreo  
                 let a: u8 = get_register_value(Register::A); // obtener el valor del registro A
                 let b: u8 = get_register_value(Register::B); // obtener el valor del registro B
@@ -233,22 +260,38 @@ impl CPU {
                 self.program_counter = self.memory[self.program_counter as usize];
                 //self.registers[0] = self.memory[self.program_counter as usize];
                 opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
+                opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
+                opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
                 opcode_window.refresh();
                 },
-
-/* 
-            0x0B => self.registers[1] = operands[0],
-            0x01 => self.registers[0] += self.registers[1],
-            0x0C => {
-                if self.registers[0] == operands[0] {
-                    self.program_counter = operands[1];
+                /* Instrucción 0xC3 manejando direcciones de 16 bits
+                fn 0x3C (address: u16) {
+                    // La dirección a la que saltaremos es una palabra de 16 bits, por lo que
+                    // debemos leer dos bytes de memoria consecutivos.
+                    let high_byte = memory[address as usize];
+                    let low_byte  = memory[(address + 1) as usize];
+                    // Combinamos los dos bytes leídos en una sola dirección de memoria de 16 bits.
+                    /* ((high_byte as u16) << 8) | (low_byte as u16)
+                    Convertimos el byte más significativo (high_byte) en un valor u16 utilizando la sintaxis as u16.
+                    Luego, utilizamos el operador de desplazamiento a la izquierda << para mover este byte 8 bits
+                    hacia la izquierda, lo que coloca los bits del byte en las posiciones más altas del valor de 16
+                    bits. A continuación, convertimos el byte menos significativo (low_byte) en un valor u16 de la
+                    misma manera. Finalmente, combinamos los dos valores u16 utilizando el operador OR |, lo que
+                    establece los bits del byte menos significativo en las posiciones más bajas del valor de 16 bits.
+                    Ejemplo:
+                        let inst0: u8 = 0b11011010;         // variable con valor binario 11011010
+                        let inst1: u8 = inst0 & 0x0F;       // operación AND con 0x0F (00001111)
+                        println!("Inst0: {:08b}", inst0);   // imprime Inst0: 11011010
+                        println!("Inst1: {:08b}", inst1);   // imprime Inst1: 00001010
+                        let inst2 = ((inst1 as u16) << 8) | (inst0 as u16);
+                        println!("Inst2: {:016b}", inst2);  // imprime Inst2: Inst2: 0000101011011010
+                    */
+                    let jump_address = ((high_byte as u16) << 8) | (low_byte as u16);
+                    // Saltamos a la dirección de memoria especificada.
+                    pc = jump_address;
                 }
-            },
-            0x0D => {
-                self.program_counter = operands[0];
-            },
-            0x02 => self.registers[0] -= self.registers[1],
-*/
+                */
+
             0xFF => println!("Fin del programa"),
             _ =>    {
                         print!("");
@@ -273,16 +316,16 @@ impl CPU {
         reg_window.border('|', '|', '-', '-', '+', '+', '+', '+');
         imprime_titulo(&reg_window, &titulo_ventana_reg);
         reg_window.refresh();
-        let mut pos_y = 4;
 
-    //**************************************
+    //************************************** Ventana principal
+        let mut pos_y = 3;
 
         loop {
             window.mv(pos_y, 2);
             window.printw(format!("Contador: 0x{:02x}, Instruccion: {:02x}", self.program_counter, self.memory[self.program_counter as usize]));
             window.printw(format!(" Reg A: {:02x}, Reg B: {:02x}", self.registers[0], self.registers[1]));
             pos_y += 1;
-            if pos_y == 29 {pos_y = 4;}
+            if pos_y == 29 {pos_y = 3;}
             self.step();
             
             match window.getch() {
@@ -316,8 +359,8 @@ pub fn cpu_generica_0() {
     ventana_principal.border('|', '|', '-', '-', '+', '+', '+', '+');
     noecho();
     start_color();
-    ventana_principal.refresh();
     imprime_titulo(&ventana_principal, &titulo);
+    ventana_principal.refresh();
 
     //**************************************
     let mut cpu = CPU::new();
@@ -325,52 +368,43 @@ pub fn cpu_generica_0() {
         0x00,               // NOP
         0x3E, 0x04,         // Almacenar el valor 4 en el registro 0 (A)
         0x00,               // NOP
-        0x06, 0x04,         // Almacenar el valor 4 en el registro 0 (B)
+        0x06, 0x0B,         // Almacenar el valor 4 en el registro 0 (B)
         0x80,               // Suma el contenido del Registro 1 (B) al registro 0 (A)
         0xC3, 0x00,         // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
-/*
-        0x01,
-        0x0B, 0x02, 0x02,   // Almacenar el valor 2 en el registro 1 (B)
-        0x01, 0x00, 0x01,   // Sumar los valores de los registros 0 y 1 y almacenar el resultado en el registro 0
-                            // el valor en el registro 0 ahora es 3 (suma registro B al registro A)
-        0x0C, 0x00, 0x06,   // Si el valor en el registro 0 es igual a 0, saltar a la posición de memoria 6
-                            // no se cumplió la condición, por lo que se continúa con la siguiente instrucción
-        0x0D, 0x00, 0x06,   // Establecer el contador del programa en la posición de memoria 6
-        0x3E, 0x00, 0x03,   // Almacenar el valor 3 en el registro 0 (A)
-        0x02, 0x00, 0x02,   // Restar el valor en el registro 1 (B) del valor en el registro 0 (A) y almacenar el
-                            // resultado en el registro 0 (el valor en el registro 0 ahora es 0)
-        0xFF, 0xFF, 0xFF,    // Imprimir "Fin del programa"
-*/
     ];
+
     cpu.load_program(program);
     cpu.run(&ventana_principal);
 
     //**************************************
+
     endwin();
 }
 
 //*****************************************************************************
-pub fn cpu_generica_1() {
-    let titulo = String::from(" Simulacion CPU Generica 1 ");
-    let ventana_principal = initscr();
+fn info_pruebas() {
+    let titulo_ventana_comentarios = String::from(" Pruebas / Info");
+    let comentarios_window = newwin(10, 60, 30, 0);
+    comentarios_window.border('|', '|', '-', '-', '+', '+', '+', '+');
+    imprime_titulo(&comentarios_window, &titulo_ventana_comentarios);
+    //comentarios_window.refresh();
 
-    ventana_principal.border('|', '|', '-', '-', '+', '+', '+', '+');
+    let mut pos_y = 2;
+    let pos_x = 2;
 
-    start_color();
-    // Definición de combinación de colores
-    init_pair(1, COLOR_RED, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    init_pair(3, COLOR_GREEN, COLOR_YELLOW);
-    init_pair(4, COLOR_WHITE, COLOR_BLACK);
-    init_pair(5, COLOR_WHITE, COLOR_BLUE);
-    ventana_principal.bkgd(COLOR_PAIR(2));
-    
-    ventana_principal.attrset(ColorPair(1));
-    imprime_titulo(&ventana_principal, &titulo);
-    ventana_principal.attrset(Attribute::Normal);
+    comentarios_window.mv(pos_y, 2);
 
-    ventana_principal.getch();   
-    endwin();
+    let inst0: u8 = 0b11011010;
+    let inst1: u8 = inst0 & 0x0F;
+    let inst2 = ((inst1 as u16) << 8) | (inst0 as u16);
+    comentarios_window.mvprintw(pos_y, pos_x, format!("Inst0: {:08b}", inst0));
+    pos_y += 1;
+    comentarios_window.mvprintw(pos_y, pos_x, format!("Inst1: {:08b}", inst1));
+    pos_y += 1;
+    comentarios_window.mvprintw(pos_y, pos_x, format!("Inst2: {:016b}", inst2));
+
+    comentarios_window.refresh();
+
 }
 
 //***************************************************************************** 

@@ -234,6 +234,6 @@ fn main() {
     
     
     proyectos::sim_cpu_generica::cpu_generica_0();
-    proyectos::sim_cpu_generica::cpu_generica_1();  // Pruebas ...
+    
     proyectos::sim_cpu::z80_sim();
 */
