@@ -88,7 +88,7 @@ fn main() {
 
     //proyectos::sim_cpu::z80_sim_0();
 
-    //proyectos::sim_cpu_pruebas::z80_sim_1();
+    proyectos::sim_cpu_pruebas::z80_sim_1();
 
 
 //*****************************************************************************

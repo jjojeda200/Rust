@@ -130,42 +130,54 @@ impl Flags {
 
 //***************************************************************************** Estructura e implementación Registros
 pub struct RegistrosCPU {
-    a: u8,      // Registro A de 8 bits
+    reg_a: u8,      // Registro A de 8 bits
     //f: u8,    // Manejamos el registro de flags F de manera independiente
-    b: u8,      // Registro B de 8 bits
-    c: u8,      // Registro C de 8 bits
-    d: u8,      // Registro D de 8 bits
-    e: u8,      // Registro E de 8 bits
-    h: u8,      // Registro H de 8 bits
-    l: u8,      // Registro L de 8 bits
-    ix: u16,    // Registro IX de 16 bits
-    iy: u16,    // Registro IY de 16 bits
+    reg_b: u8,      // Registro B de 8 bits
+    reg_c: u8,      // Registro C de 8 bits
+    reg_d: u8,      // Registro D de 8 bits
+    reg_e: u8,      // Registro E de 8 bits
+    reg_h: u8,      // Registro H de 8 bits
+    reg_l: u8,      // Registro L de 8 bits
+    reg_ix: u16,    // Registro IX de 16 bits
+    reg_iy: u16,    // Registro IY de 16 bits
     sp: u16,    // Registro SP de 16 bits
     pc: u16,    // Registro PC de 16 bits
 }
 
 impl RegistrosCPU {
     pub fn new() -> RegistrosCPU {
-        RegistrosCPU { a: 0, b: 0, c: 0, d: 0, e: 0, h: 0, l: 0, ix: 0, iy: 0, sp: 0, pc: 0,}
+        RegistrosCPU {
+            reg_a: 0, 
+            reg_b: 0, 
+            reg_c: 0, 
+            reg_d: 0, 
+            reg_e: 0, 
+            reg_h: 0, 
+            reg_l: 0, 
+            reg_ix: 0, 
+            reg_iy: 0, 
+            sp: 0, 
+            pc: 0,
+        }
     }
 
 //************************************* Manejo de Registro
-    pub fn get_a(&self) -> u8 { self.a }
-    pub fn set_a(&mut self, valor: u8) { self.a = valor; }
+    pub fn get_a(&self) -> u8 { self.reg_a }
+    pub fn set_a(&mut self, valor: u8) { self.reg_a = valor; }
 
-    pub fn get_b(&self) -> u8 { self.b }
-    pub fn set_b(&mut self, valor: u8) { self.b = valor; }
-    pub fn get_c(&self) -> u8 { self.c }
-    pub fn set_c(&mut self, valor: u8) { self.c = valor; }
-    pub fn get_bc(&self) -> u16 { u16::from_be_bytes([self.b, self.c]) }
+    pub fn get_b(&self) -> u8 { self.reg_b }
+    pub fn set_b(&mut self, valor: u8) { self.reg_b = valor; }
+    pub fn get_c(&self) -> u8 { self.reg_c }
+    pub fn set_c(&mut self, valor: u8) { self.reg_c = valor; }
+    pub fn get_bc(&self) -> u16 { u16::from_be_bytes([self.reg_b, self.reg_c]) }
     pub fn set_bc(&mut self, valor: u16) {
         let bytes = valor.to_be_bytes();
-        self.b = bytes[0];
-        self.c = bytes[1];
+        self.reg_b = bytes[0];
+        self.reg_c = bytes[1];
         /*
         Este método permite acceder al registro BC como un valor de 16 bits, pero solo permite
         la escritura de los 4 bits más significativos del registro:
-        self.c = bytes[1] & 0xF0;
+        self.reg_c = bytes[1] & 0xF0;
         */
     }
     //******************************** Otra forma de manejar BC
@@ -173,31 +185,31 @@ impl RegistrosCPU {
         u16::from_be_bytes([self.get_b(), self.get_c()])
     }
     pub fn set_reg_bc(&mut self, valor: u16) {
-        let [b, c] = valor.to_be_bytes();
-        self.set_b(b);
-        self.set_c(c);
+        let [reg_b, reg_c] = valor.to_be_bytes();
+        self.set_b(reg_b);
+        self.set_c(reg_c);
     }
 
-    pub fn get_d(&self) -> u8 { self.d }
-    pub fn set_d(&mut self, valor: u8) { self.d = valor; }
-    pub fn get_e(&self) -> u8 { self.e }
-    pub fn set_e(&mut self, valor: u8) { self.e = valor; }
-    pub fn get_de(&self) -> u16 { u16::from_be_bytes([self.d, self.d]) }
+    pub fn get_d(&self) -> u8 { self.reg_d }
+    pub fn set_d(&mut self, valor: u8) { self.reg_d = valor; }
+    pub fn get_e(&self) -> u8 { self.reg_e }
+    pub fn set_e(&mut self, valor: u8) { self.reg_e = valor; }
+    pub fn get_de(&self) -> u16 { u16::from_be_bytes([self.reg_d, self.reg_e]) }
     pub fn set_de(&mut self, valor: u16) {
         let bytes = valor.to_be_bytes();
-        self.d = bytes[0];
-        self.e = bytes[1];
+        self.reg_d = bytes[0];
+        self.reg_e = bytes[1];
     }
 
-    pub fn get_h(&self) -> u8 { self.h }
-    pub fn set_h(&mut self, valor: u8) { self.h = valor; }
-    pub fn get_l(&self) -> u8 { self.c }
-    pub fn set_l(&mut self, valor: u8) { self.l = valor; }
-    pub fn get_hl(&self) -> u16 { u16::from_be_bytes([self.h, self.l]) }
+    pub fn get_h(&self) -> u8 { self.reg_h }
+    pub fn set_h(&mut self, valor: u8) { self.reg_h = valor; }
+    pub fn get_l(&self) -> u8 { self.reg_c }
+    pub fn set_l(&mut self, valor: u8) { self.reg_l = valor; }
+    pub fn get_hl(&self) -> u16 { u16::from_be_bytes([self.reg_h, self.reg_l]) }
     pub fn set_hl(&mut self, valor: u16) {
         let bytes = valor.to_be_bytes();
-        self.h = bytes[0];
-        self.e = bytes[1];
+        self.reg_h = bytes[0];
+        self.reg_l = bytes[1];
     }
 
 

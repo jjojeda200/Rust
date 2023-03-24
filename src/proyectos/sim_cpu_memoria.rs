@@ -36,11 +36,12 @@ pub struct BancosMemoria {
     pub banco_actual: u8,
 }
 
-
 pub enum Endianess {
     LittleEndian,
     BigEndian,
-}pub struct UnidadMemoria {
+}
+
+pub struct UnidadMemoria {
     data: Vec<u8>,                                  // Datos de la unidad de memoria
     start_address: u16,                             // Dirección de inicio de la unidad de memoria
     end_address: u16,                               // Dirección final de la unidad de memoria

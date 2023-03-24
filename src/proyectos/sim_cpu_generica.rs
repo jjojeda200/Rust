@@ -13,10 +13,9 @@
 #![allow(unused_variables)]
 
 use pancurses::*;
+use super::sim_cpu_memoria::BancosMemoria;
+
 use std::sync::Mutex;
-
-use super::sim_cpu_registros::RegistrosCPU;
-
 static mut MNEMONICO_OPCODE: Option<Mutex<String>> = None;
 
 fn imprime_titulo(ventana: &Window, titulo: &str) {
@@ -90,7 +89,9 @@ valor u16 0x5678, mientras que u16::from_be_bytes lo interpretará como el valor
     }
 */
 
+
 struct CPU {
+    memoria: BancosMemoria,
     memory: [u8; 256],
     program_counter: u8,
     registro: [u8; 8],
@@ -111,6 +112,7 @@ struct CPU {
 impl CPU {
     fn new() -> CPU {
         CPU {
+            memoria: BancosMemoria { segmento_memoria: vec![vec![0; 16384]; 1], banco_actual: 0 },
             memory: [0; 256],
             program_counter: 0,
             registro: [0; 8],
@@ -129,7 +131,13 @@ impl CPU {
         }
     }
 
-    fn load_program(&mut self, program: Vec<u8>) {
+    fn cargar_programa0(&mut self, programa: Vec<u8>) {
+        for (i, &instruction) in programa.iter().enumerate() {
+            self.memoria.escribir_memoria(i as u16, instruction);
+        }
+    }
+
+    fn cargar_programa(&mut self, programa: Vec<u8>) {
     /* Descripción:                         
     Este fragmento de código es una forma de cargar el programa en la memoria del CPU. Toma como
     entrada un vector de bytes llamado program y usa el método iter() para obtener un iterador sobre
@@ -140,7 +148,7 @@ impl CPU {
     i aumenta en cada iteración para asegurarse de que los elementos se copien en la posición correcta
     de la memoria.
     */
-        for (i, &instruction) in program.iter().enumerate() {
+        for (i, &instruction) in programa.iter().enumerate() {
             self.memory[i] = instruction;
         }
     }
@@ -164,7 +172,9 @@ impl CPU {
         */
 
         // Incrementar el contador de programa para apuntar a la siguiente dirección de memoria
-        self.program_counter += 1;
+        //self.program_counter += 1;
+        //self.contador_de_programa += 1;
+
         instruction
     }
 
@@ -196,7 +206,7 @@ impl CPU {
             println!("Inst1: {:08b}", inst1);   // imprime Inst1: 00001010
         */
         
-        let operands = [self.memory[self.program_counter as usize ], self.memory[(self.program_counter + 1) as usize ]];
+        let operands = [self.memory[(self.program_counter + 1) as usize ], self.memory[(self.program_counter + 2) as usize ]];
         (opcode, operands)
     }
 
@@ -210,25 +220,133 @@ impl CPU {
 
         match opcode {
             0x00 => { // NOP: No hace nada
-                //self.program_counter += 1;
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("NOP"))); }
+                self.program_counter += 1;
+                self.contador_de_programa += 1;
             },
 
             0x04 => { // INR B incrementa el contenido en el registro (B)
                 self.registro[1] += 1;
+                self.reg_b +=1;
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("INR B"))); }
-                /* 0x04 con contro de desbordamiento
+                self.program_counter += 1;
+                self.contador_de_programa += 1;
+                /* 0x04 sin control de desbordamiento
                 let b = registers.get_b();
                 let result = b.wrapping_add(1);
                 registers.set_b(result);
                 registers.set_flags(Flags::from_increment(b, result));
+
+                ****************************
+                Zero Flag (Z): se establece en 1 si el resultado de la operación es cero, y en 0 en caso
+                contrario.
+                Sign Flag (S): se establece en 1 si el bit más significativo del resultado es 1, y en 0
+                en caso contrario.
+                Parity Flag (P): se establece en 1 si el resultado tiene un número par de bits en 1, y en
+                0 en caso contrario.
+                Auxiliary Carry Flag (AC): se establece en 1 si hubo un acarreo desde el bit 3 al bit 4 de
+                B, y en 0 en caso contrario.
+
+                En Rust, podemos definir los métodos para establecer los flags afectados por la instrucción
+                0x04 de la siguiente manera:
+
+                impl Flags {
+                    fn set_zero(&mut self, value: bool) {
+                        self.z = value as u8;
+                    }
+
+                    fn set_sign(&mut self, value: bool) {
+                        self.s = (value as u8) << 7;
+                    }
+
+                    fn set_parity(&mut self, value: bool) {
+                        self.p = value as u8;
+                    }
+
+                    fn set_aux_carry(&mut self, value: bool) {
+                        self.ac = value as u8;
+                    }
+                }
+
+                Y podemos definir un método from_increment que establece los flags correspondientes al
+                incrementar un registro:
+
+                impl Flags {
+                    fn from_increment(before: u8, after: u8) -> Flags {
+                        let mut flags = Flags::default();
+                        let result = after as i16 - before as i16;
+
+                        flags.set_zero(after == 0);
+                        flags.set_sign((result & 0x80) != 0);
+                        flags.set_parity((after.count_ones() & 1) == 0);
+                        flags.set_aux_carry((before & 0x0f) + 1 > 0x0f);
+
+                        flags
+                    }
+                }
+
+                Este método toma el valor anterior y posterior del registro B y calcula el resultado
+                de la operación como la diferencia entre los dos valores. Luego, establece los flags
+                correspondientes de acuerdo con el resultado utilizando los métodos de establecimiento
+                de flags definidos anteriormente.
+
+                Con estas implementaciones, podemos actualizar la función increment_b para establecer
+                los flags correspondientes:
+
+                fn increment_b(registers: &mut Registers) {
+                    let b = registers.get_b();
+                    let result = b.wrapping_add(1);
+                    registers.set_b(result);
+                    registers.set_flags(Flags::from_increment(b, result));
+                }
+                */
+            },
+
+            0x05 => { // DCR B decrementa el contenido en el registro (B)
+                self.registro[1] -= 1;
+                self.reg_b -=1;
+                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("DCR B"))); }
+                self.program_counter += 1;
+                self.contador_de_programa += 1;
+                /* 0x054 sin control de desbordamiento
+                    let b = get_register_value(Register::B);
+                    let result = b.wrapping_sub(1);
+                    set_register_value(Register::B, result);
+                    set_flags_sub(b, 1, result);
+
+                ****************************
+                El flag Z se establece en 1 si el resultado de la operación es cero (es decir, si el
+                valor original de B era 1).
+                El flag S se establece en 1 si el bit más significativo del resultado es 1 (es decir,
+                si el valor original de B era mayor o igual a 0x80).
+                El flag P se establece en 1 si el número de bits 1 en el resultado es par.
+                El flag CY no se ve afectado por esta instrucción.
+                El flag AC se establece en 1 si ocurre un acarreo en el nibble inferior de la operación
+                (es decir, si el valor original de B era menor o igual a 0x0F).
+
+                Por lo tanto, en la implementación en Rust de la instrucción 0x05 en una CPU 8080, la
+                función opcode_05 debería actualizar los flags de la CPU según las reglas descritas
+                anteriormente:
+
+                impl Cpu {
+                    fn opcode_05(&mut self) {
+                        let old_value = self.b;
+                        self.b = self.b.wrapping_sub(1);
+                        self.flags.z = self.b == 0;
+                        self.flags.s = (self.b & 0x80) != 0;
+                        self.flags.p = self.b.count_ones() % 2 == 0;
+                        self.flags.ac = (old_value & 0x0F) == 0;
+                    }
+                }
                 */
             },
 
             0x06 => { // MVI B,d8 cargar un valor de 8 bits en el registro (B)
-                self.registro[1] = self.memory[self.program_counter as usize];
+                self.registro[1] = self.memory[(self.program_counter + 1) as usize];
+                self.reg_b = self.memoria.leer_memoria(self.contador_de_programa + 1);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI B,d8"))); }
-                self.program_counter += 1;
+                self.program_counter += 2;
+                self.contador_de_programa += 2;
             },
 
 // Pendiente implementar acceso a 16 bit ***
@@ -240,25 +358,115 @@ impl CPU {
             },
 
             0x3C => { // INR A incrementa el contenido en el registro (A)
-                self.registro[0] += self.registro[0];
+                self.registro[0] += 1;
+                self.reg_a +=1;
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("INR A"))); }
-                /* 0x3C con contro de desbordamiento
+                self.program_counter += 1;
+                self.contador_de_programa += 1;
+                /* 0x3C sin control de desbordamiento
                 let a = registers.get_a();
                 let result = a.wrapping_add(1);
                 registers.set_a(result);
                 registers.set_flags(Flags::from_increment(a, result));
+
+                ****************************
+                fn increment_a(registers: &mut Registers) {
+                let a = registers.get_a();
+                let result = a.wrapping_add(1);
+                registers.set_a(result);
+
+                // Actualizar los flags afectados
+                let mut flags = Flags::default();
+                flags.set_zero(result == 0);
+                flags.set_sign((result & 0x80) != 0);
+                flags.set_parity(result.count_ones() % 2 == 0);
+                flags.set_auxiliary_carry((a & 0x0f) == 0x0f);
+                flags.set_carry(false);
+                registers.set_flags(flags);
+                }
+
+                En esta implementación, después de actualizar el registro A, se crea una nueva instancia
+                de la estructura Flags y se establecen los flags correspondientes de acuerdo con el
+                resultado del incremento.
+
+                El flag Zero se establece si el resultado es cero.
+                El flag Sign se establece si el bit más significativo del resultado es 1.
+                El flag Parity se establece si el número de bits 1 en el resultado es par.
+                El flag Auxiliary Carry se establece si el incremento ha generado un acarreo de 4 bits
+                desde los bits más bajos de A.
+                El flag Carry se establece en 0 ya que el incremento no ha generado un acarreo desde el
+                bit más significativo de A.
+                */
+            },
+
+            0x3D => { // DCR A decrementa el contenido en el registro (A)
+                self.registro[0] -= 1;
+                self.reg_a -=1;
+                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("DCR A"))); }
+                self.program_counter += 1;
+                self.contador_de_programa += 1;
+                /* 0x3D sin control de desbordamiento
+                let a = registers.get_a();
+                let result = a.wrapping_sub(1);
+                registers.set_a(result);
+                registers.set_flags(Flags::from_decrement(a, result));
+
+                ****************************
+                El flag de Carry (C) no se ve afectado por esta instrucción.
+                El flag de Signo (S) se establece si el resultado de la operación tiene el bit más
+                significativo (MSB) en 1, lo que indica que el resultado es negativo. En Rust, podemos
+                establecer el flag de Signo de la siguiente manera:
+
+                let sign = result & 0x80 != 0;
+                registers.set_sign(sign);
+
+                El flag de Paridad (P/V) se establece si el resultado de la operación tiene un número
+                par de bits en 1. En Rust, podemos establecer el flag de Paridad de la siguiente manera:
+
+                let parity = result.count_ones() % 2 == 0;
+                registers.set_parity(parity);
+
+                El flag de Ajuste/Substracción (A) se establece en 1 para indicar que se realizó una
+                operación de sustracción. En Rust, podemos establecer el flag de Ajuste/Substracción
+                de la siguiente manera:
+
+                registers.set_adjust(true);
+
+                El flag de Cero (Z) se establece si el resultado de la operación es cero. En Rust,
+                podemos establecer el flag de Cero de la siguiente manera:
+
+                let zero = result == 0;
+                registers.set_zero(zero);
+
+                El flag de Desbordamiento (V) se establece si la resta resulta en un valor fuera del
+                rango permitido por el tamaño del registro (en este caso, 8 bits). En Rust, podemos
+                establecer el flag de Desbordamiento de la siguiente manera:
+
+                let overflow = a == 0x80;
+                registers.set_overflow(overflow);
+
+                Es importante tener en cuenta que, en Rust, la estructura Flags almacena los flags de
+                estado de la CPU como booleanos, donde true indica que el flag está activo y false
+                indica que el flag está inactivo. La función from_decrement() de la estructura Flags
+                se encarga de establecer los valores adecuados de estos booleanos para cada flag
+                afectado por la instrucción de decremento de registro A.
                 */
             },
 
             0x3E => { // MVI A,n cargar un valor de 8 bits en el acumulador (A)
-                self.registro[0] = self.memory[self.program_counter as usize];
+                self.registro[0] = self.memory[(self.program_counter + 1) as usize];
+                self.reg_a = self.memoria.leer_memoria(self.contador_de_programa + 1);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI A,d8"))); }
-                self.program_counter += 1;
+                self.program_counter += 2;
+                self.contador_de_programa += 2;
             },
 
             0x80 => { // ADD A,B suma el contenido del registro B al acumulador (A)
                 self.registro[0] = self.registro[0].wrapping_add(self.registro[1]);
+                self.reg_a = self.reg_a.wrapping_add(self.reg_b);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("ADD A,B"))); }
+                self.program_counter += 1;
+                self.contador_de_programa += 1;
                 /* 0x80 Sin propagación de acarreo  
                 let a: u8 = get_register_value(Register::A);    // obtener el valor del registro A
                 let b: u8 = get_register_value(Register::B);    // obtener el valor del registro B
@@ -276,11 +484,78 @@ impl CPU {
                     clear_flag(Flag::C);    // borrar la bandera de acarreo si no se produce acarreo
                 }
                 */
+                /* Control de todos los flags       
+                La bandera de acarreo (C) se establece si se produce un acarreo en la operación.
+                La bandera de signo (S) se establece si el resultado de la suma tiene el bit más
+                significativo (MSB) encendido, lo que indica que el resultado es negativo.
+                La bandera de cero (Z) se establece si el resultado de la suma es cero.
+                La bandera de paridad (P) se establece si el resultado de la suma tiene un número par de
+                bits encendidos.
+
+                El código en Rust para implementar la instrucción "ADD A, B" con propagación de acarreo
+                y control de todos los flags afectados sería el siguiente:
+
+                let a: u8 = get_register_value(Register::A); // obtener el valor del registro A
+                let b: u8 = get_register_value(Register::B); // obtener el valor del registro B
+
+                let (result, carry) = a.overflowing_add(b); // suma con propagación de acarreo (overflowing add)
+
+                set_register_value(Register::A, result); // guardar el resultado en el registro A
+
+                // Establecer los flags afectados
+                if result == 0 {
+                    set_flag(Flag::Z);
+                } else {
+                    clear_flag(Flag::Z);
+                }
+
+                if (result & 0x80) == 0x80 {
+                    set_flag(Flag::S);
+                } else {
+                    clear_flag(Flag::S);
+                }
+
+                if parity(result) {
+                    set_flag(Flag::P);
+                } else {
+                    clear_flag(Flag::P);
+                }
+
+                if carry {
+                    set_flag(Flag::C);
+                } else {
+                    clear_flag(Flag::C);
+                }
+
+                En este código, la función overflowing_add se utiliza para realizar la suma con propagación
+                de acarreo y se obtienen tanto el resultado de la suma como el booleano que indica si se
+                produjo un acarreo. Luego, se guarda el resultado en el registro A y se establecen o borran
+                las banderas de acuerdo con el valor del resultado y el booleano.
+
+                La función parity se utiliza para determinar si el número de bits encendidos en el resultado
+                es par. El código de la función parity es el siguiente:
+
+                fn parity(value: u8) -> bool {
+                    let mut count = 0;
+                    for i in 0..8 {
+                        if (value & (1 << i)) != 0 {
+                            count += 1;
+                        }
+                    }
+                    count % 2 == 0
+                }
+
+                En este código, se cuentan los bits encendidos en el valor y se devuelve true si el número
+                de bits es par o false si es impar.
+                */
             },
 
-// Revisar implementar acceso a 16 bit *****
-            0xC3 => { // JMP nn marca PC con la dirección indicada por los dos siguientes bytes 
-                self.program_counter = self.memory[self.program_counter as usize];
+// Revisar implementar manejo de direccionamiento de 16 bit *****
+            0xC3 => { // JMP nn marca PC con la dirección indicada por los dos siguientes bytes
+                self.program_counter = self.memory[(self.program_counter + 1) as usize];
+                self.contador_de_programa = self.memoria.leer_memoria(self.contador_de_programa + 1) as u16;
+                //self.contador_de_programa = self.program_counter as u16;    
+
                 //self.registro[0] = self.memory[self.program_counter as usize];
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("JMP nn"))); }
                 /* Instrucción 0xC3 manejando direcciones de 16 bits
@@ -324,13 +599,17 @@ impl CPU {
         let (opcode, operands) = self.decode_instruction(instruction);
         //println!(" {:02x}", instruction);
         self.execute_instruction(opcode, operands);
+
         /* (&self).info_registros()         
         El paréntesis es necesario para asegurar que se tome la referencia de self antes de llamar al método
         info_registros(). Esto se debe a que el operador . tiene una mayor precedencia que el operador &
         */
         (&self).info_opcode(opcode, operands);
         (&self).info_registros();
-        info_pruebas();
+        (&self).info_pruebas();
+
+        //info_pruebas();
+
     }
 
     fn run(&mut self, window: &Window) {
@@ -380,53 +659,84 @@ pub fn cpu_generica_0() {
     ventana_principal.refresh();
 
     //**************************************
-    let mut cpu8080 = RegistrosCPU::new();
-
-
+    //let mut cpu8080 = RegistrosCPU::new();
+    //let mut memoria = BancosMemoria::new();
     //**************************************
     let mut cpu = CPU::new();
-    let program = vec![
+    let programa = vec![
         0x00,               // NOP
         0x3E, 0x04,         // Almacenar el valor 4 en el registro 0 (A)
         0x00,               // NOP
-        0x06, 0x0a,         // Almacenar el valor 4 en el registro 0 (B)
+        0x06, 0x0a,         // Almacenar el valor 0x0a en el registro 0 (B)
         0x04,               // Incrementa registro 1 (B)
         0x80,               // Suma el contenido del Registro 1 (B) al registro 0 (A)
         0xC3, 0x00,         // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
     ];
+    cpu.cargar_programa(programa.clone());
+    cpu.cargar_programa0(programa);
+    //cpu.info_pruebas(0000);
 
-    cpu.load_program(program);
     cpu.run(&ventana_principal);
 
     //**************************************
 
+    echo();
     endwin();
 }
 
 //*****************************************************************************
-fn info_pruebas() {
-    let titulo_ventana_comentarios = String::from(" Pruebas / Info");
-    let comentarios_window = newwin(10, 60, 30, 0);
-    comentarios_window.border('|', '|', '-', '-', '+', '+', '+', '+');
-    imprime_titulo(&comentarios_window, &titulo_ventana_comentarios);
-    //comentarios_window.refresh();
+    /*
+    fn info_pruebas() {
+        let titulo_ventana_comentarios = String::from(" Pruebas / Info");
+        let comentarios_window = newwin(10, 60, 30, 0);
+        comentarios_window.border('|', '|', '-', '-', '+', '+', '+', '+');
+        imprime_titulo(&comentarios_window, &titulo_ventana_comentarios);
+        comentarios_window.refresh();
 
-    let pos_y = 2;
-    let pos_x = 2;
+        let pos_y = 2;
+        let pos_x = 2;
 
-    comentarios_window.mv(pos_y, 2);
+        comentarios_window.mv(pos_y, 2);
 
-    let inst0: u8 = 0b11011010;
-    let inst1: u8 = inst0 & 0x0F;
-    let inst2 = ((inst1 as u16) << 8) | (inst0 as u16);
-    comentarios_window.mvprintw(pos_y+1, pos_x, format!("Inst0: {:08b}", inst0));
-    comentarios_window.mvprintw(pos_y+2, pos_x, format!("Inst1: {:08b}", inst1));
-    comentarios_window.mvprintw(pos_y+3, pos_x, format!("Inst2: {:016b}", inst2));
+        let inst0: u8 = 0b11011010;
+        let inst1: u8 = inst0 & 0x0F;
+        let inst2 = ((inst1 as u16) << 8) | (inst0 as u16);
+        comentarios_window.mvprintw(pos_y+1, pos_x, format!("Inst0: {:08b}", inst0));
+        comentarios_window.mvprintw(pos_y+2, pos_x, format!("Inst1: {:08b}", inst1));
+        comentarios_window.mvprintw(pos_y+3, pos_x, format!("Inst1: {:08b}", inst2));
 
-    comentarios_window.refresh();
-}
+        //comentarios_window.mvprintw(pos_y+3, pos_x, format!("Inst1: {:08b}", mem.leer_byte(0000)));
+        //comentarios_window.mvprintw(pos_y+1, pos_x, format!("{:?}", self.));        
+
+        comentarios_window.refresh();
+    }
+    */
 
 impl CPU{   // Funciones de manejo de ventanas
+
+    fn info_pruebas(&self /* , mem: u8 */) {
+        let titulo_ventana_comentarios = String::from(" Pruebas / Info");
+        let comentarios_window = newwin(10, 60, 30, 0);
+        comentarios_window.border('|', '|', '-', '-', '+', '+', '+', '+');
+        imprime_titulo(&comentarios_window, &titulo_ventana_comentarios);
+        comentarios_window.refresh();
+
+        let pos_y = 2;
+        let pos_x = 2;
+        comentarios_window.mv(pos_y, pos_x);
+
+        comentarios_window.mvprintw(pos_y+1, pos_x, format!("Direccion de memoria: {:04X}", self.contador_de_programa));
+        //self.memoria.segmento_memoria[self.memoria.banco_actual as usize][mem as usize]));
+
+        //comentarios_window.mvprintw(pos_y+2, pos_x, format!("Contenido en direccion de memoria: {:04x}", mem));
+        comentarios_window.mvprintw(pos_y+2, pos_x, format!("Contenido en direccion de memoria: {:02X}",
+        self.memoria.leer_memoria(self.contador_de_programa)));
+
+        comentarios_window.mvprintw(pos_y+4, pos_x, format!("Contenido Reg. A: {:02X}", self.reg_a));
+        comentarios_window.mvprintw(pos_y+5, pos_x, format!("Contenido Reg. B: {:02X}", self.reg_b));
+
+        comentarios_window.refresh();
+    }
 
     // Función manejo ventana de los registros
     fn info_registros(&self) {
