@@ -13,6 +13,11 @@
 #![allow(unused_variables)]
 
 use pancurses::*;
+use std::sync::Mutex;
+
+use super::sim_cpu_registros::RegistrosCPU;
+
+static mut MNEMONICO_OPCODE: Option<Mutex<String>> = None;
 
 fn imprime_titulo(ventana: &Window, titulo: &str) {
     let max_x = ventana.get_max_x();
@@ -101,20 +106,6 @@ struct CPU {
     contador_de_programa: u16,
     puntero_de_pila: u16,
     registro_instrucciones: u8,
-}
-
-pub struct Z80Reg {
-    reg_a: u8,      // Registro A de 8 bits
-    reg_b: u8,      // Registro B de 8 bits
-    reg_c: u8,      // Registro C de 8 bits
-    reg_d: u8,      // Registro D de 8 bits
-    reg_e: u8,      // Registro E de 8 bits
-    reg_h: u8,      // Registro H de 8 bits
-    reg_l: u8,      // Registro L de 8 bits
-    reg_ix: u16,    // Registro IX de 16 bits
-    reg_iy: u16,    // Registro IY de 16 bits
-    sp: u16,        // Registro SP de 16 bits
-    pc: u16,        // Registro PC de 16 bits
 }
 
 impl CPU {
@@ -219,87 +210,79 @@ impl CPU {
 
         match opcode {
             0x00 => { // NOP: No hace nada
-                // opcode_window.mvprintw(2, 2,format!("NOP"));
-                // opcode_window.mvprintw(3, 2,format!("Hex: 0x00"));
-                // opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
-                // opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
-                // opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
                 //self.program_counter += 1;
-                info_pruebas();
+                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("NOP"))); }
             },
 
-            0x06 => { // MOV B,n cargar un valor de 8 bits en el registro (B)
-                //opcode_window.mvprintw(2, 2,format!("MOV B,dato"));
-                //opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02x}", opcode));
-                //opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
-                self.registro[1] = self.memory[self.program_counter as usize];
-                //opcode_window.mvprintw(5, 2,format!("B  : {:02x}", self.registro[1]));
-                //opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
-                //opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
-                //opcode_window.refresh();
-                self.program_counter += 1;
-                },
-// Revisar *********************************
-            0x0A => { // LDAX A,(BC) cargar el valor contenido en la dirección BC bits en el acumulador (A)
-                opcode_window.mvprintw(2, 2,format!("MOV A,[BC]"));
-                opcode_window.mvprintw(3, 2,format!("Hex: 0x0A"));
-                opcode_window.mvprintw(4, 2,format!("PC : {:02x}", self.program_counter));
-                self.registro[0] = operands[0];
-                opcode_window.printw(format!("0x{:02x}", self.registro[0]));
-                opcode_window.refresh();
-                },
+            0x04 => { // INR B incrementa el contenido en el registro (B)
+                self.registro[1] += 1;
+                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("INR B"))); }
+                /* 0x04 con contro de desbordamiento
+                let b = registers.get_b();
+                let result = b.wrapping_add(1);
+                registers.set_b(result);
+                registers.set_flags(Flags::from_increment(b, result));
+                */
+            },
 
-            0x3E => { // MOV A,n cargar un valor de 8 bits en el acumulador (A)
-                opcode_window.mvprintw(2, 2,format!("MOV A,dato"));
-                opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02x}", opcode));
-                opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
-                self.registro[0] = self.memory[self.program_counter as usize];
-                opcode_window.mvprintw(5, 2,format!("A  : {:02x}", self.registro[0]));
-                opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
-                opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
-                opcode_window.refresh();
+            0x06 => { // MVI B,d8 cargar un valor de 8 bits en el registro (B)
+                self.registro[1] = self.memory[self.program_counter as usize];
+                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI B,d8"))); }
                 self.program_counter += 1;
-                },
+            },
+
+// Pendiente implementar acceso a 16 bit ***
+            0x0A => { // LDAX A,(BC) cargar el valor contenido en la dirección BC bits en el acumulador (A)
+                self.registro[0] = operands[0];
+                unsafe {
+                    MNEMONICO_OPCODE = Some(Mutex::new(String::from("LDAX A,[BC]")));
+                }
+            },
+
+            0x3C => { // INR A incrementa el contenido en el registro (A)
+                self.registro[0] += self.registro[0];
+                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("INR A"))); }
+                /* 0x3C con contro de desbordamiento
+                let a = registers.get_a();
+                let result = a.wrapping_add(1);
+                registers.set_a(result);
+                registers.set_flags(Flags::from_increment(a, result));
+                */
+            },
+
+            0x3E => { // MVI A,n cargar un valor de 8 bits en el acumulador (A)
+                self.registro[0] = self.memory[self.program_counter as usize];
+                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI A,d8"))); }
+                self.program_counter += 1;
+            },
 
             0x80 => { // ADD A,B suma el contenido del registro B al acumulador (A)
-                opcode_window.mvprintw(2, 2,format!("ADD A,B"));
-                opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02x}", opcode));
-                opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
                 self.registro[0] = self.registro[0].wrapping_add(self.registro[1]);
-                opcode_window.mvprintw(5, 2,format!("A  : {:02x}", self.registro[0]));
-                opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
-                opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
-                opcode_window.refresh();
+                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("ADD A,B"))); }
                 /* 0x80 Sin propagación de acarreo  
-                let a: u8 = get_register_value(Register::A); // obtener el valor del registro A
-                let b: u8 = get_register_value(Register::B); // obtener el valor del registro B
-                let result = a.wrapping_add(b); // suma sin propagación de acarreo (wrapping add)
-                set_register_value(Register::A, result); // guardar el resultado en el registro A
+                let a: u8 = get_register_value(Register::A);    // obtener el valor del registro A
+                let b: u8 = get_register_value(Register::B);    // obtener el valor del registro B
+                let result = a.wrapping_add(b);                 // suma sin propagación de acarreo (wrapping add)
+                set_register_value(Register::A, result);        // guardar el resultado en el registro A
                 */
                 /* 0x88 Con propagación de acarreo  
-                let a: u8 = get_register_value(Register::A); // obtener el valor del registro A
-                let b: u8 = get_register_value(Register::B); // obtener el valor del registro B
-                let (result, carry) = a.overflowing_add(b); // suma con propagación de acarreo (overflowing add)
-                set_register_value(Register::A, result); // guardar el resultado en el registro A
+                let a: u8 = get_register_value(Register::A);    // obtener el valor del registro A
+                let b: u8 = get_register_value(Register::B);    // obtener el valor del registro B
+                let (result, carry) = a.overflowing_add(b);     // suma con propagación de acarreo (overflowing add)
+                set_register_value(Register::A, result);        // guardar el resultado en el registro A
                 if carry {
-                    set_flag(Flag::C); // establecer la bandera de acarreo si se produce acarreo
+                    set_flag(Flag::C);      // establecer la bandera de acarreo si se produce acarreo
                 } else {
-                    clear_flag(Flag::C); // borrar la bandera de acarreo si no se produce acarreo
+                    clear_flag(Flag::C);    // borrar la bandera de acarreo si no se produce acarreo
                 }
                 */
-                },
+            },
 
+// Revisar implementar acceso a 16 bit *****
             0xC3 => { // JMP nn marca PC con la dirección indicada por los dos siguientes bytes 
-                opcode_window.mvprintw(2, 2,format!("JMP direcc."));
-                opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02x}", opcode));
-                opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
                 self.program_counter = self.memory[self.program_counter as usize];
                 //self.registro[0] = self.memory[self.program_counter as usize];
-                opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
-                opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
-                opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
-                opcode_window.refresh();
-                },
+                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("JMP nn"))); }
                 /* Instrucción 0xC3 manejando direcciones de 16 bits
                 fn 0x3C (address: u16) {
                     // La dirección a la que saltaremos es una palabra de 16 bits, por lo que
@@ -327,12 +310,11 @@ impl CPU {
                     pc = jump_address;
                 }
                 */
+            },
 
+// Revisar *********************************
             0xFF => println!("Fin del programa"),
-            _ =>    {
-                        print!("");
-                    }, // unimplemented!(),
-
+            _ =>    { print!(""); },
         }
         opcode_window.refresh();
     }
@@ -342,8 +324,13 @@ impl CPU {
         let (opcode, operands) = self.decode_instruction(instruction);
         //println!(" {:02x}", instruction);
         self.execute_instruction(opcode, operands);
+        /* (&self).info_registros()         
+        El paréntesis es necesario para asegurar que se tome la referencia de self antes de llamar al método
+        info_registros(). Esto se debe a que el operador . tiene una mayor precedencia que el operador &
+        */
         (&self).info_opcode(opcode, operands);
         (&self).info_registros();
+        info_pruebas();
     }
 
     fn run(&mut self, window: &Window) {
@@ -393,12 +380,17 @@ pub fn cpu_generica_0() {
     ventana_principal.refresh();
 
     //**************************************
+    let mut cpu8080 = RegistrosCPU::new();
+
+
+    //**************************************
     let mut cpu = CPU::new();
     let program = vec![
         0x00,               // NOP
         0x3E, 0x04,         // Almacenar el valor 4 en el registro 0 (A)
         0x00,               // NOP
-        0x06, 0x0B,         // Almacenar el valor 4 en el registro 0 (B)
+        0x06, 0x0a,         // Almacenar el valor 4 en el registro 0 (B)
+        0x04,               // Incrementa registro 1 (B)
         0x80,               // Suma el contenido del Registro 1 (B) al registro 0 (A)
         0xC3, 0x00,         // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
     ];
@@ -432,16 +424,15 @@ fn info_pruebas() {
     comentarios_window.mvprintw(pos_y+3, pos_x, format!("Inst2: {:016b}", inst2));
 
     comentarios_window.refresh();
-
-
 }
 
-impl CPU{
+impl CPU{   // Funciones de manejo de ventanas
+
     // Función manejo ventana de los registros
     fn info_registros(&self) {
         let titulo_ventana_reg = String::from(" Registros ");
         //let max_x = window.get_max_x();
-        let reg_window = newwin(10, 16, 0, 60);
+        let reg_window = newwin(12, 16, 0, 60);
         reg_window.border('|', '|', '-', '-', '+', '+', '+', '+');
         imprime_titulo(&reg_window, &titulo_ventana_reg);
 
@@ -452,28 +443,30 @@ impl CPU{
         reg_window.mvprintw(4, 9, format!("E: {:02X}", self.registro[4]));
         reg_window.mvprintw(5, 2, format!("H: {:02X}", self.registro[5]));
         reg_window.mvprintw(5, 9, format!("L: {:02X}", self.registro[5]));
-        reg_window.mvprintw(6, 2, format!("iX: {:04X}", self.reg_ix));
-        reg_window.mvprintw(7, 2, format!("iY: {:04X}", self.reg_iy));
+        reg_window.mvprintw(7, 2, format!("iX: {:04X}", self.reg_ix));
+        reg_window.mvprintw(8, 2, format!("iY: {:04X}", self.reg_iy));
         reg_window.refresh();
     }
 
     // Función manejo ventana de los OP Code
     fn info_opcode(&self, opcode: u8, operandos: [u8;2] ) {
-        let titulo_ventana_opcode = String::from(" OP Codes ");
+        let titulo_ventana_opcode = String::from(" OP Code ");
         let pos_x = 60;
-        let opcode_window = newwin(10, 16, 10, pos_x);
+        let opcode_window = newwin(10, 16, 12, pos_x);
         opcode_window.border('|', '|', '-', '-', '+', '+', '+', '+');
         imprime_titulo(&opcode_window, &titulo_ventana_opcode);
         let pos_y = opcode_window.get_cur_y();
 
-        opcode_window.mvprintw(2, 2,format!("NOP"));
-        opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02X}",opcode));
+        let mnemonico_opcode = unsafe { MNEMONICO_OPCODE.as_ref().unwrap().lock().unwrap() };
+        opcode_window.mvprintw(2, 2,format!("{}", mnemonico_opcode));
+        opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02X}", opcode));
         opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
-        opcode_window.mvprintw(6, 2,format!("oper 0 0x{:02X}", operandos[0]));
-        opcode_window.mvprintw(7, 2,format!("oper 1 0x{:02X}", operandos[1]));
+        opcode_window.mvprintw(6, 2,format!("Contenido en"));
+        opcode_window.mvprintw(7, 2,format!("PC +1: 0x{:02X}", operandos[0]));
+        opcode_window.mvprintw(8, 2,format!("PC +2: 0x{:02X}", operandos[1]));
         opcode_window.refresh();
     }
-}
 
+}
 
 //***************************************************************************** 

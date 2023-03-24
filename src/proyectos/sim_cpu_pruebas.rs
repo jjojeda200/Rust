@@ -158,7 +158,7 @@ pub fn z80_sim_1() {
 //************************************* Prueba manejo registros
     println!("");
     // Inicializar la estructura de registros y de flags
-    let mut z80_reg = sim_cpu_registros::Z80Reg::new();
+    let mut z80_reg = sim_cpu_registros::RegistrosCPU::new();
     let mut z80_flags = sim_cpu_registros::Flags::new_flags();
    
     // Registro A al inicializar

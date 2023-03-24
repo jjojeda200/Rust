@@ -129,7 +129,7 @@ impl Flags {
 }
 
 //***************************************************************************** Estructura e implementación Registros
-pub struct Z80Reg {
+pub struct RegistrosCPU {
     a: u8,      // Registro A de 8 bits
     //f: u8,    // Manejamos el registro de flags F de manera independiente
     b: u8,      // Registro B de 8 bits
@@ -144,9 +144,9 @@ pub struct Z80Reg {
     pc: u16,    // Registro PC de 16 bits
 }
 
-impl Z80Reg {
-    pub fn new() -> Z80Reg {
-        Z80Reg { a: 0, b: 0, c: 0, d: 0, e: 0, h: 0, l: 0, ix: 0, iy: 0, sp: 0, pc: 0,}
+impl RegistrosCPU {
+    pub fn new() -> RegistrosCPU {
+        RegistrosCPU { a: 0, b: 0, c: 0, d: 0, e: 0, h: 0, l: 0, ix: 0, iy: 0, sp: 0, pc: 0,}
     }
 
 //************************************* Manejo de Registro
