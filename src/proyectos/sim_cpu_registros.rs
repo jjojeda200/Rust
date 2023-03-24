@@ -131,7 +131,7 @@ impl Flags {
 //***************************************************************************** Estructura e implementación Registros
 pub struct Z80Reg {
     a: u8,      // Registro A de 8 bits
-    //f: u8,    // Manejamos el registro de flags F de manera independiete
+    //f: u8,    // Manejamos el registro de flags F de manera independiente
     b: u8,      // Registro B de 8 bits
     c: u8,      // Registro C de 8 bits
     d: u8,      // Registro D de 8 bits

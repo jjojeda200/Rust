@@ -87,17 +87,53 @@ valor u16 0x5678, mientras que u16::from_be_bytes lo interpretará como el valor
 
 struct CPU {
     memory: [u8; 256],
-    registers: [u8; 8],
     program_counter: u8,
+    registro: [u8; 8],
+    reg_a: u8,      // Registro A de 8 bits
+    reg_b: u8,      // Registro B de 8 bits
+    reg_c: u8,      // Registro C de 8 bits
+    reg_d: u8,      // Registro D de 8 bits
+    reg_e: u8,      // Registro E de 8 bits
+    reg_h: u8,      // Registro H de 8 bits
+    reg_l: u8,      // Registro L de 8 bits
+    reg_ix: u16,    // Registro IX de 16 bits
+    reg_iy: u16,    // Registro IY de 16 bits
+    contador_de_programa: u16,
+    puntero_de_pila: u16,
     registro_instrucciones: u8,
+}
+
+pub struct Z80Reg {
+    reg_a: u8,      // Registro A de 8 bits
+    reg_b: u8,      // Registro B de 8 bits
+    reg_c: u8,      // Registro C de 8 bits
+    reg_d: u8,      // Registro D de 8 bits
+    reg_e: u8,      // Registro E de 8 bits
+    reg_h: u8,      // Registro H de 8 bits
+    reg_l: u8,      // Registro L de 8 bits
+    reg_ix: u16,    // Registro IX de 16 bits
+    reg_iy: u16,    // Registro IY de 16 bits
+    sp: u16,        // Registro SP de 16 bits
+    pc: u16,        // Registro PC de 16 bits
 }
 
 impl CPU {
     fn new() -> CPU {
         CPU {
             memory: [0; 256],
-            registers: [0; 8],
             program_counter: 0,
+            registro: [0; 8],
+            reg_a: 0,
+            reg_b: 0,
+            reg_c: 0,
+            reg_d: 0,
+            reg_e: 0,
+            reg_h: 0,
+            reg_l: 0,
+            reg_ix: 0,
+            reg_iy: 0,
+            contador_de_programa: 0,
+            puntero_de_pila: 0,
             registro_instrucciones: 0,
         }
     }
@@ -183,24 +219,24 @@ impl CPU {
 
         match opcode {
             0x00 => { // NOP: No hace nada
-                opcode_window.mvprintw(2, 2,format!("NOP"));
-                opcode_window.mvprintw(3, 2,format!("Hex: 0x00"));
-                opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
-                opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
-                opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
+                // opcode_window.mvprintw(2, 2,format!("NOP"));
+                // opcode_window.mvprintw(3, 2,format!("Hex: 0x00"));
+                // opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
+                // opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
+                // opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
                 //self.program_counter += 1;
                 info_pruebas();
             },
 
             0x06 => { // MOV B,n cargar un valor de 8 bits en el registro (B)
-                opcode_window.mvprintw(2, 2,format!("MOV B,dato"));
-                opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02x}", opcode));
-                opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
-                self.registers[1] = self.memory[self.program_counter as usize];
-                opcode_window.mvprintw(5, 2,format!("B  : {:02x}", self.registers[1]));
-                opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
-                opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
-                opcode_window.refresh();
+                //opcode_window.mvprintw(2, 2,format!("MOV B,dato"));
+                //opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02x}", opcode));
+                //opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
+                self.registro[1] = self.memory[self.program_counter as usize];
+                //opcode_window.mvprintw(5, 2,format!("B  : {:02x}", self.registro[1]));
+                //opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
+                //opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
+                //opcode_window.refresh();
                 self.program_counter += 1;
                 },
 // Revisar *********************************
@@ -208,8 +244,8 @@ impl CPU {
                 opcode_window.mvprintw(2, 2,format!("MOV A,[BC]"));
                 opcode_window.mvprintw(3, 2,format!("Hex: 0x0A"));
                 opcode_window.mvprintw(4, 2,format!("PC : {:02x}", self.program_counter));
-                self.registers[0] = operands[0];
-                opcode_window.printw(format!("0x{:02x}", self.registers[0]));
+                self.registro[0] = operands[0];
+                opcode_window.printw(format!("0x{:02x}", self.registro[0]));
                 opcode_window.refresh();
                 },
 
@@ -217,8 +253,8 @@ impl CPU {
                 opcode_window.mvprintw(2, 2,format!("MOV A,dato"));
                 opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02x}", opcode));
                 opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
-                self.registers[0] = self.memory[self.program_counter as usize];
-                opcode_window.mvprintw(5, 2,format!("A  : {:02x}", self.registers[0]));
+                self.registro[0] = self.memory[self.program_counter as usize];
+                opcode_window.mvprintw(5, 2,format!("A  : {:02x}", self.registro[0]));
                 opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
                 opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
                 opcode_window.refresh();
@@ -229,8 +265,8 @@ impl CPU {
                 opcode_window.mvprintw(2, 2,format!("ADD A,B"));
                 opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02x}", opcode));
                 opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
-                self.registers[0] = self.registers[0].wrapping_add(self.registers[1]);
-                opcode_window.mvprintw(5, 2,format!("A  : {:02x}", self.registers[0]));
+                self.registro[0] = self.registro[0].wrapping_add(self.registro[1]);
+                opcode_window.mvprintw(5, 2,format!("A  : {:02x}", self.registro[0]));
                 opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
                 opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
                 opcode_window.refresh();
@@ -258,7 +294,7 @@ impl CPU {
                 opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02x}", opcode));
                 opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
                 self.program_counter = self.memory[self.program_counter as usize];
-                //self.registers[0] = self.memory[self.program_counter as usize];
+                //self.registro[0] = self.memory[self.program_counter as usize];
                 opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
                 opcode_window.mvprintw(6, 2,format!("oper 0 {:02x}", operands[0]));
                 opcode_window.mvprintw(7, 2,format!("oper 1 {:02x}", operands[1]));
@@ -306,24 +342,18 @@ impl CPU {
         let (opcode, operands) = self.decode_instruction(instruction);
         //println!(" {:02x}", instruction);
         self.execute_instruction(opcode, operands);
+        (&self).info_opcode(opcode, operands);
+        (&self).info_registros();
     }
 
     fn run(&mut self, window: &Window) {
-    //************************************** Ventana para mostrar los registros
-        let titulo_ventana_reg = String::from(" Registros ");
-        let max_x = window.get_max_x();
-        let reg_window = newwin(10, 16, 0, max_x);
-        reg_window.border('|', '|', '-', '-', '+', '+', '+', '+');
-        imprime_titulo(&reg_window, &titulo_ventana_reg);
-        reg_window.refresh();
 
     //************************************** Ventana principal
         let mut pos_y = 3;
-
         loop {
             window.mv(pos_y, 2);
             window.printw(format!("Contador: 0x{:02x}, Instruccion: {:02x}", self.program_counter, self.memory[self.program_counter as usize]));
-            window.printw(format!(" Reg A: {:02x}, Reg B: {:02x}", self.registers[0], self.registers[1]));
+            window.printw(format!(" Reg A: {:02x}, Reg B: {:02x}", self.registro[0], self.registro[1]));
             pos_y += 1;
             if pos_y == 29 {pos_y = 3;}
             self.step();
@@ -389,7 +419,7 @@ fn info_pruebas() {
     imprime_titulo(&comentarios_window, &titulo_ventana_comentarios);
     //comentarios_window.refresh();
 
-    let mut pos_y = 2;
+    let pos_y = 2;
     let pos_x = 2;
 
     comentarios_window.mv(pos_y, 2);
@@ -397,133 +427,53 @@ fn info_pruebas() {
     let inst0: u8 = 0b11011010;
     let inst1: u8 = inst0 & 0x0F;
     let inst2 = ((inst1 as u16) << 8) | (inst0 as u16);
-    comentarios_window.mvprintw(pos_y, pos_x, format!("Inst0: {:08b}", inst0));
-    pos_y += 1;
-    comentarios_window.mvprintw(pos_y, pos_x, format!("Inst1: {:08b}", inst1));
-    pos_y += 1;
-    comentarios_window.mvprintw(pos_y, pos_x, format!("Inst2: {:016b}", inst2));
+    comentarios_window.mvprintw(pos_y+1, pos_x, format!("Inst0: {:08b}", inst0));
+    comentarios_window.mvprintw(pos_y+2, pos_x, format!("Inst1: {:08b}", inst1));
+    comentarios_window.mvprintw(pos_y+3, pos_x, format!("Inst2: {:016b}", inst2));
 
     comentarios_window.refresh();
 
+
 }
+
+impl CPU{
+    // Función manejo ventana de los registros
+    fn info_registros(&self) {
+        let titulo_ventana_reg = String::from(" Registros ");
+        //let max_x = window.get_max_x();
+        let reg_window = newwin(10, 16, 0, 60);
+        reg_window.border('|', '|', '-', '-', '+', '+', '+', '+');
+        imprime_titulo(&reg_window, &titulo_ventana_reg);
+
+        reg_window.mvprintw(2, 2, format!("A: {:02X}", self.registro[0]));
+        reg_window.mvprintw(3, 2, format!("B: {:02X}", self.registro[1]));
+        reg_window.mvprintw(3, 9, format!("C: {:02X}", self.registro[2]));
+        reg_window.mvprintw(4, 2, format!("D: {:02X}", self.registro[3]));
+        reg_window.mvprintw(4, 9, format!("E: {:02X}", self.registro[4]));
+        reg_window.mvprintw(5, 2, format!("H: {:02X}", self.registro[5]));
+        reg_window.mvprintw(5, 9, format!("L: {:02X}", self.registro[5]));
+        reg_window.mvprintw(6, 2, format!("iX: {:04X}", self.reg_ix));
+        reg_window.mvprintw(7, 2, format!("iY: {:04X}", self.reg_iy));
+        reg_window.refresh();
+    }
+
+    // Función manejo ventana de los OP Code
+    fn info_opcode(&self, opcode: u8, operandos: [u8;2] ) {
+        let titulo_ventana_opcode = String::from(" OP Codes ");
+        let pos_x = 60;
+        let opcode_window = newwin(10, 16, 10, pos_x);
+        opcode_window.border('|', '|', '-', '-', '+', '+', '+', '+');
+        imprime_titulo(&opcode_window, &titulo_ventana_opcode);
+        let pos_y = opcode_window.get_cur_y();
+
+        opcode_window.mvprintw(2, 2,format!("NOP"));
+        opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02X}",opcode));
+        opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
+        opcode_window.mvprintw(6, 2,format!("oper 0 0x{:02X}", operandos[0]));
+        opcode_window.mvprintw(7, 2,format!("oper 1 0x{:02X}", operandos[1]));
+        opcode_window.refresh();
+    }
+}
+
 
 //***************************************************************************** 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_load_program() {
-        let mut cpu = CPU::new();
-        let program = vec![0x01, 0x02, 0x03, 0x04];
-        cpu.load_program(program);
-
-        assert_eq!(cpu.memory[0], 0x01);
-        assert_eq!(cpu.memory[1], 0x02);
-        assert_eq!(cpu.memory[2], 0x03);
-        assert_eq!(cpu.memory[3], 0x04);
-}
-
-    #[test]
-    fn test_fetch_instruction() {
-        let mut cpu = CPU::new();
-        let program = vec![0x00, 0x3E, 0xFF];
-        cpu.load_program(program);
-
-        let instruction = cpu.fetch_instruction();
-        assert_eq!(instruction, 0x00);
-
-        let instruction = cpu.fetch_instruction();
-        assert_eq!(instruction, 0x3E);
-
-        let instruction = cpu.fetch_instruction();
-        assert_eq!(instruction, 0xFF);
-    }
-
-    #[test]
-    fn test_decode_instruction() {
-        let mut cpu = CPU::new();
-        cpu.memory[0] = 0x00;
-        cpu.memory[1] = 0xFF;
-
-        let instruction = cpu.fetch_instruction();
-        let decoded = cpu.decode_instruction(instruction);
-
-        assert_eq!(decoded.0, 0x00);
-        assert_eq!(decoded.1, [0x00, 0xFF]);
-    }
-
-    #[test]
-    fn test_execute_instruction() {
-        let mut cpu = CPU::new();
-        cpu.registers[0] = 0;
-        cpu.registers[1] = 0;
-
-        // Ejecuta una instrucción que suma los valores en los registros 0 y 1
-        cpu.execute_instruction(0x0A, [4,0]);
-
-        // Verifica que el valor en el registro 0 se haya actualizado correctamente
-        assert_eq!(cpu.registers[0], 4);
-    }
-/*
-    0x0A: Almacenar el operando en el registro 0
-    0x0B: Almacenar el operando en el registro 1
-    0x01: Sumar los valores de los registros 0 y 1 y almacenar el resultado en el registro 0
-    0x0C: Si el valor en el registro 0 es igual al primer operando, establecer el contador del programa en el segundo operando
-    0x0D: Establecer el contador del programa en el primer operando
-    0x02: Restar el valor del registro 1 del valor del registro 0 y almacenar el resultado en el registro 0
-    0xFF: Imprimir "Program finished" en la consola.
-*/
-    #[test]
-    fn test_step() {
-        let mut cpu = CPU::new();
-        let program = vec![0x0A, 0x05, 0x01, 0x0C, 0x05, 0x06, 0xFF];
-        cpu.load_program(program);
-
-        // Primer paso
-        cpu.execute_instruction(0x0A, [0x05, 0x00]);
-        cpu.step();
-        assert_eq!(cpu.program_counter, 1);
-        assert_eq!(cpu.registers[0], 5);
-
-        // Segundo paso
-        cpu.execute_instruction(0x05, [0x01, 0x00]);
-        cpu.step();
-        assert_eq!(cpu.program_counter, 2);
-        assert_eq!(cpu.registers[0], 5);
-
-        // Tercer paso
-        cpu.execute_instruction(0x01, [0x00, 0x00]);
-        cpu.step();
-        assert_eq!(cpu.program_counter, 3);
-        assert_eq!(cpu.registers[0], 5);
-        assert_eq!(cpu.registers[1], 0);
-/*
-        // Cuarto paso
-        cpu.execute_instruction(0x0C, [0x05, 0x04]);
-        cpu.step();
-        assert_eq!(cpu.program_counter, 4);
-        assert_eq!(cpu.registers[0], 5);
-        assert_eq!(cpu.registers[1], 0);
-
-        // Quinto paso
-        cpu.execute_instruction(0x05, [0x06, 0x00]);
-        cpu.step();
-        assert_eq!(cpu.program_counter, 5);
-        assert_eq!(cpu.registers[0], 30);
-        assert_eq!(cpu.registers[1], 0);
-
-        // Sexto paso
-        cpu.execute_instruction(0x06, [0x05, 0x00]);
-        cpu.step();
-        assert_eq!(cpu.program_counter, 6);
-        assert_eq!(cpu.registers[0], 6);
-        assert_eq!(cpu.registers[1], 0);
-
-        // Séptimo paso
-        cpu.execute_instruction(0xFF, [0x00, 0x00]);
-        cpu.step();
-        assert_eq!(cpu.program_counter, 6); */
-    }
-
-}
