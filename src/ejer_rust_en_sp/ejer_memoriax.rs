@@ -108,7 +108,7 @@ of para obtener el tamaño del objeto y std::slice::from_raw_parts para crear un
 a la memoria del objeto. Luego, llama a la función muestra_mem para imprimir el contenido
 de la memoria.
 */
-fn muestra_mem_obj<T>(var_a: T) {
+pub fn muestra_mem_obj<T>(var_a: T) {
     let var_ptr = &var_a as *const T as *const u8;
     println!("--> Tamaño ocupado en bytes ({})", std::mem::size_of::<T>());
     muestra_mem(unsafe { std::slice::from_raw_parts(var_ptr, std::mem::size_of::<T>()) }, std::mem::size_of::<T>(), COL_POR_DEFECTO);
@@ -130,7 +130,7 @@ pub fn memoria() {
     muestra_mem_obj(var_a_array);
 
     let mut var_a_vector: Vec<i32> = vec![1, 2, 4, 8, 16, 32, 64, 128];
-    muestra_mem_obj(var_a_vector.clone());
+    //muestra_mem_obj(var_a_vector.clone());
     println!("Vector .begin {:p}", var_a_vector.as_ptr());
     // println!("Vector .[0]   {:p}", &var_a_vector[0]);
     println!("Vector .[7]   {:p}", &var_a_vector[7]);

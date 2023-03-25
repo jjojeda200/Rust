@@ -26,6 +26,7 @@ fn imprime_titulo(ventana: &Window, titulo: &str) {
     // Definición de combinación de colores
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
+    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
     ventana.attrset(ColorPair(1));
     ventana.printw(&format!("{}", titulo));
     ventana.attrset(Attribute::Normal);
@@ -211,13 +212,6 @@ impl CPU {
     }
 
     fn execute_instruction(&mut self, opcode: u8, operands: [u8; 2]) {
-        let titulo_ventana_opcode = String::from(" OP Codes ");
-        let pos_x = 60;
-        let opcode_window = newwin(10, 16, 10, pos_x);
-        opcode_window.border('|', '|', '-', '-', '+', '+', '+', '+');
-        imprime_titulo(&opcode_window, &titulo_ventana_opcode);
-        let pos_y = opcode_window.get_cur_y();
-
         match opcode {
             0x00 => { // NOP: No hace nada
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("NOP"))); }
@@ -591,7 +585,6 @@ impl CPU {
             0xFF => println!("Fin del programa"),
             _ =>    { print!(""); },
         }
-        opcode_window.refresh();
     }
 
     fn step(&mut self) {
@@ -651,11 +644,23 @@ pub fn cpu_generica_0() {
     ventana_principal.refresh();
     ventana_principal.getch();
     */
+    let val_y= 50;
+    let val_x= 100;
+    // Verificación medidas de la terminal
+    if ventana_principal.get_max_y() < val_y || ventana_principal.get_max_x() < val_x
+    {
+        endwin();
+        println!("La Terminal es menor del tamaño requerido: {} x {} \n", val_y, val_x);
+        return;
+    }
+    
+
     ventana_principal.resize(30,60);
     ventana_principal.border('|', '|', '-', '-', '+', '+', '+', '+');
     noecho();
     start_color();
     imprime_titulo(&ventana_principal, &titulo);
+    ventana_principal.mvprintw(0, 2, " Salir: q/Q ");
     ventana_principal.refresh();
 
     //**************************************
@@ -713,10 +718,10 @@ pub fn cpu_generica_0() {
     */
 
 impl CPU{   // Funciones de manejo de ventanas
-
+    // Función manejo ventana de info / pruebas
     fn info_pruebas(&self /* , mem: u8 */) {
         let titulo_ventana_comentarios = String::from(" Pruebas / Info");
-        let comentarios_window = newwin(10, 60, 30, 0);
+        let comentarios_window = newwin(21, 90, 29, 0);
         comentarios_window.border('|', '|', '-', '-', '+', '+', '+', '+');
         imprime_titulo(&comentarios_window, &titulo_ventana_comentarios);
         comentarios_window.refresh();
@@ -725,16 +730,36 @@ impl CPU{   // Funciones de manejo de ventanas
         let pos_x = 2;
         comentarios_window.mv(pos_y, pos_x);
 
-        comentarios_window.mvprintw(pos_y+1, pos_x, format!("Direccion de memoria: {:04X}", self.contador_de_programa));
-        //self.memoria.segmento_memoria[self.memoria.banco_actual as usize][mem as usize]));
-
-        //comentarios_window.mvprintw(pos_y+2, pos_x, format!("Contenido en direccion de memoria: {:04x}", mem));
-        comentarios_window.mvprintw(pos_y+2, pos_x, format!("Contenido en direccion de memoria: {:02X}",
+        comentarios_window.mvprintw(pos_y+1, pos_x, format!("Direccion a la que apunta PC de memoria     : {:04X}", self.contador_de_programa));
+        comentarios_window.mvprintw(pos_y+2, pos_x, format!("Contenido en la dirección a la que apunta PC: {:02X}",
         self.memoria.leer_memoria(self.contador_de_programa)));
+        comentarios_window.mvprintw(pos_y+3, pos_x, format!("Contenido Reg. A: {:02X}", self.reg_a));
+        comentarios_window.mvprintw(pos_y+4, pos_x, format!("Contenido Reg. B: {:02X}", self.reg_b));
+        
+        comentarios_window.attrset(ColorPair(2));
+        comentarios_window.mvprintw(pos_y+5, pos_x, "********************************************************");
 
-        comentarios_window.mvprintw(pos_y+4, pos_x, format!("Contenido Reg. A: {:02X}", self.reg_a));
-        comentarios_window.mvprintw(pos_y+5, pos_x, format!("Contenido Reg. B: {:02X}", self.reg_b));
+        let var_a_array: [i32; 8] = [1, 2, 4, 8, 16, 32, 64, 128];
+        muestra_mem_obj(&comentarios_window, 8, 2, var_a_array);
 
+        /*                                  
+        comentarios_window.mvprintw(pos_y+6,  pos_x, format!("", ));
+        comentarios_window.mvprintw(pos_y+7,  pos_x, format!("", ));
+        comentarios_window.mvprintw(pos_y+8,  pos_x, format!("", ));
+        comentarios_window.mvprintw(pos_y+9,  pos_x, format!("", ));
+        comentarios_window.mvprintw(pos_y+10, pos_x, format!("", ));
+        comentarios_window.mvprintw(pos_y+11, pos_x, format!("", ));
+        comentarios_window.mvprintw(pos_y+12, pos_x, format!("", ));
+        comentarios_window.mvprintw(pos_y+13, pos_x, format!("", ));
+        comentarios_window.mvprintw(pos_y+14, pos_x, format!("", ));
+        comentarios_window.mvprintw(pos_y+15, pos_x, format!("", ));
+        comentarios_window.mvprintw(pos_y+16, pos_x, format!("", ));
+        comentarios_window.mvprintw(pos_y+17, pos_x, format!("", ));
+        */
+
+        // pruebas_00(&comentarios_window, pos_y, pos_x);
+
+        comentarios_window.attrset(Attribute::Normal);
         comentarios_window.refresh();
     }
 
@@ -742,7 +767,7 @@ impl CPU{   // Funciones de manejo de ventanas
     fn info_registros(&self) {
         let titulo_ventana_reg = String::from(" Registros ");
         //let max_x = window.get_max_x();
-        let reg_window = newwin(12, 16, 0, 60);
+        let reg_window = newwin(12, 16, 0, 59);
         reg_window.border('|', '|', '-', '-', '+', '+', '+', '+');
         imprime_titulo(&reg_window, &titulo_ventana_reg);
 
@@ -761,8 +786,8 @@ impl CPU{   // Funciones de manejo de ventanas
     // Función manejo ventana de los OP Code
     fn info_opcode(&self, opcode: u8, operandos: [u8;2] ) {
         let titulo_ventana_opcode = String::from(" OP Code ");
-        let pos_x = 60;
-        let opcode_window = newwin(10, 16, 12, pos_x);
+        let pos_x = 74;
+        let opcode_window = newwin(12, 16, 0, pos_x);
         opcode_window.border('|', '|', '-', '-', '+', '+', '+', '+');
         imprime_titulo(&opcode_window, &titulo_ventana_opcode);
         let pos_y = opcode_window.get_cur_y();
@@ -770,7 +795,7 @@ impl CPU{   // Funciones de manejo de ventanas
         let mnemonico_opcode = unsafe { MNEMONICO_OPCODE.as_ref().unwrap().lock().unwrap() };
         opcode_window.mvprintw(2, 2,format!("{}", mnemonico_opcode));
         opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02X}", opcode));
-        opcode_window.mvprintw(4, 2,format!("PC : {:04x}", self.program_counter));
+        opcode_window.mvprintw(5, 2,format!("PC : {:04x}", self.program_counter));
         opcode_window.mvprintw(6, 2,format!("Contenido en"));
         opcode_window.mvprintw(7, 2,format!("PC +1: 0x{:02X}", operandos[0]));
         opcode_window.mvprintw(8, 2,format!("PC +2: 0x{:02X}", operandos[1]));
@@ -779,4 +804,68 @@ impl CPU{   // Funciones de manejo de ventanas
 
 }
 
+//***************************************************************************** pruebas_00 "Mascaras de bits"
+fn pruebas_00(comentarios_window: &Window, pos_y: i32, pos_x:i32) {
+        comentarios_window.attrset(ColorPair(2));
+        // Get
+        comentarios_window.mvprintw(pos_y+6,  pos_x, format!("Creacion de un byte activando el bit 0       : {:08b}", (1<<0) ));
+        comentarios_window.mvprintw(pos_y+7,  pos_x, format!("Creacion de un byte activando el bit 7       : {:08b}", (1<<7) ));
+        let mut num:u8 = 0x00;
+        comentarios_window.mvprintw(pos_y+8,  pos_x, format!("Mascara de bits (AND): {:08b}, con & (1<<1): {:08b}", num, (num & (1<<1)) ));
+        comentarios_window.mvprintw(pos_y+9,  pos_x, format!("Esta activo el bit 1? con & (1<<1)           : {}", (num & (1 << 1)) != 0) );
+        num = 0xff;
+        comentarios_window.mvprintw(pos_y+10, pos_x, format!("Mascara de bits (AND): {:08b}, con & (1<<1): {:08b}", num, (num & (1<<1)) ));
+        comentarios_window.mvprintw(pos_y+11, pos_x, format!("Esta activo el bit 1? con & (1<<1)           : {}", (num & (1 << 1)) != 0) );
+        // Reset y Set
+        comentarios_window.mvprintw(pos_y+12, pos_x, format!("Desactivando el bit 1                        : {:08b}", (num & !(1 << 1)) ));
+        comentarios_window.mvprintw(pos_y+13, pos_x, format!("Esta activo el bit 1? con & (1<<1)           : {}", (num & (1 << 1)) == 1) );
+        comentarios_window.mvprintw(pos_y+14, pos_x, format!("Activando el bit 1                           : {:08b}", (num | (1 << 1)) ));
+        comentarios_window.mvprintw(pos_y+15, pos_x, format!("Esta activo el bit 1? con & (1<<1)           : {}", (num & (1 << 1)) != 0) );
+        // comentarios_window.mvprintw(pos_y+16, pos_x, format!(" : {:08b}", 4 ));
+        // comentarios_window.mvprintw(pos_y+17, pos_x, format!(" : {:08b}", 7 ));
+        comentarios_window.attrset(Attribute::Normal);
+}
+
 //***************************************************************************** 
+
+/* fn muestra_linea_mem(mem: &[u8], ancho: usize) {
+    let mut line_str = format!("{:16p} ||", mem.as_ptr());
+    for i in 0..ancho {
+        line_str.push_str(&format!(" {:02x}", mem[i]));
+    }
+    // line_str.push_str(" || ");
+    // for i in 0..ancho {
+    //     let var_char = if mem[i] > 32 && mem[i] < 128 { mem[i] } else { b'.' };
+    //     line_str.push(var_char as char);
+    //     line_str.push(' ');
+    // }
+    addstr(&line_str);
+    addstr("\n");
+} */
+
+/* */
+fn muestra_mem(comentarios_window: &Window, pos_y: i32, pos_x:i32, mem: &[u8]/* , size: usize, ancho: usize */) {
+    comentarios_window.mv(pos_y, pos_x);
+    comentarios_window.mvprintw(pos_y, pos_x, format!(" Dir. Memoria  || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F"));
+    comentarios_window.mvprintw(pos_y+1, pos_x, format!("-------------- || -----------------------------------------------"));
+/*    let lineas = calcula_lineas(size, ancho);
+    let mut offset = 0;
+     for _ in 0..lineas {
+        muestra_linea_mem(&mem[offset..], ancho);
+        offset += ancho;
+    } */
+    comentarios_window.mvprintw(pos_y+10, pos_x, format!("-----------------------------------------------------------------" ));
+    //comentarios_window.addstr("----------------------------------------------\n");
+    //comentarios_window.refresh();
+    //comentarios_window.getch();
+    //endwin();
+} 
+
+pub fn muestra_mem_obj<T>(comentarios_window: &Window, pos_y: i32, pos_x:i32, var_a: T) {
+    comentarios_window.mv(pos_y, pos_x);
+    let var_ptr = &var_a as *const T as *const u8;
+    // comentarios_window.clear();
+    comentarios_window.addstr(&format!("--> Espacio ocupado en bytes ({})", std::mem::size_of::<T>()));
+    muestra_mem(&comentarios_window, 9, 2, unsafe { std::slice::from_raw_parts(var_ptr, std::mem::size_of::<T>()) });
+    //muestra_mem(&comentarios_window, unsafe { std::slice::from_raw_parts(var_ptr, std::mem::size_of::<T>()) }, std::mem::size_of::<T>());
+}

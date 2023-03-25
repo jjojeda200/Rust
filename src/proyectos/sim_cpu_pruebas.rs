@@ -193,7 +193,7 @@ pub fn z80_sim_1() {
     z80_flags.set_bit(7, false);
     println!("Valor de los flags: 0b{:08b}", z80_flags.get_flags());
     z80_flags.set_flags(0b00000000);
-    println!("Valor de los flags: 0b{:08b}", z80_flags.get_flags_b());
+    println!("Valor de los flags: 0b{:08b}", z80_flags.get_flags_1());
 
 //************************************* Prueba manejo memoria
     println!("");
