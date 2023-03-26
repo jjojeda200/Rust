@@ -83,9 +83,9 @@ fn main() {
     }
 */
 
- 
-    ejer_rust_en_sp::ejer_memoria0::memoria_heap_stack();
-    ejer_rust_en_sp::ejer_memoriax::memoria();
+
+    //ejer_rust_en_sp::ejer_memoriax::memoria_0();
+    //ejer_rust_en_sp::ejer_memoriax::memoria_1();
 
     proyectos::sim_cpu_pruebas::z80_sim_0();
     proyectos::sim_cpu_generica::cpu_generica_0();
@@ -168,14 +168,16 @@ fn main() {
     ejer_rust_en_sp::ejer_memoria0::memoria_deref();
     ejer_rust_en_sp::ejer_memoria0::memoria_alloc_0();
     ejer_rust_en_sp::ejer_memoria0::memoria_alloc_1();
-    ejer_rust_en_sp::ejer_memoria0::memoria_heap();
+    ejer_rust_en_sp::ejer_memoria0::memoria_heap(); 
+    ejer_rust_en_sp::ejer_memoria0::memoria_heap_stack();
     ejer_rust_en_sp::ejer_memoria0::memoria_ptr0();
     ejer_rust_en_sp::ejer_memoria0::memoria_prt1();
     ejer_rust_en_sp::ejer_memoria0::memoria_manuallydrop();
     ejer_rust_en_sp::ejer_memoria0::ejemplo_impresion_datos_hex();
 */
 /* Manejo de memoria x                          
-    ejer_rust_en_sp::ejer_memoriax::memoria();
+    ejer_rust_en_sp::ejer_memoriax::memoria_0();
+    ejer_rust_en_sp::ejer_memoriax::memoria_1();
 */
 /* Trait 0 (Métodos de instancia y estáticos)   
     ejer_rust_en_sp::ejer_trait_rasgos0::ejemplo_instancia_0();
