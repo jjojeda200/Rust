@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          01-02-2023
+    Fecha:          26-03-2023
     Titulo:         introducción a RUST
     Descripción:    Jugando con la memoria, punteros, referencias, etc.
     Referencias:
@@ -23,7 +23,10 @@
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
 ***************************************************************************************/
-use hexdump::{hexdump};
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(unused_assignments)]
+
 use std::alloc::{alloc, dealloc, Layout};
 
 fn imprime_titulo(titulo: &String) {
@@ -33,7 +36,6 @@ fn imprime_titulo(titulo: &String) {
 //***************************************************************************** Deref y size_of
 use std::ops::Deref;
 
-#[allow(dead_code)]
 pub fn memoria_deref() {
     let titulo = String::from(" Deref (des referenciar) ");
     imprime_titulo(&titulo);
@@ -61,42 +63,71 @@ pub fn memoria_deref() {
 
 //***************************************************************************** Manejo alloc y dealloc
 /* Notas:   
-Es importante tener en cuenta que la función malloc no está disponible por defecto
-en Rust, por lo que debemos importar la biblioteca std::alloc. Además, debemos
-usar la función con precaución, ya que estamos trabajando con punteros y
-operaciones unsafe.
+Es importante tener en cuenta que la función malloc no está disponible por defecto en Rust, por lo que debemos
+importar la biblioteca std::alloc. Además, debemos usar la función con precaución, ya que estamos trabajando
+con punteros y operaciones unsafe.
 */
 
-#[allow(dead_code)]
 pub fn memoria_alloc_0() {
     let titulo = String::from(" Manejo alloc y dealloc 0 ");
     imprime_titulo(&titulo);
 
-    // Asignar un bloque de memoria de 10 bytes
-    let size = 16;
+    // Reserva un bloque de memoria de 16 bytes
+    let size = 64;
+    println!("Tamaño de la reserva {} Bit, {} Bytes", (64 * size/8), size);
     let ptr = malloc(size);
-    println!(" {:p}", ptr);
-    unsafe { println!(" {}", *ptr as u8); }
+    println!("Dirección de memoria de inicio de la reserva {:p}", ptr);
+    unsafe { println!("Contenido de la primera posición (no modificarlo): {}", *ptr as u8); }
 
-    // Código para utilizar la memoria asignada
+    // Código para utilizar la memoria asignada (usar el puntero)
     unsafe { *(ptr as *mut u8) = 42 }
-    unsafe { println!(" {:X}", *ptr as u8); }
+    unsafe { println!("Contenido de la primera posición (modificarlo)   : {:X}", *ptr as u8); }
 
-    unsafe {
+    /* El siguiente bloque rellena la memoria reservada con el valor del contador i
+     unsafe {
         for i in 0..size {
         let contenido:u8 = (i + 0).try_into().unwrap();
-        //ptr.write(45);
         ptr.add(i).write(contenido);
+        ptr.add(i).write(0xaa);         // Rellena de AA toda la memoria reservada
+        ptr.write(0xff);                // Escribe FF en la primera dirección
         }
+    }
+    */
+
+    // Imprime el rango de memoria en hexadecimal
+    println!(" Dir. Memoria   || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
+    println!("--------------  || -----------------------------------------------");
+    for i in 0..size {
+        
+        if i % 16 == 0 {
+            let address = unsafe { ptr.add(i) };
+            print!("{:p}: || ", address);
+        }
+        let address = unsafe { ptr.add(i) };
+        let value = unsafe { *address };
+        print!("{:02X} ", value);
+        if (i + 1) % 16 == 0 {
+            println!("");
+            if (i + 1) % 240 == 0 {
+                println!("Presione cualquier tecla para continuar...");
+                std::io::stdin().read_line(&mut String::new()).unwrap();
+            }
+        }
+    }
+    if size % 15 != 0 {
+        println!("");
+        println!("--------------  || -----------------------------------------------");
+    } else {
+        println!("--------------  || -----------------------------------------------");
     }
 
     // Imprime el rango de memoria en hexadecimal
-    for i in 0..size {
-        let address = unsafe { ptr.add(i) };
-        let value = unsafe { *address };
-        println!("{:p}: 0x{:x}", address, value);
-    }
-    
+    // for i in 0..size {
+    //     let address = unsafe { ptr.add(i) };
+    //     let value = unsafe { *address };
+    //     println!("{:p}: 0x{:x}", address, value);
+    // }
+
     // Liberar la memoria asignada
     free(ptr);
 }
@@ -114,7 +145,6 @@ fn free(ptr: *mut u8) {
 }
 
 //***************************************************************************** Manejo alloc y dealloc
-#[allow(dead_code)]
 pub fn memoria_alloc_1() {
     let titulo = String::from(" Manejo alloc y dealloc 1 ");
     imprime_titulo(&titulo);
@@ -128,35 +158,54 @@ pub fn memoria_alloc_1() {
 
     // Reservamos memoria con malloc
     let ptr = unsafe { alloc(diseno) };
-    println!(" {:p}", ptr);
-    unsafe { println!(" {}", *ptr as u8); }
+    println!("Dirección de memoria de inicio de la reserva {:p}", ptr);
+    unsafe { println!("Contenido de la primera posición (no modificarlo): {}", *ptr as u8); }
 
-    // Usamos el puntero
+    // Código para utilizar la memoria asignada (usar el puntero)
     unsafe { *(ptr as *mut u8) = 42 }
-    //unsafe { *ptr.as_ptr().add(0) = 42 };
-    unsafe { println!(" {:X}", *ptr as u8); }
+    unsafe { println!("Contenido de la primera posición (modificarlo)   : {:X}", *ptr as u8); }
 
     // Imprime el rango de memoria en hexadecimal
+    println!(" Dir. Memoria   || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
+    println!("--------------  || -----------------------------------------------");
     for i in 0..size {
+        
+        if i % 16 == 0 {
+            let address = unsafe { ptr.add(i) };
+            print!("{:p}: || ", address);
+        }
         let address = unsafe { ptr.add(i) };
         let value = unsafe { *address };
-        println!("{:p}: 0x{:x}", address, value);
+        print!("{:02X} ", value);
+        if (i + 1) % 16 == 0 {
+            println!("");
+            if (i + 1) % 240 == 0 {
+                println!("Presione cualquier tecla para continuar...");
+                std::io::stdin().read_line(&mut String::new()).unwrap();
+            }
+        }
     }
+    if size % 15 != 0 {
+        println!("");
+        println!("--------------  || -----------------------------------------------");
+    } else {
+        println!("--------------  || -----------------------------------------------");
+    }
+
+    // Imprime el rango de memoria en hexadecimal
+    // for i in 0..size {
+    //     let address = unsafe { ptr.add(i) };
+    //     let value = unsafe { *address };
+    //     println!("{:p}: 0x{:x}", address, value);
+    // }
 
     // Liberamos la memoria con free
     unsafe { dealloc(ptr, diseno) };
-
-    //*********************************
-    println!("*************************************** librería hexdump");
-    let data = [0x1, 0x2, 0x3, 0x4];
-    hexdump(&data);
-
-    println!("{:?}", hexdump(b"Esto aparece como una lista de numeros"));
 }
 
 //***************************************************************************** Manejo HEAP
 use std::collections::BinaryHeap;
-#[allow(dead_code)]
+
 pub fn memoria_heap() {
     let titulo = String::from(" Manejo HEAP ");
     imprime_titulo(&titulo);
@@ -198,6 +247,59 @@ pub fn memoria_heap() {
     );
 }
 
+//***************************************************************************** Manejo HEAP y STACK
+use std::ptr;
+
+pub fn memoria_heap_stack() {
+    let titulo = String::from(" Manejo HEAP y STACK");
+    imprime_titulo(&titulo);
+
+    println!("");
+    println!("Memoria Stack");
+    println!("Se crea la variable puntero *pun_a y se guarda a 0 (Rust no contempla Null)");
+    println!("Se crea la variable var_a y se almacena el valor 20:");
+    /* Detalles:                            
+    *mut i32 : esto se refiere al tipo de variable que se está declarando. En este caso, es un puntero mutable
+    a un entero de 32 bits. El asterisco (*) indica que estamos declarando un puntero, mientras que i32 es el
+    tipo de datos al que apuntará el puntero. El modificador mut indica que el puntero será mutable, lo que
+    significa que se puede modificar el valor al que apunta.
+    ptr::null_mut() : esto inicializa el puntero con un valor nulo. ptr es un módulo dentro de la biblioteca estándar
+    de Rust que proporciona funciones y tipos relacionados con punteros. null_mut() es una función que devuelve un
+    puntero nulo de un tipo determinado.
+    */
+    let mut pun_a: *mut i32 = ptr::null_mut();
+    println!("*pun_a\t{:p}", pun_a);
+    let mut var_a: i32 = 20;
+    println!("var_a\t{}", var_a);
+    println!("Se almacena en pun_a la dirección de memoria que el sistema asigno a var_a");
+    println!("Mostramos la dirección de memoria de var_a y su contenido:");
+    pun_a = &mut var_a as *mut i32;
+    println!("pun_a\t{:p}", pun_a);
+    unsafe {
+        println!("*pun_a\t{}", *pun_a);
+    }
+
+    println!("");
+    println!("Memoria Heap");
+    println!("Se crea *pun_b y se devuelve la dirección de memoria heap asignada en él");
+    let mut pun_b: *mut i32 = Box::into_raw(Box::new(0));
+    println!("*pun_b\t{:p}", pun_b);
+    println!("Por desreferencia se almacena en esa dirección de memoria el valor 40");
+    unsafe {
+        *pun_b = 40;
+    }
+    println!("Mostramos nuevamente la dirección de memoria y su contenido");
+    println!("pun_b\t{:p}", pun_b);
+    unsafe {
+        println!("*pun_b\t{}", *pun_b);
+    }
+    println!("Se borra el contenido del puntero y el puntero con Box::from_raw()\n");
+    unsafe {
+        pun_b = ptr::null_mut();
+        drop(Box::from_raw(pun_b));
+    }
+}
+
 //***************************************************************************** Manejo Punteros
 /* Notas:   
 Este código muestra cómo acceder a la memoria de un arreglo y como imprimir los
@@ -210,7 +312,6 @@ los valores en hexadecimal usando la dirección de memoria y el valor.  -->
 */
 //use std::ptr;
 
-#[allow(dead_code)]
 pub fn memoria_ptr0() {
     let titulo = String::from(" Manejo Punteros ");
     imprime_titulo(&titulo);
@@ -237,7 +338,6 @@ dirección de memoria en la pila y en la heap en formato hexadecimal, así como 
 */
 use std::mem;
 
-#[allow(dead_code)]
 pub fn memoria_prt1() {
     let titulo = String::from(" Manejo Punteros ");
     imprime_titulo(&titulo);
@@ -350,6 +450,5 @@ pub fn ejemplo_impresion_datos_hex() {
         print!("{:02X} ", byte);
     }
 }
-
 
 //***************************************************************************** 

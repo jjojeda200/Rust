@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          02-03-2023
+    Fecha:          26-03-2023
     Titulo:         introducción a RUST
     Descripción:    Jugando con la memoria, punteros, referencias, etc.
     Referencias:
@@ -130,9 +130,9 @@ pub fn memoria() {
     muestra_mem_obj(var_a_array);
 
     let mut var_a_vector: Vec<i32> = vec![1, 2, 4, 8, 16, 32, 64, 128];
-    //muestra_mem_obj(var_a_vector.clone());
+    muestra_mem_obj(var_a_vector.clone());
     println!("Vector .begin {:p}", var_a_vector.as_ptr());
-    // println!("Vector .[0]   {:p}", &var_a_vector[0]);
+    println!("Vector .[0]   {:p}", &var_a_vector[0]);
     println!("Vector .[7]   {:p}", &var_a_vector[7]);
     unsafe {println!("Vector .end   {:p}", var_a_vector.as_ptr().add(var_a_vector.len()));};
     println!("varAvector contiene {} elementos.", var_a_vector.len());
