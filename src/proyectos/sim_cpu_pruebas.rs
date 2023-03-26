@@ -197,7 +197,6 @@ pub fn z80_sim_1() {
 
 //************************************* Prueba manejo memoria
     println!("");
-    //memoria_0();
 
 /*
 */

@@ -676,6 +676,7 @@ pub fn cpu_generica_0() {
         0x04,               // Incrementa registro 1 (B)
         0x80,               // Suma el contenido del Registro 1 (B) al registro 0 (A)
         0xC3, 0x00,         // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
+        0xFF,               // Marca fin de programa
     ];
     cpu.cargar_programa(programa.clone());
     cpu.cargar_programa0(programa);
@@ -739,7 +740,7 @@ impl CPU{   // Funciones de manejo de ventanas
         comentarios_window.attrset(ColorPair(2));
         comentarios_window.mvprintw(pos_y+5, pos_x, "********************************************************");
 
-        let var_a_array: [i32; 8] = [1, 2, 4, 8, 16, 32, 64, 128];
+        let var_a_array: [u8; 8] = [1, 2, 4, 8, 16, 32, 64, 128];
         muestra_mem_obj(&comentarios_window, 8, 2, var_a_array);
 
         /*                                  
@@ -847,7 +848,7 @@ fn pruebas_00(comentarios_window: &Window, pos_y: i32, pos_x:i32) {
 fn muestra_mem(comentarios_window: &Window, pos_y: i32, pos_x:i32, mem: &[u8]/* , size: usize, ancho: usize */) {
     comentarios_window.mv(pos_y, pos_x);
     comentarios_window.mvprintw(pos_y, pos_x, format!(" Dir. Memoria  || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F"));
-    comentarios_window.mvprintw(pos_y+1, pos_x, format!("-------------- || -----------------------------------------------"));
+    comentarios_window.mvprintw(pos_y+1, pos_x, format!("-------------- || ----------------------------------------------"));
 /*    let lineas = calcula_lineas(size, ancho);
     let mut offset = 0;
      for _ in 0..lineas {

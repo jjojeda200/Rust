@@ -87,8 +87,8 @@ fn main() {
     proyectos::sim_cpu_generica::cpu_generica_0();
 
     //proyectos::sim_cpu::z80_sim_0();
-
     proyectos::sim_cpu_pruebas::z80_sim_1();
+
 
 
 //*****************************************************************************
@@ -229,10 +229,7 @@ fn main() {
 /* proyectos                    
     proyectos::firebase::firebase();
 
-    proyectos::sim_cpu::z80_sim_0();
     proyectos::sim_cpu_pruebas::z80_sim_1();
-    
-    
     proyectos::sim_cpu_generica::cpu_generica_0();
     
     proyectos::sim_cpu::z80_sim();

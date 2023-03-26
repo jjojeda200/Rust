@@ -300,11 +300,11 @@ pub fn memoria_manuallydrop() {
     let var_vector = vec![1, 2, 3];
     println!("{:?}", var_vector);
 
-    // Evite ejecutar el destructor de `v` para que tengamos el control completo
+    // Evite ejecutar el destructor de `var_vector` para que tengamos el control completo
     // de la asignación.
     let mut var_vector = mem::ManuallyDrop::new(var_vector);
 
-    // Extraiga las diversas piezas importantes de información sobre `v`
+    // Extraiga las diversas piezas importantes de información sobre `var_vector`
     let p = var_vector.as_mut_ptr();
     let len = var_vector.len();
     let cap = var_vector.capacity();
@@ -322,3 +322,34 @@ pub fn memoria_manuallydrop() {
     }
     println!("{:?}", var_vector);
 }
+
+//***************************************************************************** 
+pub fn ejemplo_impresion_datos_hex() {
+    // Vector de 256 elementos u8
+    let mut data = [0u8; 256];
+    // Llenar el vector con datos de prueba
+    for i in 0..data.len() {
+        data[i] = i as u8;
+    }
+    // Imprimir los datos en formato hexadecimal
+    let mut line_count = 0;
+    for (i, byte) in data.iter().enumerate() {
+        if i % 15 == 0 {
+            print!("\n{:04X}: ", i);
+            line_count += 1;
+            if line_count == 16 {
+                line_count = 0;
+                // Esperar por una pulsación de tecla
+                let mut input = String::new();
+                std::io::stdin().read_line(&mut input).unwrap();
+                if data[i] == 0xFF {
+                    break;
+                }
+            }
+        }
+        print!("{:02X} ", byte);
+    }
+}
+
+
+//***************************************************************************** 
