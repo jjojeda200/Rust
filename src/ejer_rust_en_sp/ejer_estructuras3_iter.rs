@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          06-03-2023
+    Fecha:          28-03-2023
     Titulo:         introducción a RUST
     Descripción:    Iteradores
     Referencias:
@@ -229,6 +229,46 @@ pub fn metodos_iter_string_0() {
     for item in my_library.clone() { // Se pasa un clon de la biblioteca para que no se destruya
         println!("{}", item);
     }
+}
+
+//***************************************************************************** Iteradores 3 - String
+pub fn metodos_iter_string_1() {
+    let titulo = String::from(" Introducción a Iteradores 3 - String ");
+    imprime_titulo(&titulo);
+
+    let meses = vec!["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    println!("{:?}", meses.clone().into_iter());
+    println!("{:?}", meses.clone().into_iter().filter(|mes| mes.len() <= 5).collect::<Vec<_>>());
+    println!("{:?}", meses.clone().into_iter().filter(|mes| mes.contains("u")).collect::<Vec<_>>());
+    
+    let filtered_meses = meses
+        .into_iter()                         // crea un iterador
+        .filter(|month| month.len() <= 5)    // Solo los meses con cinco o menos caracteres (byte)
+                                             // En este caso, todos los caracteres son de un byte, por eso funciona usar .len()
+        .filter(|month| month.contains("u")) // Se seleccionan solo los meses que contengan la letra u
+        .collect::<Vec<&str>>();
+    println!("{:?}", filtered_meses);
+
+
+//*************************************
+    let titulo = String::from(" Introducción a Iteradores 3 - parse ");
+    imprime_titulo(&titulo);
+    
+    let user_input = vec!["8.9", "nueve cinco", "8.0", "8", "7.6", "once"];
+    println!("Contenido del vector: {:?}", user_input.clone().into_iter());
+
+    let actual_numbers = user_input.clone()
+        .into_iter()
+        .filter_map(|input| input.parse::<u32>().ok())
+        .collect::<Vec<u32>>();
+    println!("Imprime solamente los números que convierta parse a u32: {:?}", actual_numbers);
+
+    let actual_numbers = user_input
+        .into_iter()
+        .filter_map(|input| input.parse::<f32>().ok())
+        .collect::<Vec<f32>>();
+    println!("Imprime solamente los números que convierta parse a f32: {:?}", actual_numbers);
+
 }
 
 //*****************************************************************************

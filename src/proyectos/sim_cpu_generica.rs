@@ -845,10 +845,45 @@ fn pruebas_00(comentarios_window: &Window, pos_y: i32, pos_x:i32) {
 } */
 
 /* */
-fn muestra_mem(comentarios_window: &Window, pos_y: i32, pos_x:i32, mem: &[u8]/* , size: usize, ancho: usize */) {
+fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, pos_x:i32, mem: &[u8]/* , size: usize, ancho: usize */) {
+    let vec: [u8; 32] = 
+    [0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
+    0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+    0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00,
+    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,];
+    
+    //0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
+    //0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
+    //0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20,
+    //0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28];
+
+    let mut lineas = vec.len()/16;
+    if (vec.len() & 0xf) != 0 {
+        lineas += 1;
+    }
+
     comentarios_window.mv(pos_y, pos_x);
     comentarios_window.mvprintw(pos_y, pos_x, format!(" Dir. Memoria  || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F"));
     comentarios_window.mvprintw(pos_y+1, pos_x, format!("-------------- || ----------------------------------------------"));
+    comentarios_window.mv(pos_y+2, 20);
+
+
+    let mut output = String::new();
+    while lineas > 0{
+        for (i, byte) in vec.iter().enumerate() {
+            output.push_str(&format!("{:02X} ", byte));
+            if (i + 1) % 16 == 0 {
+                output.push('\n');
+            }
+        }
+        pos_y += 1;
+        comentarios_window.mv(pos_y as i32, 20);
+        lineas -=1;
+    }
+
+    comentarios_window.printw(&output);
+    comentarios_window.refresh();
+
 /*    let lineas = calcula_lineas(size, ancho);
     let mut offset = 0;
      for _ in 0..lineas {

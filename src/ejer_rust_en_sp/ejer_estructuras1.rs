@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          14-02-2023
+    Fecha:          28-03-2023
     Titulo:         introducción a RUST
     Descripción:    Funciones para structs y enums
     Referencias:
@@ -23,6 +23,8 @@
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
 ***************************************************************************************/
+#![allow(dead_code)]
+#![allow(unused_variables)]
 
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo);
@@ -47,7 +49,7 @@ Self y self son dos identificadores diferentes que se utilizan en diferentes con
 
 Self ese utiliza para hacer referencia al tipo de la estructura o el objeto en el
 que se encuentra el método. Se utiliza para especificar el tipo de retorno de un
-método o para hacer referencia al tipo de la estructura o el objeto implementado
+método (normalmente una instancia) o para hacer referencia al tipo de la estructura o el objeto implementado
 de un trait.
 
 self se utiliza para hacer referencia al objeto o estructura en la que se está
@@ -77,7 +79,6 @@ impl Estructura {
     fn add_tipo_x(&mut self, var_y: u8) { self.tipo_x += var_y; }
 }
 
-#[allow(dead_code)]
 pub fn metodo_0() {
     let titulo = String::from(" ¡Self / self! ");
     imprime_titulo(&titulo);
@@ -92,7 +93,6 @@ pub fn metodo_0() {
 
 
 //***************************************************************************** Método/función con enums
-#[allow(dead_code)]
 enum Estado {
     Bueno,
     Malo,
@@ -109,7 +109,6 @@ impl Estado {
     }
 }
 
-#[allow(dead_code)]
 pub fn metodo_1() {
     let titulo = String::from(" Método con enum ");
     imprime_titulo(&titulo);
@@ -118,80 +117,87 @@ pub fn metodo_1() {
     mi_estado.consultar();
 }
 
-//***************************************************************************** Método/función con structs y enums
-#[allow(dead_code)]
-#[derive(Debug)]
-struct Animal {
-    edad: u8,
-    tipo_animal: TipoAnimal,
-}
-
-#[derive(Debug)]
-enum TipoAnimal {
-    Gato,
-    Perro,
-}
-
-impl Animal {
-    fn new() -> Self {
-        // Self, aquí, significa Animal. Se podría haber usado Animal en lugar de Self
-
-        Self {
-            // Cuando se escriba Animal::new(), se obtendrá siempre un gato de 10 años
-            edad: 10,
-            tipo_animal: TipoAnimal::Gato,
-        }
-    }
-
-    fn cambiar_a_perro(&mut self) { // como está dentro de Animal, &mut self significa &mut Animal
-                                    // usa .cambiar_a_perro() para convertir el gato en un perro
-                                    // con &mut self se puede modificar
-        println!("¡Cambiando el animal a perro! {:?}", self.edad = 12);
-        self.tipo_animal = TipoAnimal::Perro;
-        //self.edad = 14;
-    }
-
-    fn cambiar_a_gato(&mut self) {
-        // usa .cambiar_a_gato() para cambiar el perro a gato
-        println!("¡Cambiando el animal a gato!");
-        self.tipo_animal = TipoAnimal::Gato;
-        self.edad = 10;
-    }
-
-    fn comprobar_tipo(&self) {
-        // se lee a sí mismo self
-        match self.tipo_animal {
-            TipoAnimal::Perro => println!("El animal es un perro"),
-            TipoAnimal::Gato => println!("El animal es un gato"),
-        }
-    }
-}
+//***************************************************************************** Detalles de Self y self 
 /* Nota Importante:     
 Self (el tipo Self) y self (la variable self) funcionan como abreviaturas
 del tipo que sea en cada momento.
 
-En el código anterior, Self es igual a Animal. Y en fn cambiar_a_perro(&mut self)
-significa que el parámetro primero es un Animal. Este parámetro es la variable
-animal_nuevo cuando se llama de la siguiente forma animal_nuevo.cambiar_a_perro().
+En este ejemplo, tanto self como Self se utilizan en los métodos doble_tamaño,
+invertir y nuevo. self se utiliza para referirse a una instancia a la estructura
+actual (Rectangulo) y Self se utiliza como un tipo de retorno implícito para que
+se pueda devolver, un nuevo objeto (instancia) de la estructura con los valores
+calculados en el método.
+Indistintamente se puede usar Self o el nombre de la estructura, en este caso
+Rectangulo.
 */
 
+#[derive(Debug)]
+struct Rectangulo {
+    ancho: u32,
+    alto: u32,
+}
 
-#[allow(dead_code)]
-#[allow(unused_variables)]
+impl Rectangulo {
+    // Devuelve un nuevo Rectangulo, indistintamente se puede usar Self o Rectangulo
+    fn doble_tamaño(&self) -> Rectangulo {
+        Rectangulo {
+            ancho: self.ancho * 2,
+            alto: self.alto * 2,
+        }
+    }
+    
+    // Devuelve un nuevo Rectangulo, indistintamente se puede usar Self o Rectangulo
+    fn invertir(&self) -> Self {
+        Self {
+            ancho: self.alto,
+            alto: self.ancho,
+        }
+    }
+    
+    fn area(&self) -> u32 {
+        self.ancho * self.alto
+    }
+    
+    // Devuelve el área del Rectangulo,  se puede utilizar Self en lugar de Option<u32>
+    // ¡¡¡En las pruebas no funciona!!! 
+    // fn area_1 (&self ) -> Self {
+    fn area_1 (&self) -> Option<u32> {
+        if self.ancho == 0 || self.alto == 0 {
+            // Self::None
+            None
+        } else {
+            // Self::Some(self.ancho * self.alto)::Option<u32>
+            Some(self.ancho * self.alto)
+        }
+    }
+
+    // Método que crea un nuevo Rectangulo con el ancho y alto dados
+    fn nuevo(ancho: u32, alto: u32) -> Self /*o Rectangulo*/ {
+        Rectangulo /*o Self*/ {
+            ancho,
+            alto,
+        }
+    }
+}
+
 pub fn metodo_2() {
-    let titulo = String::from(" Métodos con struct y enum ");
+    let titulo = String::from(" Detalles de Self y self ");
     imprime_titulo(&titulo);
 
-    // Función asociada para crear una variable Animal
-    let mut animal_nuevo = Animal::new();   // Es un gato de 10 años
+    let r = Rectangulo::nuevo(10, 20);
+    println!("Rectangulo original: {} x {} = {:?}", r.ancho, r.alto, r.area());
+    
+    let r_doble = r.doble_tamaño();
+    println!("Rectangulo doble tamaño: {} x {} = {:?}", r_doble.ancho, r_doble.alto, r_doble.area());
+    
+    let r_invertido = r.invertir();
+    println!("Rectangulo invertido: {} x {} = {:?}", r_invertido.ancho, r_invertido.alto, r_invertido.area());
 
-    animal_nuevo.comprobar_tipo();
-    animal_nuevo.cambiar_a_perro();
-    println!("Edad {}", animal_nuevo.edad);
-    animal_nuevo.comprobar_tipo();
-    animal_nuevo.cambiar_a_gato();
-    animal_nuevo.comprobar_tipo();
-    println!("Edad {}", animal_nuevo.edad);
+    let area = r.area_1();
+    match area {
+        Some(valor) => println!("El área del rectángulo es {}", valor),
+        None => println!("El rectángulo no tiene área"),
+    }
 }
 
 //*****************************************************************************
