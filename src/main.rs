@@ -90,6 +90,7 @@ fn main() {
     proyectos::sim_cpu_pruebas::z80_sim_0();
     proyectos::sim_cpu_generica::cpu_generica_0();
 
+    ejer_rust_en_sp::ejer_trait_rasgos6::manipulacion_byte_0();
 
 //*****************************************************************************
 /* Características básicas                      
@@ -196,6 +197,9 @@ fn main() {
 /* Trait 3 (Genéricos y manejo de memoria)      
     ejer_rust_en_sp::ejer_trait_rasgos3::ejemplo_generico_0();
     ejer_rust_en_sp::ejer_trait_rasgos3::ejemplo_generico_memoria();
+*/
+/* Trait 6 (Trait - Manipulación de Bytes)      
+    ejer_rust_en_sp::ejer_trait_rasgos6::manipulacion_byte_0();
 */
 /* Trait x (Rasgos)                             
     ejer_rust_en_sp::ejer_trait_rasgosx::fn_windows();

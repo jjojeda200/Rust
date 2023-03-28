@@ -39,4 +39,5 @@ pub mod ejer_trait_rasgos0;
 pub mod ejer_trait_rasgos1;
 pub mod ejer_trait_rasgos2;
 pub mod ejer_trait_rasgos3;
+pub mod ejer_trait_rasgos6;
 pub mod ejer_trait_rasgosx;
