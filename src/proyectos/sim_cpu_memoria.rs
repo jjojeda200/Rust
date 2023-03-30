@@ -183,8 +183,22 @@ impl BancosMemoria {
 */
 
 //************************************* 
-/* Implementación de unidades de memoria, sus metodos, LitteEndian y Bigendian 
+/* Implementación de unidades de memoria, sus métodos, LitteEndian y Bigendian      
+struct UnidadMemoria                        
+En esta estructura, los datos de la memoria estarían almacenados en un vector dinámico.
+Además, se han agregado los campos start_address y end_address para indicar las
+direcciones de inicio y final de la unidad de memoria.
 
+También se han agregado dos campos opcionales de tipo Fn, read_handler y write_handler,
+que son funciones que se llamarán cuando se intente leer o escribir en una dirección
+de memoria que pertenezca a esta unidad. Estas funciones permiten implementar de 
+forma flexible el comportamiento de la memoria, por ejemplo, simulando dispositivos
+de entrada/salida o áreas de memoria especiales.
+
+La estructura Z80CPU se modificaría para tener una lista de unidades de memoria:
+*/
+
+/*
 pub struct UnidadMemoria {
     data: Vec<u8>,                                  // Datos de la unidad de memoria
     start_address: u16,                             // Dirección de inicio de la unidad de memoria
@@ -193,7 +207,6 @@ pub struct UnidadMemoria {
     write_handler: Option<Box<dyn Fn(u16, u8)>>,    // Función para escribir datos en la unidad de memoria
     endianness: Endianess,
 }
-
 
 impl UnidadMemoria {
     pub fn new(start_address: u16, end_address: u16, endianness: Endianness) -> UnidadMemoria {
@@ -258,106 +271,6 @@ impl UnidadMemoria {
             },
         }
     }
-}
-*/
-
-//************************************* MemoryUnit
-/* struct MemoryUnit                        
-En esta estructura, los datos de la memoria estarían almacenados en un vector dinámico.
-Además, se han agregado los campos start_address y end_address para indicar las
-direcciones de inicio y final de la unidad de memoria.
-
-También se han agregado dos campos opcionales de tipo Fn, read_handler y write_handler,
-que son funciones que se llamarán cuando se intente leer o escribir en una dirección
-de memoria que pertenezca a esta unidad. Estas funciones permiten implementar de 
-forma flexible el comportamiento de la memoria, por ejemplo, simulando dispositivos
-de entrada/salida o áreas de memoria especiales.
-
-La estructura Z80CPU se modificaría para tener una lista de unidades de memoria:
-
-struct Z80Reg {
-    // ...
-    mem: Vec<MemoryUnit>,       // Lista de unidades de memoria
-}
-*/
-struct MemoryUnit {
-    data: Vec<u8>,              // Datos de la unidad de memoria
-    start_address: u16,         // Dirección de inicio de la unidad de memoria
-    end_address: u16,           // Dirección final de la unidad de memoria
-    read_handler: Option<Box<dyn Fn(u16) -> u8>>,   // Función para leer datos de la unidad de memoria
-    write_handler: Option<Box<dyn Fn(u16, u8)>>,    // Función para escribir datos en la unidad de memoria
-}
-
-/*
-Ejemplo de cómo se podrían realizar las modificaciones necesarias en la estructura Z80CPU
-y en las funciones read_byte y write_byte para utilizar la nueva estructura MemoryUnit.
-*/
-
-struct Z80cpuAnalisis {        // Añadir
-    mem: Vec<MemoryUnit>,       // Lista de unidades de memoria
-}
-
-impl Z80cpuAnalisis {
-/* función read_byte                        
-En la función read_byte, se itera sobre todas las unidades de memoria en la lista mem
-hasta encontrar una que contenga la dirección addr. Si la unidad tiene una función
-read_handler, se llama a esta función para obtener el valor de la memoria en la dirección
-addr. Si la unidad no tiene una función read_handler, se busca el byte correspondiente en
-el vector data.
-*/
-    fn read_byte(&self, addr: u16 ) -> u8 {
-        for mem_unit in self.mem.iter() {
-            if addr >= mem_unit.start_address && addr <= mem_unit.end_address {
-                if let Some(ref read_handler) = mem_unit.read_handler {
-                    return read_handler(addr);
-                }
-                else {
-                    let offset = (addr - mem_unit.start_address) as usize;
-                    return mem_unit.data[offset];
-                }
-            }
-        }
-        panic!("Error: dirección de memoria fuera de rango.");
-    }
-/* función write_byte
-En la función write_byte, se realiza un proceso similar. Se itera sobre todas las unidades
-de memoria en la lista mem hasta encontrar una que contenga la dirección addr. Si la unidad
-tiene una función write_handler, se llama a esta función para escribir el valor value en la
-dirección addr. Si la unidad no tiene una función write_handler, se busca el byte
-correspondiente en el vector data y se escribe el valor value en el lugar correspondiente.
-*/
-    fn write_byte(&mut self, addr: u16, value: u8) {
-        for mem_unit in self.mem.iter_mut() {
-            if addr >= mem_unit.start_address && addr <= mem_unit.end_address {
-                if let Some(ref write_handler) = mem_unit.write_handler {
-                    write_handler(addr, value);
-                    return;
-                }
-                else {
-                    let offset = (addr - mem_unit.start_address) as usize;
-                    mem_unit.data[offset] = value;
-                    return;
-                }
-            }
-        }
-        panic!("Error: dirección de memoria fuera de rango.");
-    }
-}
-/* 
-Para agregar una nueva unidad de memoria, se puede crear una nueva instancia de la
-estructura MemoryUnit y agregarla a la lista mem de la siguiente manera:En este ejemplo,
-se crea una nueva unidad de memoria de 1 KB que va desde la dirección 0x2000 hasta la
-dirección 0x2FFF.
-
-pub fn z80_sim(){
-    let new_mem_unit = MemoryUnit {
-        data: vec![0; 1024],        // 1 KB de memoria inicializada con ceros
-        start_address: 0x2000,
-        end_address: 0x2FFF,
-        read_handler: None,
-        write_handler: None,
-    };
-    reg.mem.push(new_mem_unit);
 }
 */
 

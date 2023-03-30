@@ -1,9 +1,9 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          23-03-2023
+    Fecha:          30-03-2023
     Titulo:         Simulación CPU Genérica
     Descripción:    CPU con direccionamiento de 8 bit (por ahora) y opcode del Intel 8080
-    Referencias:    
+    Referencias:
     Crate bitflags  https://crates.io/crates/bitflags
     PanCurses       https://crates.io/crates/pancurses
 
@@ -12,10 +12,10 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use pancurses::*;
 use super::sim_cpu_memoria::BancosMemoria;
+use pancurses::*;
 
-use std::{sync::Mutex};
+use std::sync::Mutex;
 static mut MNEMONICO_OPCODE: Option<Mutex<String>> = None;
 
 fn imprime_titulo(ventana: &Window, titulo: &str) {
@@ -32,8 +32,8 @@ fn imprime_titulo(ventana: &Window, titulo: &str) {
     ventana.attrset(Attribute::Normal);
 }
 
-//***************************************************************************** 
-/* Introducción:                            
+//*****************************************************************************
+/* Introducción:
 Métodos parte de una implementación de una máquina virtual o un emulador de un procesador:
 *   self.fetch_instruction(): Este método es responsable de obtener la siguiente instrucción
     del programa que se está ejecutando y devolverla al llamador. En una arquitectura real,
@@ -52,7 +52,7 @@ Métodos parte de una implementación de una máquina virtual o un emulador de u
     de control match para manejar cada opcode en particular. El código unimplemented!() indica que
     el comportamiento para este opcode aún no se ha implementado.
 */
-/* Little-endian - Big-endian               
+/* Little-endian - Big-endian
 u16::from_le_bytes y u16::from_be_bytes son dos métodos en el tipo u16 de Rust que te permiten
 convertir un arreglo de bytes en un valor u16. La diferencia entre ellos está en el orden de
 los bytes utilizado para interpretar el arreglo.
@@ -69,20 +69,20 @@ de computadora.
 Por ejemplo, si tienes un arreglo de bytes [0x78, 0x56], u16::from_le_bytes lo interpretará como el
 valor u16 0x5678, mientras que u16::from_be_bytes lo interpretará como el valor u16 0x7856.
 */
-/* Manejar los bit 3, 4 y 5 de un byte      
+/* Manejar los bit 3, 4 y 5 de un byte
     fn main() {
         let byte: u8 = 0b11100101; // byte de ejemplo
-        
+
         // Máscara con los bits 3, 4 y 5 establecidos en 1 y los demás en 0
         let mask: u8 = 0b00111000;
-        
+
         // Comprobación de los bits 3, 4 y 5
         if byte & mask == mask {
             println!("Los bits 3, 4 y 5 están establecidos en 1");
         } else {
             println!("Los bits 3, 4 y 5 no están establecidos en 1");
         }
-        
+
         // Manipulación de los bits 3, 4 y 5
         let new_byte = (byte & !mask) | (0b010 << 3); // Establece los bits 3, 4 y 5 en 010
         println!("Byte original: {:08b}", byte);
@@ -90,21 +90,20 @@ valor u16 0x5678, mientras que u16::from_be_bytes lo interpretará como el valor
     }
 */
 
-
 struct CPU {
     memoria: BancosMemoria,
     memory: [u8; 256],
     program_counter: u8,
     registro: [u8; 8],
-    reg_a: u8,      // Registro A de 8 bits
-    reg_b: u8,      // Registro B de 8 bits
-    reg_c: u8,      // Registro C de 8 bits
-    reg_d: u8,      // Registro D de 8 bits
-    reg_e: u8,      // Registro E de 8 bits
-    reg_h: u8,      // Registro H de 8 bits
-    reg_l: u8,      // Registro L de 8 bits
-    reg_ix: u16,    // Registro IX de 16 bits
-    reg_iy: u16,    // Registro IY de 16 bits
+    reg_a: u8,   // Registro A de 8 bits
+    reg_b: u8,   // Registro B de 8 bits
+    reg_c: u8,   // Registro C de 8 bits
+    reg_d: u8,   // Registro D de 8 bits
+    reg_e: u8,   // Registro E de 8 bits
+    reg_h: u8,   // Registro H de 8 bits
+    reg_l: u8,   // Registro L de 8 bits
+    reg_ix: u16, // Registro IX de 16 bits
+    reg_iy: u16, // Registro IY de 16 bits
     contador_de_programa: u16,
     puntero_de_pila: u16,
     registro_instrucciones: u8,
@@ -113,7 +112,11 @@ struct CPU {
 impl CPU {
     fn new() -> CPU {
         CPU {
-            memoria: BancosMemoria { segmento_memoria: vec![vec![0; 16384]; 1], banco_actual: 0 },
+            memoria: BancosMemoria {
+                segmento_memoria: vec![vec![0; 1024]; 1],
+                //segmento_memoria: vec![vec![0; 16384]; 1],
+                banco_actual: 0,
+            },
             memory: [0; 256],
             program_counter: 0,
             registro: [0; 8],
@@ -139,16 +142,16 @@ impl CPU {
     }
 
     fn cargar_programa(&mut self, programa: Vec<u8>) {
-    /* Descripción:                         
-    Este fragmento de código es una forma de cargar el programa en la memoria del CPU. Toma como
-    entrada un vector de bytes llamado program y usa el método iter() para obtener un iterador sobre
-    los elementos del vector. Luego, utiliza el método enumerate() para obtener una tupla que contiene
-    el índice i y una referencia &instruction a cada elemento del vector.
-    Dentro del cuerpo del for, se asigna el valor de instruction en la posición i de la memoria del
-    CPU. En otras palabras, está copiando cada elemento del programa en la memoria del CPU. El índice
-    i aumenta en cada iteración para asegurarse de que los elementos se copien en la posición correcta
-    de la memoria.
-    */
+        /* Descripción:
+        Este fragmento de código es una forma de cargar el programa en la memoria del CPU. Toma como
+        entrada un vector de bytes llamado program y usa el método iter() para obtener un iterador sobre
+        los elementos del vector. Luego, utiliza el método enumerate() para obtener una tupla que contiene
+        el índice i y una referencia &instruction a cada elemento del vector.
+        Dentro del cuerpo del for, se asigna el valor de instruction en la posición i de la memoria del
+        CPU. En otras palabras, está copiando cada elemento del programa en la memoria del CPU. El índice
+        i aumenta en cada iteración para asegurarse de que los elementos se copien en la posición correcta
+        de la memoria.
+        */
         for (i, &instruction) in programa.iter().enumerate() {
             self.memory[i] = instruction;
         }
@@ -163,7 +166,7 @@ impl CPU {
         La instrucción activa extrae un byte de la memoria en la posición actual del contador del
         programa (self.program_counter) y lo almacena en la variable "instruction". Esta instrucción
         asume que la memoria almacena cada opcode en un solo byte.
-        
+
         let instruction = u16::from_le_bytes([self.memory[self.program_counter], self.memory[self.program_counter + 1]]);
         La segunda instrucción, en cambio, extrae dos bytes de la memoria en las posiciones actual y
         siguiente del contador del programa (self.program_counter y self.program_counter + 1), y los
@@ -180,7 +183,7 @@ impl CPU {
     }
 
     fn decode_instruction(&self, instruction: u8) -> (u8, [u8; 2]) {
-        /* let opcode = instruction >> 4;   
+        /* let opcode = instruction >> 4;
         El código instruction >> 4 es una operación de desplazamiento a la derecha a nivel de bits.
         El operador >> desplaza los bits de la variable instruction hacia la derecha en 4 posiciones.
         El resultado de la operación se asigna luego a la variable opcode.
@@ -206,23 +209,32 @@ impl CPU {
             println!("Inst0: {:08b}", inst0);   // imprime Inst0: 11011010
             println!("Inst1: {:08b}", inst1);   // imprime Inst1: 00001010
         */
-        
-        let operands = [self.memory[(self.program_counter + 1) as usize ], self.memory[(self.program_counter + 2) as usize ]];
+
+        let operands = [
+            self.memory[(self.program_counter + 1) as usize],
+            self.memory[(self.program_counter + 2) as usize],
+        ];
         (opcode, operands)
     }
 
     fn execute_instruction(&mut self, opcode: u8, operands: [u8; 2]) {
         match opcode {
-            0x00 => { // NOP: No hace nada
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("NOP"))); }
+            0x00 => {
+                // NOP: No hace nada
+                unsafe {
+                    MNEMONICO_OPCODE = Some(Mutex::new(String::from("NOP")));
+                }
                 self.program_counter += 1;
                 self.contador_de_programa += 1;
-            },
+            }
 
-            0x04 => { // INR B incrementa el contenido en el registro (B)
+            0x04 => {
+                // INR B incrementa el contenido en el registro (B)
                 self.registro[1] += 1;
-                self.reg_b +=1;
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("INR B"))); }
+                self.reg_b += 1;
+                unsafe {
+                    MNEMONICO_OPCODE = Some(Mutex::new(String::from("INR B")));
+                }
                 self.program_counter += 1;
                 self.contador_de_programa += 1;
                 /* 0x04 sin control de desbordamiento
@@ -294,12 +306,15 @@ impl CPU {
                     registers.set_flags(Flags::from_increment(b, result));
                 }
                 */
-            },
+            }
 
-            0x05 => { // DCR B decrementa el contenido en el registro (B)
+            0x05 => {
+                // DCR B decrementa el contenido en el registro (B)
                 self.registro[1] -= 1;
-                self.reg_b -=1;
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("DCR B"))); }
+                self.reg_b -= 1;
+                unsafe {
+                    MNEMONICO_OPCODE = Some(Mutex::new(String::from("DCR B")));
+                }
                 self.program_counter += 1;
                 self.contador_de_programa += 1;
                 /* 0x054 sin control de desbordamiento
@@ -333,28 +348,35 @@ impl CPU {
                     }
                 }
                 */
-            },
+            }
 
-            0x06 => { // MVI B,d8 cargar un valor de 8 bits en el registro (B)
+            0x06 => {
+                // MVI B,d8 cargar un valor de 8 bits en el registro (B)
                 self.registro[1] = self.memory[(self.program_counter + 1) as usize];
                 self.reg_b = self.memoria.leer_memoria(self.contador_de_programa + 1);
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI B,d8"))); }
+                unsafe {
+                    MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI B,d8")));
+                }
                 self.program_counter += 2;
                 self.contador_de_programa += 2;
-            },
+            }
 
-// Pendiente implementar acceso a 16 bit ***
-            0x0A => { // LDAX A,(BC) cargar el valor contenido en la dirección BC bits en el acumulador (A)
+            // Pendiente implementar acceso a 16 bit ***
+            0x0A => {
+                // LDAX A,(BC) cargar el valor contenido en la dirección BC bits en el acumulador (A)
                 self.registro[0] = operands[0];
                 unsafe {
                     MNEMONICO_OPCODE = Some(Mutex::new(String::from("LDAX A,[BC]")));
                 }
-            },
+            }
 
-            0x3C => { // INR A incrementa el contenido en el registro (A)
+            0x3C => {
+                // INR A incrementa el contenido en el registro (A)
                 self.registro[0] += 1;
-                self.reg_a +=1;
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("INR A"))); }
+                self.reg_a += 1;
+                unsafe {
+                    MNEMONICO_OPCODE = Some(Mutex::new(String::from("INR A")));
+                }
                 self.program_counter += 1;
                 self.contador_de_programa += 1;
                 /* 0x3C sin control de desbordamiento
@@ -391,12 +413,15 @@ impl CPU {
                 El flag Carry se establece en 0 ya que el incremento no ha generado un acarreo desde el
                 bit más significativo de A.
                 */
-            },
+            }
 
-            0x3D => { // DCR A decrementa el contenido en el registro (A)
+            0x3D => {
+                // DCR A decrementa el contenido en el registro (A)
                 self.registro[0] -= 1;
-                self.reg_a -=1;
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("DCR A"))); }
+                self.reg_a -= 1;
+                unsafe {
+                    MNEMONICO_OPCODE = Some(Mutex::new(String::from("DCR A")));
+                }
                 self.program_counter += 1;
                 self.contador_de_programa += 1;
                 /* 0x3D sin control de desbordamiento
@@ -445,29 +470,35 @@ impl CPU {
                 se encarga de establecer los valores adecuados de estos booleanos para cada flag
                 afectado por la instrucción de decremento de registro A.
                 */
-            },
+            }
 
-            0x3E => { // MVI A,n cargar un valor de 8 bits en el acumulador (A)
+            0x3E => {
+                // MVI A,n cargar un valor de 8 bits en el acumulador (A)
                 self.registro[0] = self.memory[(self.program_counter + 1) as usize];
                 self.reg_a = self.memoria.leer_memoria(self.contador_de_programa + 1);
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI A,d8"))); }
+                unsafe {
+                    MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI A,d8")));
+                }
                 self.program_counter += 2;
                 self.contador_de_programa += 2;
-            },
+            }
 
-            0x80 => { // ADD A,B suma el contenido del registro B al acumulador (A)
+            0x80 => {
+                // ADD A,B suma el contenido del registro B al acumulador (A)
                 self.registro[0] = self.registro[0].wrapping_add(self.registro[1]);
                 self.reg_a = self.reg_a.wrapping_add(self.reg_b);
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("ADD A,B"))); }
+                unsafe {
+                    MNEMONICO_OPCODE = Some(Mutex::new(String::from("ADD A,B")));
+                }
                 self.program_counter += 1;
                 self.contador_de_programa += 1;
-                /* 0x80 Sin propagación de acarreo  
+                /* 0x80 Sin propagación de acarreo
                 let a: u8 = get_register_value(Register::A);    // obtener el valor del registro A
                 let b: u8 = get_register_value(Register::B);    // obtener el valor del registro B
                 let result = a.wrapping_add(b);                 // suma sin propagación de acarreo (wrapping add)
                 set_register_value(Register::A, result);        // guardar el resultado en el registro A
                 */
-                /* 0x88 Con propagación de acarreo  
+                /* 0x88 Con propagación de acarreo
                 let a: u8 = get_register_value(Register::A);    // obtener el valor del registro A
                 let b: u8 = get_register_value(Register::B);    // obtener el valor del registro B
                 let (result, carry) = a.overflowing_add(b);     // suma con propagación de acarreo (overflowing add)
@@ -478,7 +509,7 @@ impl CPU {
                     clear_flag(Flag::C);    // borrar la bandera de acarreo si no se produce acarreo
                 }
                 */
-                /* Control de todos los flags       
+                /* Control de todos los flags
                 La bandera de acarreo (C) se establece si se produce un acarreo en la operación.
                 La bandera de signo (S) se establece si el resultado de la suma tiene el bit más
                 significativo (MSB) encendido, lo que indica que el resultado es negativo.
@@ -542,16 +573,20 @@ impl CPU {
                 En este código, se cuentan los bits encendidos en el valor y se devuelve true si el número
                 de bits es par o false si es impar.
                 */
-            },
+            }
 
-// Revisar implementar manejo de direccionamiento de 16 bit *****
-            0xC3 => { // JMP nn marca PC con la dirección indicada por los dos siguientes bytes
+            // Revisar implementar manejo de direccionamiento de 16 bit *****
+            0xC3 => {
+                // JMP nn marca PC con la dirección indicada por los dos siguientes bytes
                 self.program_counter = self.memory[(self.program_counter + 1) as usize];
-                self.contador_de_programa = self.memoria.leer_memoria(self.contador_de_programa + 1) as u16;
-                //self.contador_de_programa = self.program_counter as u16;    
+                self.contador_de_programa =
+                    self.memoria.leer_memoria(self.contador_de_programa + 1) as u16;
+                //self.contador_de_programa = self.program_counter as u16;
 
                 //self.registro[0] = self.memory[self.program_counter as usize];
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("JMP nn"))); }
+                unsafe {
+                    MNEMONICO_OPCODE = Some(Mutex::new(String::from("JMP nn")));
+                }
                 /* Instrucción 0xC3 manejando direcciones de 16 bits
                 fn 0x3C (address: u16) {
                     // La dirección a la que saltaremos es una palabra de 16 bits, por lo que
@@ -579,11 +614,13 @@ impl CPU {
                     pc = jump_address;
                 }
                 */
-            },
+            }
 
-// Revisar *********************************
+            // Revisar *********************************
             0xFF => println!("Fin del programa"),
-            _ =>    { print!(""); },
+            _ => {
+                print!("");
+            }
         }
     }
 
@@ -593,7 +630,7 @@ impl CPU {
         //println!(" {:02x}", instruction);
         self.execute_instruction(opcode, operands);
 
-        /* (&self).info_registros()         
+        /* (&self).info_registros()
         El paréntesis es necesario para asegurar que se tome la referencia de self antes de llamar al método
         info_registros(). Esto se debe a que el operador . tiene una mayor precedencia que el operador &
         */
@@ -602,30 +639,38 @@ impl CPU {
         (&self).info_pruebas();
 
         //info_pruebas();
-
     }
 
     fn run(&mut self, window: &Window) {
-
-    //************************************** Ventana principal
+        //************************************** Ventana principal
         let mut pos_y = 3;
         loop {
             window.mv(pos_y, 2);
-            window.printw(format!("Contador: 0x{:02x}, Instruccion: {:02x}", self.program_counter, self.memory[self.program_counter as usize]));
-            window.printw(format!(" Reg A: {:02x}, Reg B: {:02x}", self.registro[0], self.registro[1]));
+            window.printw(format!(
+                "Contador: 0x{:02x}, Instruccion: {:02x}",
+                self.program_counter, self.memory[self.program_counter as usize]
+            ));
+            window.printw(format!(
+                " Reg A: {:02x}, Reg B: {:02x}",
+                self.registro[0], self.registro[1]
+            ));
             pos_y += 1;
-            if pos_y == 29 {pos_y = 3;}
+            if pos_y == 29 {
+                pos_y = 3;
+            }
             self.step();
-            
+
             match window.getch() {
                 Some(Input::Character(tecla)) => {
                     if tecla == 'q' || tecla == 'Q' {
                         return;
                     }
-                },
+                }
                 Some(Input::KeyDC) => break,
-                Some(input) => { window.addstr(&format!("{:?}", input)); },
-                None => ()
+                Some(input) => {
+                    window.addstr(&format!("{:?}", input));
+                }
+                None => (),
             }
 
             if self.memory[self.program_counter as usize] == 0xFF {
@@ -633,29 +678,30 @@ impl CPU {
             }
         }
     }
-
 }
 
 pub fn cpu_generica_0() {
     let titulo = String::from(" Simulacion CPU Generica 0 ");
     let mut ventana_principal = initscr();
-    /* Comprobación de coordenadas          
+    /* Comprobación de coordenadas
     ventana_principal.printw(format!("{}, {}", ventana_principal.get_max_y(), ventana_principal.get_max_x()));
     ventana_principal.refresh();
     ventana_principal.getch();
     */
-    let val_y= 50;
-    let val_x= 100;
+    let val_y = 50;
+    let val_x = 100;
+    
     // Verificación medidas de la terminal
-    if ventana_principal.get_max_y() < val_y || ventana_principal.get_max_x() < val_x
-    {
+    if ventana_principal.get_max_y() < val_y || ventana_principal.get_max_x() < val_x {
         endwin();
-        println!("La Terminal es menor del tamaño requerido: {} x {} \n", val_y, val_x);
+        println!(
+            "La Terminal es menor del tamaño requerido: {} x {} \n",
+            val_y, val_x
+        );
         return;
     }
-    
 
-    ventana_principal.resize(30,60);
+    ventana_principal.resize(30, 60);
     ventana_principal.border('|', '|', '-', '-', '+', '+', '+', '+');
     noecho();
     start_color();
@@ -669,14 +715,14 @@ pub fn cpu_generica_0() {
     //**************************************
     let mut cpu = CPU::new();
     let programa = vec![
-        0x00,               // NOP
-        0x3E, 0x04,         // Almacenar el valor 4 en el registro 0 (A)
-        0x00,               // NOP
-        0x06, 0x0a,         // Almacenar el valor 0x0a en el registro 0 (B)
-        0x04,               // Incrementa registro 1 (B)
-        0x80,               // Suma el contenido del Registro 1 (B) al registro 0 (A)
-        0xC3, 0x00,         // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
-        0xFF,               // Marca fin de programa
+        0x00, // NOP
+        0x3E, 0x04, // Almacenar el valor 4 en el registro 0 (A)
+        0x00, // NOP
+        0x06, 0x0a, // Almacenar el valor 0x0a en el registro 0 (B)
+        0x04, // Incrementa registro 1 (B)
+        0x80, // Suma el contenido del Registro 1 (B) al registro 0 (A)
+        0xC3, 0x00, // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
+        0xFF, // Marca fin de programa
     ];
     cpu.cargar_programa(programa.clone());
     cpu.cargar_programa0(programa);
@@ -685,40 +731,40 @@ pub fn cpu_generica_0() {
     cpu.run(&ventana_principal);
 
     //**************************************
-
     echo();
     endwin();
 }
 
 //*****************************************************************************
-    /*
-    fn info_pruebas() {
-        let titulo_ventana_comentarios = String::from(" Pruebas / Info");
-        let comentarios_window = newwin(10, 60, 30, 0);
-        comentarios_window.border('|', '|', '-', '-', '+', '+', '+', '+');
-        imprime_titulo(&comentarios_window, &titulo_ventana_comentarios);
-        comentarios_window.refresh();
+/*
+fn info_pruebas() {
+    let titulo_ventana_comentarios = String::from(" Pruebas / Info");
+    let comentarios_window = newwin(10, 60, 30, 0);
+    comentarios_window.border('|', '|', '-', '-', '+', '+', '+', '+');
+    imprime_titulo(&comentarios_window, &titulo_ventana_comentarios);
+    comentarios_window.refresh();
 
-        let pos_y = 2;
-        let pos_x = 2;
+    let pos_y = 2;
+    let pos_x = 2;
 
-        comentarios_window.mv(pos_y, 2);
+    comentarios_window.mv(pos_y, 2);
 
-        let inst0: u8 = 0b11011010;
-        let inst1: u8 = inst0 & 0x0F;
-        let inst2 = ((inst1 as u16) << 8) | (inst0 as u16);
-        comentarios_window.mvprintw(pos_y+1, pos_x, format!("Inst0: {:08b}", inst0));
-        comentarios_window.mvprintw(pos_y+2, pos_x, format!("Inst1: {:08b}", inst1));
-        comentarios_window.mvprintw(pos_y+3, pos_x, format!("Inst1: {:08b}", inst2));
+    let inst0: u8 = 0b11011010;
+    let inst1: u8 = inst0 & 0x0F;
+    let inst2 = ((inst1 as u16) << 8) | (inst0 as u16);
+    comentarios_window.mvprintw(pos_y+1, pos_x, format!("Inst0: {:08b}", inst0));
+    comentarios_window.mvprintw(pos_y+2, pos_x, format!("Inst1: {:08b}", inst1));
+    comentarios_window.mvprintw(pos_y+3, pos_x, format!("Inst1: {:08b}", inst2));
 
-        //comentarios_window.mvprintw(pos_y+3, pos_x, format!("Inst1: {:08b}", mem.leer_byte(0000)));
-        //comentarios_window.mvprintw(pos_y+1, pos_x, format!("{:?}", self.));        
+    //comentarios_window.mvprintw(pos_y+3, pos_x, format!("Inst1: {:08b}", mem.leer_byte(0000)));
+    //comentarios_window.mvprintw(pos_y+1, pos_x, format!("{:?}", self.));
 
-        comentarios_window.refresh();
-    }
-    */
+    comentarios_window.refresh();
+}
+*/
 
-impl CPU{   // Funciones de manejo de ventanas
+impl CPU {                                   // Funciones de manejo de ventanas
+    
     // Función manejo ventana de info / pruebas
     fn info_pruebas(&self /* , mem: u8 */) {
         let titulo_ventana_comentarios = String::from(" Pruebas / Info");
@@ -731,19 +777,27 @@ impl CPU{   // Funciones de manejo de ventanas
         let pos_x = 2;
         comentarios_window.mv(pos_y, pos_x);
 
-        comentarios_window.mvprintw(pos_y+1, pos_x, format!("Direccion a la que apunta PC de memoria     : {:04X}", self.contador_de_programa));
-        comentarios_window.mvprintw(pos_y+2, pos_x, format!("Contenido en la direccion a la que apunta PC: {:02X}",
-        self.memoria.leer_memoria(self.contador_de_programa)));
-        comentarios_window.mvprintw(pos_y+3, pos_x, format!("Contenido Reg. A: {:02X}", self.reg_a));
-        comentarios_window.mvprintw(pos_y+4, pos_x, format!("Contenido Reg. B: {:02X}", self.reg_b));
-        
+        comentarios_window.mvprintw( pos_y + 1, pos_x, format!("Direccion a la que apunta PC de memoria     : {:04X}", self.contador_de_programa),);
+        comentarios_window.mvprintw( pos_y + 2, pos_x, format!("Contenido en la direccion a la que apunta PC: {:02X}", self.memoria.leer_memoria(self.contador_de_programa)),);
+        comentarios_window.mvprintw( pos_y + 3, pos_x, format!("Contenido Reg. A: {:02X}", self.reg_a),);
+        comentarios_window.mvprintw( pos_y + 4, pos_x, format!("Contenido Reg. B: {:02X}", self.reg_b),);
+
         comentarios_window.attrset(ColorPair(2));
-        comentarios_window.mvprintw(pos_y+5, pos_x, "********************************************************");
+        comentarios_window.mvprintw(
+            pos_y + 5,
+            pos_x,
+            "********************************************************",
+        );
 
-        let var_a_array: [u8; 8] = [1, 2, 4, 8, 16, 32, 64, 128];
-        muestra_mem_obj(&comentarios_window, 8, 2, var_a_array);
+        
+        //let var_a_array: [u8; 8] = [1, 2, 4, 8, 16, 32, 64, 128];
+        let mut var_a_array = &self.memoria.segmento_memoria[*(&self.memoria.get_banco_activo()) as usize];
+        muestra_mem(&comentarios_window, 9, 2, var_a_array);
+        //muestra_mem_obj(&comentarios_window, 8, 2, var_a_array);
+        //muestra_mem_obj(&comentarios_window, 8, 2, (&self).memoria.segmento_memoria.clone());
 
-        /*                                  
+
+        /*
         comentarios_window.mvprintw(pos_y+6,  pos_x, format!("", ));
         comentarios_window.mvprintw(pos_y+7,  pos_x, format!("", ));
         comentarios_window.mvprintw(pos_y+8,  pos_x, format!("", ));
@@ -785,7 +839,7 @@ impl CPU{   // Funciones de manejo de ventanas
     }
 
     // Función manejo ventana de los OP Code
-    fn info_opcode(&self, opcode: u8, operandos: [u8;2] ) {
+    fn info_opcode(&self, opcode: u8, operandos: [u8; 2]) {
         let titulo_ventana_opcode = String::from(" OP Code ");
         let pos_x = 74;
         let opcode_window = newwin(12, 16, 0, pos_x);
@@ -794,40 +848,111 @@ impl CPU{   // Funciones de manejo de ventanas
         let pos_y = opcode_window.get_cur_y();
 
         let mnemonico_opcode = unsafe { MNEMONICO_OPCODE.as_ref().unwrap().lock().unwrap() };
-        opcode_window.mvprintw(2, 2,format!("{}", mnemonico_opcode));
-        opcode_window.mvprintw(3, 2,format!("Hex: 0x{:02X}", opcode));
-        opcode_window.mvprintw(5, 2,format!("PC : {:04x}", self.program_counter));
-        opcode_window.mvprintw(6, 2,format!("Contenido en"));
-        opcode_window.mvprintw(7, 2,format!("PC +1: 0x{:02X}", operandos[0]));
-        opcode_window.mvprintw(8, 2,format!("PC +2: 0x{:02X}", operandos[1]));
+        opcode_window.mvprintw(2, 2, format!("{}", mnemonico_opcode));
+        opcode_window.mvprintw(3, 2, format!("Hex: 0x{:02X}", opcode));
+        opcode_window.mvprintw(5, 2, format!("PC : {:04x}", self.program_counter));
+        opcode_window.mvprintw(6, 2, format!("Contenido en"));
+        opcode_window.mvprintw(7, 2, format!("PC +1: 0x{:02X}", operandos[0]));
+        opcode_window.mvprintw(8, 2, format!("PC +2: 0x{:02X}", operandos[1]));
         opcode_window.refresh();
     }
-
 }
 
 //***************************************************************************** pruebas_00 "Mascaras de bits"
-fn pruebas_00(comentarios_window: &Window, pos_y: i32, pos_x:i32) {
-        comentarios_window.attrset(ColorPair(2));
-        // Get
-        comentarios_window.mvprintw(pos_y+6,  pos_x, format!("Creacion de un byte activando el bit 0       : {:08b}", (1<<0) ));
-        comentarios_window.mvprintw(pos_y+7,  pos_x, format!("Creacion de un byte activando el bit 7       : {:08b}", (1<<7) ));
-        let mut num:u8 = 0x00;
-        comentarios_window.mvprintw(pos_y+8,  pos_x, format!("Mascara de bits (AND): {:08b}, con & (1<<1): {:08b}", num, (num & (1<<1)) ));
-        comentarios_window.mvprintw(pos_y+9,  pos_x, format!("Esta activo el bit 1? con & (1<<1)           : {}", (num & (1 << 1)) != 0) );
-        num = 0xff;
-        comentarios_window.mvprintw(pos_y+10, pos_x, format!("Mascara de bits (AND): {:08b}, con & (1<<1): {:08b}", num, (num & (1<<1)) ));
-        comentarios_window.mvprintw(pos_y+11, pos_x, format!("Esta activo el bit 1? con & (1<<1)           : {}", (num & (1 << 1)) != 0) );
-        // Reset y Set
-        comentarios_window.mvprintw(pos_y+12, pos_x, format!("Desactivando el bit 1                        : {:08b}", (num & !(1 << 1)) ));
-        comentarios_window.mvprintw(pos_y+13, pos_x, format!("Esta activo el bit 1? con & (1<<1)           : {}", (num & (1 << 1)) == 1) );
-        comentarios_window.mvprintw(pos_y+14, pos_x, format!("Activando el bit 1                           : {:08b}", (num | (1 << 1)) ));
-        comentarios_window.mvprintw(pos_y+15, pos_x, format!("Esta activo el bit 1? con & (1<<1)           : {}", (num & (1 << 1)) != 0) );
-        // comentarios_window.mvprintw(pos_y+16, pos_x, format!(" : {:08b}", 4 ));
-        // comentarios_window.mvprintw(pos_y+17, pos_x, format!(" : {:08b}", 7 ));
-        comentarios_window.attrset(Attribute::Normal);
+fn pruebas_00(comentarios_window: &Window, pos_y: i32, pos_x: i32) {
+    comentarios_window.attrset(ColorPair(2));
+    // Get
+    comentarios_window.mvprintw(
+        pos_y + 6,
+        pos_x,
+        format!(
+            "Creacion de un byte activando el bit 0       : {:08b}",
+            (1 << 0)
+        ),
+    );
+    comentarios_window.mvprintw(
+        pos_y + 7,
+        pos_x,
+        format!(
+            "Creacion de un byte activando el bit 7       : {:08b}",
+            (1 << 7)
+        ),
+    );
+    let mut num: u8 = 0x00;
+    comentarios_window.mvprintw(
+        pos_y + 8,
+        pos_x,
+        format!(
+            "Mascara de bits (AND): {:08b}, con & (1<<1): {:08b}",
+            num,
+            (num & (1 << 1))
+        ),
+    );
+    comentarios_window.mvprintw(
+        pos_y + 9,
+        pos_x,
+        format!(
+            "Esta activo el bit 1? con & (1<<1)           : {}",
+            (num & (1 << 1)) != 0
+        ),
+    );
+    num = 0xff;
+    comentarios_window.mvprintw(
+        pos_y + 10,
+        pos_x,
+        format!(
+            "Mascara de bits (AND): {:08b}, con & (1<<1): {:08b}",
+            num,
+            (num & (1 << 1))
+        ),
+    );
+    comentarios_window.mvprintw(
+        pos_y + 11,
+        pos_x,
+        format!(
+            "Esta activo el bit 1? con & (1<<1)           : {}",
+            (num & (1 << 1)) != 0
+        ),
+    );
+    // Reset y Set
+    comentarios_window.mvprintw(
+        pos_y + 12,
+        pos_x,
+        format!(
+            "Desactivando el bit 1                        : {:08b}",
+            (num & !(1 << 1))
+        ),
+    );
+    comentarios_window.mvprintw(
+        pos_y + 13,
+        pos_x,
+        format!(
+            "Esta activo el bit 1? con & (1<<1)           : {}",
+            (num & (1 << 1)) == 1
+        ),
+    );
+    comentarios_window.mvprintw(
+        pos_y + 14,
+        pos_x,
+        format!(
+            "Activando el bit 1                           : {:08b}",
+            (num | (1 << 1))
+        ),
+    );
+    comentarios_window.mvprintw(
+        pos_y + 15,
+        pos_x,
+        format!(
+            "Esta activo el bit 1? con & (1<<1)           : {}",
+            (num & (1 << 1)) != 0
+        ),
+    );
+    // comentarios_window.mvprintw(pos_y+16, pos_x, format!(" : {:08b}", 4 ));
+    // comentarios_window.mvprintw(pos_y+17, pos_x, format!(" : {:08b}", 7 ));
+    comentarios_window.attrset(Attribute::Normal);
 }
 
-//***************************************************************************** 
+//*****************************************************************************
 
 /* fn muestra_linea_mem(mem: &[u8], ancho: usize) {
     let mut line_str = format!("{:16p} ||", mem.as_ptr());
@@ -845,34 +970,34 @@ fn pruebas_00(comentarios_window: &Window, pos_y: i32, pos_x:i32) {
 } */
 
 /* */
-fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x:i32, mem: &[u8]/* , size: usize, ancho: usize */) {
-    let vec: [u8; 64] = 
-    [0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
-    0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-    0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
-    0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28];
+fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec: &[u8], /* , size: usize, ancho: usize */) {
 
-    let mut lineas = vec.len()/16;
+
+    let mut lineas = vec.len() / 16;
     if (vec.len() & 0xf) != 0 {
         lineas += 1;
     }
-//    let lineas = vec.len() / 16 + if vec.len() % 16 != 0 { 1 } else { 0 };
+    //    let lineas = vec.len() / 16 + if vec.len() % 16 != 0 { 1 } else { 0 };
 
     comentarios_window.mv(pos_y, pos_x);
-    comentarios_window.mvprintw(pos_y, pos_x, format!(" Dir. Memoria  || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F"));
-    comentarios_window.mvprintw(pos_y+1, pos_x, format!("-------------- || ----------------------------------------------"));
+    comentarios_window.mvprintw( pos_y, pos_x,format!(" Dir. Memoria  || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F"),);
+    comentarios_window.mvprintw( pos_y + 1, pos_x,format!("-------------- || ----------------------------------------------"),);
     pos_y = pos_y + 2;
     pos_x = 20;
     comentarios_window.mv(pos_y, pos_x);
 
-/*  Alternativa uno
+/*  Alternativa uno                         
 
-    for group in vec.chunks(16) {
+    'etiqueta: for group in vec.chunks(16) {
         // Construir la cadena de caracteres para la fila
         let mut fila = String::new();
         for byte in group {
             fila.push_str(&format!("{:02X} ", byte));
         }
+            if *byte == 0xff {
+                // Salir del ciclo si el byte es igual a 0xff
+                break 'etiqueta;
+            }
         // Imprimir la fila en la ventana
         comentarios_window.mvprintw(pos_y as i32, pos_x, &fila);
         // Incrementar la posición vertical
@@ -880,13 +1005,58 @@ fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x:i32, mem: 
     }
 */
 
-let mut output = String::new();
-let mut lines_printed = 0;
+/* Alternativa dos                          
+*/
+let mut buffer = String::new(); // Variable para guardar los bytes antes del 0xff
+'outer: for group in vec.chunks(16) {
+    // Construir la cadena de caracteres para la fila
+    let mut fila = String::new();
+    let mut bytes_anteriores = buffer.clone();  // Copiar los bytes anteriores del buffer
+    buffer.clear();                                     // Limpiar el buffer para el nuevo grupo
+    for byte in group {
+        if *byte == 0xff {                              // Salir de ambos ciclos si el byte es igual a 0xff
+            break 'outer;
+        }
+        fila.push_str(&format!("{:02X} ", byte));
+        buffer.push_str(&format!("{:02X} ", byte));
+    }
+    // Imprimir los bytes anteriores y la fila en la ventana
+    comentarios_window.mvprintw(pos_y as i32, pos_x, &bytes_anteriores);
+    comentarios_window.mvprintw(pos_y as i32, pos_x + bytes_anteriores.len() as i32, &fila);
+    // Incrementar la posición vertical
+    pos_y += 1;
+}
+// Imprimir los bytes restantes en el buffer
+if !buffer.is_empty() {
+    comentarios_window.mvprintw(pos_y as i32, pos_x, &buffer);
+    pos_y += 1;
+}
 
-while lineas > 0 {
-    for (i, byte) in vec.iter().enumerate() {
-        output.push_str(&format!("{:02X} ", byte));
-        if (i + 1) % 16 == 0 {
+
+
+/*   Alternativa tres                       
+    let mut output = String::new();
+    let mut lines_printed = 0;
+
+    while lineas > 0 {
+        for (i, byte) in vec.iter().enumerate() {
+            output.push_str(&format!("{:02X} ", byte));
+            if (i + 1) % 16 == 0 {
+                if lines_printed == 8 {
+                    comentarios_window.getch();
+                    pos_y = 11;
+                    comentarios_window.mv(pos_y, pos_x);
+                    lines_printed = 0;
+                } else {
+                    lines_printed += 1;
+                }
+                comentarios_window.printw(&output);
+                pos_y += 1;
+                comentarios_window.mv(pos_y, pos_x);
+                output.clear();
+            }
+        }
+        if output.len() > 0 {
             if lines_printed == 8 {
                 comentarios_window.getch();
                 pos_y = 11;
@@ -900,34 +1070,12 @@ while lineas > 0 {
             comentarios_window.mv(pos_y, pos_x);
             output.clear();
         }
+        lineas -= 1;
     }
-    if output.len() > 0 {
-        if lines_printed == 8 {
-            comentarios_window.getch();
-            pos_y = 11;
-            comentarios_window.mv(pos_y, pos_x);
-            lines_printed = 0;
-        } else {
-            lines_printed += 1;
-        }
-        comentarios_window.printw(&output);
-        pos_y += 1;
-        comentarios_window.mv(pos_y, pos_x);
-        output.clear();
-    }
-    lineas -= 1;
-}
+*/
 
     comentarios_window.refresh();
     //comentarios_window.mvprintw(19, 2, format!("-----------------------------------------------------------------" ));
-
-} 
-
-pub fn muestra_mem_obj<T>(comentarios_window: &Window, pos_y: i32, pos_x:i32, var_a: T) {
-    comentarios_window.mv(pos_y, pos_x);
-    let var_ptr = &var_a as *const T as *const u8;
-    // comentarios_window.clear();
-    comentarios_window.addstr(&format!("--> Espacio ocupado en bytes ({})", std::mem::size_of::<T>()));
-    muestra_mem(&comentarios_window, 9, 2, unsafe { std::slice::from_raw_parts(var_ptr, std::mem::size_of::<T>()) });
-    //muestra_mem(&comentarios_window, unsafe { std::slice::from_raw_parts(var_ptr, std::mem::size_of::<T>()) }, std::mem::size_of::<T>());
 }
+
+//*****************************************************************************

@@ -86,15 +86,15 @@ fn main() {
 
 
     // proyectos::sim_cpu_pruebas::z80_sim_0();
-    // proyectos::sim_cpu_generica::cpu_generica_0();
+    proyectos::sim_cpu_generica::cpu_generica_0();
 
 
     // ANALIZAR EN DETALLE
     //ejer_rust_en_sp::ejer_trait_rasgos6::manipulacion_byte_0();
 
 
-    ejer_rust_en_sp::ejer_memoria6::memoria_0();
-    ejer_rust_en_sp::ejer_memoria6::memoria_1();
+    //ejer_rust_en_sp::ejer_memoria6::memoria_0();
+    //ejer_rust_en_sp::ejer_memoria6::memoria_1();
     
     //ejer_rust_en_sp::ejer_memoriax::memoria_1();
 

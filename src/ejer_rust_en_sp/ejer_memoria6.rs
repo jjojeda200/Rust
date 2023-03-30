@@ -23,7 +23,7 @@
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
 ***************************************************************************************/
-// #![allow(dead_code)]
+#![allow(dead_code)]
 // #![allow(unused_variables)]
 // #![allow(unused_assignments)]
 // #![allow(unused_mut)]
@@ -144,7 +144,7 @@ pub struct BancosMemoria {
 fn imprimir_slices(bancos_memoria: &BancosMemoria) {
     // Obtener el vector interno actual
     let banco = &bancos_memoria.segmento_memoria[bancos_memoria.banco_actual as usize];
-    println!("{:?}, {}", banco, bancos_memoria.banco_actual);
+    
     // Iterar a través de los slices de 16 bytes
     for slice in banco.chunks_exact(16) {
         // Imprimir cada byte en hexadecimal
@@ -169,9 +169,11 @@ pub fn memoria_1() {
     };
     
     // Llenar el vector con datos de prueba
-    for i in 0..bancos_memoria.segmento_memoria.len() {
+    for i in 0..bancos_memoria.segmento_memoria[0].len() {
         bancos_memoria.segmento_memoria[0][i] = i as u8;
     }
 
     imprimir_slices(&bancos_memoria);
 }
+
+//*****************************************************************************
