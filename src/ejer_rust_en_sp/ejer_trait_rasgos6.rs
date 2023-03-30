@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          28-03-2023
+    Fecha:          29-03-2023
     Titulo:         introducción a RUST
     Descripción:    Ejemplo de traits documentado basado en el manejo de bytes 
     Referencias:
@@ -187,7 +187,7 @@ impl ManipulaByte for MiEstructura {
     }
 }
 
-//*****************************************************************************
+//*************************************
 pub fn manipulacion_byte_0() {
     let titulo = String::from(" Trait - Manipulación de Bytes ");
     imprime_titulo(&titulo);

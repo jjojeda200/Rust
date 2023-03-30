@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          26-03-2023
+    Fecha:          29-03-2023
     Titulo:         introducción a RUST
     Descripción:    Jugando con la memoria, punteros, referencias, etc.
     Referencias:
@@ -25,8 +25,8 @@
 ***************************************************************************************/
 #![allow(dead_code)]
 #![allow(unused_variables)]
-#![allow(unused_assignments)]
 #![allow(unused_mut)]
+//#![allow(unused_assignments)]
 
 /* función imprime_titulo   
 La función imprime_titulo(titulo: &String) recibe como parámetro un puntero a
@@ -248,7 +248,7 @@ fn muestra_mem_obj<T>(var_a: &T) {
 
 */
 pub fn memoria_1() {
-    let titulo = String::from(" Rutinas de salida por pantalla - Formato memoria Hex 1");
+    let titulo = String::from(" Rutinas de salida por pantalla - Formato memoria Hex 1 ");
     imprime_titulo(&titulo);
     
     let mut buffer = [0u8; 256];
@@ -270,7 +270,7 @@ pub fn memoria_1() {
 
     muestra_mem_obj(&var_a_vector);
     println!("Vector .Begin {:p}", var_a_vector.as_ptr());
-    // println!("Vector .[0]   {:p}", &var_a_vector[0] as *const i32);
+     println!("Vector .[0]   {:p}", &var_a_vector[0] as *const i32);
     println!("Vector .[8]   {:p}", &var_a_vector[7] as *const i32);
     println!("Vector .end   {:p}", unsafe{var_a_vector.as_ptr().add(var_a_vector.capacity())});
     println!("varAvector contiene {} elementos.", var_a_vector.len());
@@ -286,3 +286,5 @@ pub fn memoria_1() {
     println!("var_a_vector contiene {} elementos.", var_a_vector.len());
     println!("capacidad final={}", var_a_vector.capacity());
 }
+
+//***************************************************************************** 

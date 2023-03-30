@@ -84,13 +84,20 @@ fn main() {
 */
 
 
-    //ejer_rust_en_sp::ejer_memoriax::memoria_0();
+
+    // proyectos::sim_cpu_pruebas::z80_sim_0();
+    // proyectos::sim_cpu_generica::cpu_generica_0();
+
+
+    // ANALIZAR EN DETALLE
+    //ejer_rust_en_sp::ejer_trait_rasgos6::manipulacion_byte_0();
+
+
+    ejer_rust_en_sp::ejer_memoria6::memoria_0();
+    ejer_rust_en_sp::ejer_memoria6::memoria_1();
+    
     //ejer_rust_en_sp::ejer_memoriax::memoria_1();
 
-    proyectos::sim_cpu_pruebas::z80_sim_0();
-    proyectos::sim_cpu_generica::cpu_generica_0();
-
-    ejer_rust_en_sp::ejer_trait_rasgos6::manipulacion_byte_0();
 
 //*****************************************************************************
 /* Características básicas                      
@@ -177,6 +184,10 @@ fn main() {
     ejer_rust_en_sp::ejer_memoria0::memoria_manuallydrop();
     ejer_rust_en_sp::ejer_memoria0::ejemplo_impresion_datos_hex();
 */
+/* Manejo de memoria 6                          
+    ejer_rust_en_sp::ejer_memoria6::memoria_0();
+    ejer_rust_en_sp::ejer_memoria6::memoria_1();
+*/
 /* Manejo de memoria x                          
     ejer_rust_en_sp::ejer_memoriax::memoria_0();
     ejer_rust_en_sp::ejer_memoriax::memoria_1();
@@ -236,7 +247,6 @@ fn main() {
 
 /* proyectos                    
     proyectos::firebase::firebase();
-
 
 
     proyectos::sim_cpu_pruebas::z80_sim_0();
