@@ -361,7 +361,7 @@ impl CPU {
                 self.contador_de_programa += 2;
             }
 
-            // Pendiente implementar acceso a 16 bit ***
+// Pendiente implementar acceso a 16 bit ***
             0x0A => {
                 // LDAX A,(BC) cargar el valor contenido en la dirección BC bits en el acumulador (A)
                 self.registro[0] = operands[0];
@@ -575,7 +575,7 @@ impl CPU {
                 */
             }
 
-            // Revisar implementar manejo de direccionamiento de 16 bit *****
+// Revisar implementar manejo de direccionamiento de 16 bit *****
             0xC3 => {
                 // JMP nn marca PC con la dirección indicada por los dos siguientes bytes
                 self.program_counter = self.memory[(self.program_counter + 1) as usize];
@@ -616,7 +616,7 @@ impl CPU {
                 */
             }
 
-            // Revisar *********************************
+// Revisar *********************************
             0xFF => println!("Fin del programa"),
             _ => {
                 print!("");
