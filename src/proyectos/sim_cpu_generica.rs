@@ -1007,7 +1007,7 @@ fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec:
 
 /* Alternativa dos                          
 */
-let mut buffer = String::new(); // Variable para guardar los bytes antes del 0xff
+let mut buffer = String::new();                 // Variable para guardar los bytes antes del 0xff
 'outer: for group in vec.chunks(16) {
     // Construir la cadena de caracteres para la fila
     let mut fila = String::new();

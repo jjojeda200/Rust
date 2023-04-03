@@ -90,7 +90,7 @@ fn main() {
 
 
     // ANALIZAR EN DETALLE
-    //ejer_rust_en_sp::ejer_trait_rasgos6::manipulacion_byte_0();
+    ejer_rust_en_sp::ejer_trait_rasgos6::manipulacion_byte_0();
 
 
     //ejer_rust_en_sp::ejer_memoria6::memoria_0();

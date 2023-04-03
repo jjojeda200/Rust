@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          29-03-2023
+    Fecha:          03-04-2023
     Titulo:         introducción a RUST
     Descripción:    Ejemplo de traits documentado basado en el manejo de bytes 
     Referencias:
@@ -33,7 +33,7 @@ fn imprime_titulo(titulo: &String) {
 
 
 //*****************************************************************************
-/*
+/* Métodos del Trit                         
 Este trait tiene seis métodos:
     from_bytes: convierte un slice de bytes en una instancia del tipo que implementa el trait. Por ejemplo,
     si tenemos un tipo MiTipo que implementa ManipulaByte, podemos crear una nueva instancia a partir de
@@ -78,7 +78,7 @@ struct MiEstructura {
     campo3: u32,
 }
 
-/*
+/* funciones librería estándar              
 from_be_bytes: Esta función es una función de conversión que toma un array de bytes y devuelve un valor
 de un tipo numérico (por ejemplo, u16 o u32). La función interpreta los bytes como una representación
 big-endian (el byte más significativo primero) y convierte ese valor en el tipo numérico correspondiente.
@@ -192,35 +192,43 @@ pub fn manipulacion_byte_0() {
     let titulo = String::from(" Trait - Manipulación de Bytes ");
     imprime_titulo(&titulo);
 
-    let my_struct = MiEstructura {
+
+    // u8 es el tipo de los elementos del array y 6 es la cantidad de elementos que
+    // contiene. La sintaxis = [0xff; 7] inicializa cada elemento del array en cero.
+    let mi_array: [u8; 7] = [0x08; 7];
+    println!("mi_array: {:?}", mi_array);
+    let mi_estructura_0 = MiEstructura::from_bytes(&mi_array);
+    println!("{:?}", mi_estructura_0);
+    //*********************************
+    
+    let mi_estructura_1 = MiEstructura {
         campo1: 0xFFFF,
         campo2: 0x00,
         campo3: 0xFF00FF00,
     };
-
-    // Convert the struct to bytes
-    let bytes = my_struct.to_bytes();
+    // Convierte una estructura a bytes
+    let bytes = mi_estructura_1.to_bytes();
     impresion_datos_hex(&bytes);
 
-    // Convert the bytes back to a struct
-    let my_struct_copy = MiEstructura::from_bytes(&bytes);
+    // Convierte de bytes a estructura 
+    let mi_estructura_copia = MiEstructura::from_bytes(&bytes);
 
-    // Print the original struct and the copy
-    println!("estructura original: {:?}", my_struct);
-    println!("Copia de estructura: {:?}", my_struct_copy);
+    // Imprime la estructura original y la copia
+    println!("estructura original: {:?}", mi_estructura_1);
+    println!("Copia de estructura: {:?}", mi_estructura_copia);
 
     // Test get_byte and set_byte methods
-    let mut my_struct_mut = my_struct.clone();
-    let byte = my_struct_mut.get_byte(0).unwrap();
+    let mut mi_estructura_mut = mi_estructura_1.clone();
+    let byte = mi_estructura_mut.get_byte(0).unwrap();
     println!("Byte en el índice 0: {}", byte);
-    my_struct_mut.set_byte(0, byte + 0).unwrap();
-    println!("Byte modificado en el índice 0: {:?}", my_struct_mut);
+    mi_estructura_mut.set_byte(0, byte + 0).unwrap();
+    println!("Byte modificado en el índice 0: {:?}", mi_estructura_mut);
 
     // Test copy_bytes method
-    let mut dest = vec![0; my_struct.len_bytes() * 2];
+    let mut dest = vec![0; mi_estructura_1.len_bytes() * 2];
     impresion_datos_hex(&dest);
 
-    my_struct.copy_bytes(&mut dest, 0).unwrap();
+    mi_estructura_1.copy_bytes(&mut dest, 0).unwrap();
     println!("bytes copiados: {:?}", dest);
 }
 
