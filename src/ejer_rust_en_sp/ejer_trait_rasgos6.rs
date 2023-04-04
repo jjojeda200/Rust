@@ -31,9 +31,8 @@ fn imprime_titulo(titulo: &String) {
 }
 
 
-
 //*****************************************************************************
-/* Métodos del Trit                         
+/* Métodos del Trait                         
 Este trait tiene seis métodos:
     from_bytes: convierte un slice de bytes en una instancia del tipo que implementa el trait. Por ejemplo,
     si tenemos un tipo MiTipo que implementa ManipulaByte, podemos crear una nueva instancia a partir de

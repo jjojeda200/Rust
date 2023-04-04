@@ -116,7 +116,7 @@ fn muestra(mem: &[u8], size: usize, ascii: bool, ancho: usize) {
 }
 
 pub fn memoria_0() {
-    let titulo = String::from(" Rutinas de salida por pantalla - Formato memoria Hex 0");
+    let titulo = String::from(" Rutinas de salida por pantalla - Formato memoria Hex 0 ");
     imprime_titulo(&titulo);
 
     let mut mem = [0u8; 256];       // Vector de 256 elementos u8

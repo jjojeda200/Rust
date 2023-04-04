@@ -144,62 +144,62 @@ fn ejecutar_programa() -> u8 {
     registros.a
 }
 
-pub fn z80_sim_0() {
-    let titulo = String::from(" Z80 - Simulación CPU - Aproximación de pruebas 1");
+
+
+pub fn cpu_sim_0() {
+    let titulo = String::from(" CPU - Simulación CPU - Aproximación de pruebas 1 ");
     imprime_titulo(&titulo);
 
     let resultado = ejecutar_programa();
     println!("Valor de registro A después de ejecutar el programa: {:02x}", resultado);
-
-//*************************************
 
 
 
 //************************************* Prueba manejo registros
     println!("");
     // Inicializar la estructura de registros y de flags
-    let mut z80_reg = sim_cpu_registros::RegistrosCPU::new();
-    let mut z80_flags = sim_cpu_registros::Flags::new_flags();
+    let mut cpu_reg = sim_cpu_registros::RegistrosCPU::new();
+    let mut cpu_flags = sim_cpu_registros::Flags::new_flags();
    
     // Registro A al inicializar
-    println!("Registro A: 0x{:02x}", z80_reg.get_a());
+    println!("Registro A: 0x{:02x}", cpu_reg.get_a());
     // Registro A modificado
-    z80_reg.set_a(0x12);
-    println!("Registro A: 0x{:02x}", z80_reg.get_a());
+    cpu_reg.set_a(0x12);
+    println!("Registro A: 0x{:02x}", cpu_reg.get_a());
 
 
     // Registro BC al inicializar
-    println!("Registro BC: 0x{:04x}", z80_reg.get_bc());
-    z80_reg.set_b(0xff);
-    z80_reg.set_c(0b11111111);
+    println!("Registro BC: 0x{:04x}", cpu_reg.get_bc());
+    cpu_reg.set_b(0xff);
+    cpu_reg.set_c(0b11111111);
     // Registro BC modificados por separados
-    println!("Registro BC: 0x{:04x}", z80_reg.get_bc());
+    println!("Registro BC: 0x{:04x}", cpu_reg.get_bc());
     // Registro BC modificados como uno solo
-    z80_reg.set_reg_bc(0b0000111111110000);
-    println!("Registro BC: 0x{:04x}", z80_reg.get_reg_bc());
+    cpu_reg.set_reg_bc(0b0000111111110000);
+    println!("Registro BC: 0x{:04x}", cpu_reg.get_reg_bc());
 
 //************************************* Prueba manejo flags
-    z80_flags.set_flags(0b10110101);
+    cpu_flags.set_flags(0b10110101);
 
     // Nota: bit 3 y 5 no se utilizan
     // Actualizar los flags con un valor de 0b11111111 (true)
-    z80_flags.set_flags(0b11111111);
+    cpu_flags.set_flags(0b11111111);
 
     // Obtener el valor de los flags
-    let flags_value = z80_flags.get_flags();
+    let flags_value = cpu_flags.get_flags();
     println!("Valor de los flags: 0b{:08b}", flags_value);
 
     // Establecer el bit de signo a 0 (false)
-    z80_flags.set_bit(7, false);
-    println!("Valor de los flags: 0b{:08b}", z80_flags.get_flags());
-    z80_flags.set_flags(0b00000000);
-    println!("Valor de los flags: 0b{:08b}", z80_flags.get_flags_1());
+    println!("Valor del flags sign: {}", cpu_flags.get_bit(7));
+    cpu_flags.set_bit(7, false);
+    println!("Valor del flags sign: {}", cpu_flags.get_bit(7));
+    println!("Valor de los flags: 0b{:08b}", cpu_flags.get_flags());
+
+    cpu_flags.set_flags(0b00000000);
+    println!("Valor de los flags: 0b{:08b}", cpu_flags.get_flags_1());
 
 //************************************* Prueba manejo memoria
-    println!("");
 
-/*
-*/
     // Crea un banco de memoria por defecto de 16384 bytes (16Kb)
     let mut memoria = BancosMemoria::new();
     
@@ -230,7 +230,6 @@ pub fn z80_sim_0() {
     num_banco_actual = memoria.get_banco_activo() as usize;
 
 
-
     // escribe un byte en la dirección 0x2000 del primer banco
     memoria.escribir_memoria(0x2000, 0x55);
     // lee el byte en la dirección 0x2000 del primer banco
@@ -251,6 +250,72 @@ pub fn z80_sim_0() {
 /* 
 
 */
+    println!("************");
+    println!("");
+    cpu_reg.set_a(0xff);
+    cpu_reg.set_b(0x04);
+    println!("A: {:02x}, B: {:02x}", cpu_reg.get_a(), cpu_reg.get_b());
+    // Ejecutar la instrucción "ADD A, B"    add_a_b_with_carry();
+    let carry = cpu_flags.get_bit(0);
+    let result = cpu_reg.get_a().wrapping_add(cpu_reg.get_b().wrapping_add(carry)); // suma sin propagación de acarreo (wrapping add)
+    println!("Carry {}, Result {}", carry, result);
+    cpu_reg.set_a(result);
+    // Imprimir el valor del registro A y los flags
+    println!("A: {:02x}", cpu_reg.get_a());
+    println!("Carry: {:08b}, {}", &cpu_flags.get_bit(0), &cpu_flags.get_bit_1(0));
+
+    cpu_flags.set_bit(7, false);
+    println!("Valor del flags sign: {}, flags {:08b}", cpu_flags.get_bit(7), cpu_flags.get_flags());
+    cpu_flags.set_bit(7, true);
+    println!("Valor del flags sign: {}, flags {:08b}", cpu_flags.get_bit(7), cpu_flags.get_flags());
+
+    println!("************");
+    println!("");
+    cpu_reg.set_a(0xff);
+    println!("A: {:02x}, B: {:02x}", cpu_reg.get_a(), cpu_reg.get_b());
+    let (result, carry) = cpu_reg.get_a().overflowing_add(cpu_reg.get_b()); // suma con propagación de acarreo (overflowing add)
+    if carry == true {cpu_flags.set_bit(0, true)} else {cpu_flags.set_bit(0, false)}
+
+    println!("Carry {}, Result {}", carry, result);
+    cpu_reg.set_a(result);
+    // Imprimir el valor del registro A y los flags
+    println!("A: {:02x}", cpu_reg.get_a());
+    println!("Carry: {:08b}, {}", &cpu_flags.get_bit(0), &cpu_flags.get_bit_1(0));
+
+    cpu_flags.set_bit(4, false);
+    println!("Valor del flags Auxiliary Carry: {}, flags {:08b}", cpu_flags.get_bit(4), cpu_flags.get_flags());
+    cpu_flags.set_bit(4, true);
+    println!("Valor del flags Auxiliary Carry: {}, flags {:08b}", cpu_flags.get_bit(4), cpu_flags.get_flags());
+    
+    println!("************");
+    println!("");
+    println!("Nº par = True, impar = False: {}", parity(cpu_reg.get_a()));
+    cpu_flags.set_bit(2, false);
+    println!("Valor del flags Parity: {}, flags {:08b}", cpu_flags.get_bit(2), cpu_flags.get_flags());
+    cpu_flags.set_bit(2, true);
+    println!("Valor del flags Parity: {}, flags {:08b}", cpu_flags.get_bit(2), cpu_flags.get_flags());
+
+    //cpu_flags.set_bit(2, parity(cpu_reg.get_a()));
+    println!("parity: {:08b}, {}", cpu_flags.get_bit(7), cpu_flags.get_bit_1(7));
 
 }
 
+
+fn parity(value: u8) -> bool {
+	let mut count = 0;
+	for i in 0..8 {
+    	if (value & (1 << i)) != 0 {
+        	count += 1;
+    	}
+	}
+	count % 2 != 0
+}
+
+fn add_a_b_with_carry() {
+/*
+    if result == 0 { set_flag(Flag::Z); }
+    if result & 0x80 == 0x80 { set_flag(Flag::S); }
+    if result.count_ones() % 2 == 0 { set_flag(Flag::P); }
+    if (a as u16) + (b as u16) + (carry as u16) > 0xff { set_flag(Flag::C); }
+        else { clear_flag(Flag::C); } */
+}

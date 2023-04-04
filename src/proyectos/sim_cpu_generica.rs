@@ -12,7 +12,7 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use super::sim_cpu_memoria::BancosMemoria;
+use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::Flags};
 use pancurses::*;
 
 use std::sync::Mutex;
@@ -92,6 +92,7 @@ valor u16 0x5678, mientras que u16::from_be_bytes lo interpretará como el valor
 
 struct CPU {
     memoria: BancosMemoria,
+    flags: Flags,
     memory: [u8; 256],
     program_counter: u8,
     registro: [u8; 8],
@@ -117,6 +118,7 @@ impl CPU {
                 //segmento_memoria: vec![vec![0; 16384]; 1],
                 banco_actual: 0,
             },
+            flags: Flags { carry: false, subtract: true, parity_overflow: false, half_carry: false, zero: false, sign: false, },
             memory: [0; 256],
             program_counter: 0,
             registro: [0; 8],
@@ -862,93 +864,19 @@ impl CPU {                                   // Funciones de manejo de ventanas
 fn pruebas_00(comentarios_window: &Window, pos_y: i32, pos_x: i32) {
     comentarios_window.attrset(ColorPair(2));
     // Get
-    comentarios_window.mvprintw(
-        pos_y + 6,
-        pos_x,
-        format!(
-            "Creacion de un byte activando el bit 0       : {:08b}",
-            (1 << 0)
-        ),
-    );
-    comentarios_window.mvprintw(
-        pos_y + 7,
-        pos_x,
-        format!(
-            "Creacion de un byte activando el bit 7       : {:08b}",
-            (1 << 7)
-        ),
-    );
+    comentarios_window.mvprintw( pos_y + 6, pos_x, format!( "Creacion de un byte activando el bit 0      : {:08b}", (1 << 0)),);
+    comentarios_window.mvprintw( pos_y + 7, pos_x, format!( "Creacion de un byte activando el bit 7      : {:08b}", (1 << 7)),);
     let mut num: u8 = 0x00;
-    comentarios_window.mvprintw(
-        pos_y + 8,
-        pos_x,
-        format!(
-            "Mascara de bits (AND): {:08b}, con & (1<<1): {:08b}",
-            num,
-            (num & (1 << 1))
-        ),
-    );
-    comentarios_window.mvprintw(
-        pos_y + 9,
-        pos_x,
-        format!(
-            "Esta activo el bit 1? con & (1<<1)           : {}",
-            (num & (1 << 1)) != 0
-        ),
-    );
+    comentarios_window.mvprintw( pos_y + 8, pos_x, format!( "Mascara de bits (AND): {:08b}, con & (1<<1) : {:08b}", num, (num & (1 << 1))),);
+    comentarios_window.mvprintw( pos_y + 9, pos_x, format!( "Esta activo el bit 1? con & (1<<1)          : {}", (num & (1 << 1)) != 0 ),);
     num = 0xff;
-    comentarios_window.mvprintw(
-        pos_y + 10,
-        pos_x,
-        format!(
-            "Mascara de bits (AND): {:08b}, con & (1<<1): {:08b}",
-            num,
-            (num & (1 << 1))
-        ),
-    );
-    comentarios_window.mvprintw(
-        pos_y + 11,
-        pos_x,
-        format!(
-            "Esta activo el bit 1? con & (1<<1)           : {}",
-            (num & (1 << 1)) != 0
-        ),
-    );
+    comentarios_window.mvprintw( pos_y + 10, pos_x, format!( "Mascara de bits (AND): {:08b}, con & (1<<1) : {:08b}", num, (num & (1 << 1))),);
+    comentarios_window.mvprintw( pos_y + 11, pos_x, format!( "Esta activo el bit 1? con & (1<<1)          : {}", (num & (1 << 1)) != 0 ),);
     // Reset y Set
-    comentarios_window.mvprintw(
-        pos_y + 12,
-        pos_x,
-        format!(
-            "Desactivando el bit 1                        : {:08b}",
-            (num & !(1 << 1))
-        ),
-    );
-    comentarios_window.mvprintw(
-        pos_y + 13,
-        pos_x,
-        format!(
-            "Esta activo el bit 1? con & (1<<1)           : {}",
-            (num & (1 << 1)) == 1
-        ),
-    );
-    comentarios_window.mvprintw(
-        pos_y + 14,
-        pos_x,
-        format!(
-            "Activando el bit 1                           : {:08b}",
-            (num | (1 << 1))
-        ),
-    );
-    comentarios_window.mvprintw(
-        pos_y + 15,
-        pos_x,
-        format!(
-            "Esta activo el bit 1? con & (1<<1)           : {}",
-            (num & (1 << 1)) != 0
-        ),
-    );
-    // comentarios_window.mvprintw(pos_y+16, pos_x, format!(" : {:08b}", 4 ));
-    // comentarios_window.mvprintw(pos_y+17, pos_x, format!(" : {:08b}", 7 ));
+    comentarios_window.mvprintw( pos_y + 12, pos_x, format!( "Desactivando el bit 1                       : {:08b}", (num & !(1 << 1))),);
+    comentarios_window.mvprintw( pos_y + 13, pos_x, format!( "Esta activo el bit 1? con & (1<<1)          : {}", (num & (1 << 1)) == 1),);
+    comentarios_window.mvprintw( pos_y + 14, pos_x, format!( "Activando el bit 1                          : {:08b}", (num | (1 << 1))),);
+    comentarios_window.mvprintw( pos_y + 15, pos_x, format!( "Esta activo el bit 1? con & (1<<1)          : {}", (num & (1 << 1)) != 0),);
     comentarios_window.attrset(Attribute::Normal);
 }
 
@@ -971,7 +899,6 @@ fn pruebas_00(comentarios_window: &Window, pos_y: i32, pos_x: i32) {
 
 /* */
 fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec: &[u8], /* , size: usize, ancho: usize */) {
-
 
     let mut lineas = vec.len() / 16;
     if (vec.len() & 0xf) != 0 {
@@ -1031,7 +958,6 @@ if !buffer.is_empty() {
     comentarios_window.mvprintw(pos_y as i32, pos_x, &buffer);
     pos_y += 1;
 }
-
 
 
 /*   Alternativa tres                       
