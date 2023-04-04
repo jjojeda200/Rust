@@ -31,6 +31,7 @@ Estas son las banderas que se utilizan en el Z80:
 -   Bit 0 (C): Carry flag (bandera de acarreo): Esta bandera se establece en 1 si se
     produce un acarreo de los bits más altos durante una operación aritmética. De lo
     contrario, se establece en 0.
+    ** Bit 1 no se usa en el Intel 8080 **
 -   Bit 1 (N): Add/Subtract flag (bandera de suma/resta): Esta bandera se establece en
     1 si la última operación realizada fue una resta. De lo contrario, se establece en 0.
 -   Bit 2 (PV): Parity/Overflow flag (bandera de paridad/sobreflujo): Esta bandera se
