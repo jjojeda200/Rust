@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          14-03-2023
+    Fecha:          05-04-2023
     Titulo:         Simulación CPU
     Descripción:    
     Referencias:
@@ -26,27 +26,36 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-/* Registro F (banderas)                    
+/* Registro Flags (banderas)                
+                                                    Bits    7	6	5	4	3	2	1	0
+                                                    Flags   S	Z	0	H	0	P	1	C
 Estas son las banderas que se utilizan en el Z80:
--   Bit 0 (C): Carry flag (bandera de acarreo): Esta bandera se establece en 1 si se
-    produce un acarreo de los bits más altos durante una operación aritmética. De lo
-    contrario, se establece en 0.
-    ** Bit 1 no se usa en el Intel 8080 **
--   Bit 1 (N): Add/Subtract flag (bandera de suma/resta): Esta bandera se establece en
-    1 si la última operación realizada fue una resta. De lo contrario, se establece en 0.
--   Bit 2 (PV): Parity/Overflow flag (bandera de paridad/sobreflujo): Esta bandera se
-    utiliza para indicar si se ha producido un error en una operación que involucra
-    números con signo.
--   Bit 3 (3):  Unused
--   Bit 4 (H): Half-carry flag (bandera de medio acarreo): Esta bandera se establece
-    en 1 si se produce un acarreo de los bits más bajos durante una operación aritmética.
-    De lo contrario, se establece en 0.
--   Bit 5 (3):  Unused
--   Bit 6 (Z): Zero flag (bandera de cero): Esta bandera se establece en 1 si el resultado
-    de una operación es cero. De lo contrario, se establece en 0.
--   Bit 7 (S): Sign flag (bandera de signo): Esta bandera se establece en 1 si el resultado
-    de una operación es negativo (el bit más significativo es 1). De lo contrario, se
+-   Bit 0 (C o CF) Carry Flag (bandera de acarreo): Indica si se produjo un acarreo en la
+    operación aritmética (no se usa en las operaciones lógicas). Se establece en 1 cuando se
+    produce un acarreo en la operación, de lo contrario, se establece en 0.
+-   Bit 1: siempre está en 1.
+    Nota para el Z80:
+    Bit 1 (N): Add/Subtract flag (bandera de suma/resta): Esta bandera se establece en 1 si la
+    última operación realizada fue una resta. De lo contrario, se establece en 0.
+-   Bit 2 (P o PF) Parity Flag (bandera de paridad/sobreflujo): Indica si el resultado de la
+    operación tiene un número par o impar de bits. Se establece en 1 cuando si el resultado
+    contiene un número par de unos, de lo contrario, se establece en 0.
+    Nota para el Z80 (PV):
+    Parity/Overflow flag Esta bandera también se utiliza para indicar si se ha producido un
+    error en una operación que involucra números con signo.
+-   Bit 3: siempre está en 0.
+-   Bit 4 (H o AC) Half Carry Flag o Auxiliary Carry Flag (bandera de medio acarreo): Indica
+    si se produjo un acarreo en el bit 3 de la operación aritmética (no se usa en las operaciones
+    lógicas). El AC se establece en 1 cuando se produce un acarreo en el bit 3 de la operación,
+    de lo contrario, se establece en 0.
+-   Bit 5: siempre está en 0.
+
+-   Bit 6 (Z o ZF) Zero Flag (bandera de cero): Indica si el resultado de la operación es cero.
+    Esta bandera se establece en 1 si el resultado de una operación es cero, de lo contrario, se
     establece en 0.
+-   El bit 7 (S o SF) Sign Flag (bandera de signo): Indica si el resultado de la operación es
+    negativo. Esta bandera se establece en 1 si el resultado de una operación es negativo (el bit
+    más significativo es 1), de lo contrario, se establece en 0.
 */
 
 //***************************************************************************** Estructura e implementación Flags
@@ -115,7 +124,7 @@ impl Flags {
         self.sign = valor & 0x80 != 0;              // Bit 7
     }
 
-    pub fn get_bit(&mut self, index: u8) -> u8 {
+    pub fn get_bit(&self, index: u8) -> u8 {
         match index {
             0 => {self.carry as u8},
             1 => {self.subtract as u8},
@@ -141,6 +150,32 @@ impl Flags {
             7 => self.sign = valor,
             _ => panic!("Índice de bit no válido: {}", index),
         }
+    }
+
+    pub fn flags_acarreo(&mut self, valor_reg1: u8, valor_reg2: u8) -> u8 {
+        // suma con propagación de acarreo (overflowing add)
+        let (resultado, acarreo) = valor_reg1.overflowing_add(valor_reg2);
+        if acarreo == true {self.set_bit(0, true)} else {self.set_bit(0, false)}
+        resultado
+    }
+
+    pub fn flags_paridad(&mut self, valor: u8) {
+        // Método con función interna:
+        // println!("Paridad: {}", valor.count_ones() % 2 == 0);
+        // Método manipulando bits
+        let mut count = 0;
+        for i in 0..8 {
+            if (valor & (1 << i)) != 0 { count += 1; }
+        }
+        if count % 2 == 0 {self.set_bit(2, true)} else {self.set_bit(2, false)}
+    }
+
+    pub fn flags_acarreo_auxiliar(&mut self, resultado: u8) {
+        if (resultado & 0x0F) + (self.get_bit(0)) > 0x0F { self.set_bit(4,true)} else {self.set_bit(4, false)}
+    }
+
+    pub fn flags_zero(&mut self, resultado: u8) {
+        if resultado == 0 {self.set_bit(6, true)} else {self.set_bit(6, false)}
     }
 
 }
@@ -233,13 +268,143 @@ impl RegistrosCPU {
 }
 
 //*****************************************************************************
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new_flags() {
+        let flags = Flags::new_flags();
+        assert_eq!(flags.carry, false);
+        assert_eq!(flags.subtract, true);
+        assert_eq!(flags.parity_overflow, false);
+        assert_eq!(flags.half_carry, false);
+        assert_eq!(flags.zero, false);
+        assert_eq!(flags.sign, false);
+    }
+
+    #[test]
+    fn test_get_flags() {
+        let mut flags = Flags::new_flags();
+        flags.carry = true;
+        flags.half_carry = true;
+        flags.zero = true;
+        let result = flags.get_flags();
+        assert_eq!(result, 0b01010011);
+    }
+
+    #[test]
+    fn test_get_flags_1() {
+        let mut flags = Flags::new_flags();
+        flags.carry = true;
+        flags.half_carry = true;
+        flags.zero = true;
+        let result = flags.get_flags_1();
+        assert_eq!(result, 0b01010011);
+    }
+
+    #[test]
+    fn test_set_flags() {
+        let mut flags = Flags::new_flags();
+        flags.set_flags(0b11001101);
+        assert_eq!(flags.carry, true);
+        assert_eq!(flags.subtract, false);
+        assert_eq!(flags.parity_overflow, true);
+        assert_eq!(flags.half_carry, false);
+        assert_eq!(flags.zero, true);
+        assert_eq!(flags.sign, true);
+    }
+
+    #[test]
+    fn test_get_bit() {
+        let mut flags = Flags::new_flags();
+        flags.carry = true;
+        flags.parity_overflow = true;
+        flags.sign = true;
+        assert_eq!(flags.get_bit(0), 1);
+        assert_eq!(flags.get_bit(1), 1);
+        assert_eq!(flags.get_bit(2), 1);
+        assert_eq!(flags.get_bit(4), 0);
+        assert_eq!(flags.get_bit(6), 0);
+        assert_eq!(flags.get_bit(7), 1);
+    }
+
+    #[test]
+    fn test_get_bit_1() {
+        let mut flags = Flags::new_flags();
+        flags.carry = true;
+        flags.parity_overflow = true;
+        flags.sign = true;
+        assert_eq!(flags.get_bit_1(0), true);
+        assert_eq!(flags.get_bit_1(1), true);
+        assert_eq!(flags.get_bit_1(2), true);
+        assert_eq!(flags.get_bit_1(4), false);
+        assert_eq!(flags.get_bit_1(6), false);
+        assert_eq!(flags.get_bit_1(7), true);
+    }
+
+    #[test]
+    fn test_set_bit() {
+        let mut flags = Flags::new_flags();
+        flags.set_bit(0, true);
+        flags.set_bit(4, true);
+        flags.set_bit(7, true);
+        assert_eq!(flags.carry, true);
+        assert_eq!(flags.half_carry, true);
+        assert_eq!(flags.sign, true);
+    }
+
+    #[test]
+    fn test_flags_acarreo() {
+        let mut flags = Flags::new_flags();
+        let result = flags.flags_acarreo(255, 1);
+        assert_eq!(result, 0);
+        assert_eq!(flags.carry, true);
+
+        flags = Flags::new_flags();
+        let result = flags.flags_acarreo(100, 20);
+        assert_eq!(result, 120);
+        assert_eq!(flags.carry, false);
+
+        flags = Flags::new_flags();
+        let result = flags.flags_acarreo(200, 100);
+        assert_eq!(result, 44);
+        assert_eq!(flags.carry, true);
+    }
+
+    #[test]
+    fn test_flags_paridad() {
+        let mut flags = Flags::new_flags();
+        flags.flags_paridad(0xff);
+        assert_eq!(flags.parity_overflow, true);
+
+        flags = Flags::new_flags();
+        flags.flags_paridad(0b01110110);
+        assert_eq!(flags.parity_overflow, false);
+
+        flags = Flags::new_flags();
+        flags.flags_paridad(0b01100110);
+        assert_eq!(flags.parity_overflow, true);
+    }
+
+    #[test]
+    fn test_flags_acarreo_auxiliar() {
+        let mut flags = Flags::new_flags();
+        flags.set_bit(0, true);
+        flags.flags_acarreo_auxiliar(0x1F);
+        assert_eq!(flags.half_carry, true);
+        
+        flags.flags_acarreo_auxiliar(0x1B);
+        assert_eq!(flags.half_carry, false);
+    }
+}
+
+//*****************************************************************************
 // Manejo de bit en un byte con operaciones lógicas y desplazamientos
 /*
 pub fn get0(){
-    /*
-    La expresión (1<<0) es una operación de desplazamiento a la izquierda de un bit, que se utiliza para mover
-    el valor binario 1 cero posiciones a la izquierda.
-    */
+    // La expresión (1<<0) es una operación de desplazamiento a la izquierda de un bit, que se utiliza para mover
+    // el valor binario 1 cero posiciones a la izquierda.
     println!("Creación de un byte activando el bit 0: {:08b}",(1<<0));
     println!("Creación de un byte activando el bit 1: {:08b}",(1<<1));
     println!("Creación de un byte activando el bit 7: {:08b}",(1<<7));

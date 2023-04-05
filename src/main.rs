@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          22-03-2023
+    Fecha:          xx-xx-2023
     Titulo:         introducción a RUST
     Descripción:    Inicio ;-)
     Referencias:

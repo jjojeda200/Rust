@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          30-03-2023
+    Fecha:          05-04-2023
     Titulo:         Simulación CPU Genérica
     Descripción:    CPU con direccionamiento de 8 bit (por ahora) y opcode del Intel 8080
     Referencias:
@@ -11,6 +11,8 @@
 
 #![allow(dead_code)]
 #![allow(unused_variables)]
+#![allow(unused_assignments)]
+#![allow(unused_mut)]
 
 use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::Flags};
 use pancurses::*;
@@ -478,6 +480,8 @@ impl CPU {
                 // MVI A,n cargar un valor de 8 bits en el acumulador (A)
                 self.registro[0] = self.memory[(self.program_counter + 1) as usize];
                 self.reg_a = self.memoria.leer_memoria(self.contador_de_programa + 1);
+                // La siguiente linea para pruebas (borrar) -> 
+                // self.flags.flags_paridad(self.reg_a);
                 unsafe {
                     MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI A,d8")));
                 }
@@ -488,93 +492,17 @@ impl CPU {
             0x80 => {
                 // ADD A,B suma el contenido del registro B al acumulador (A)
                 self.registro[0] = self.registro[0].wrapping_add(self.registro[1]);
-                self.reg_a = self.reg_a.wrapping_add(self.reg_b);
+                //self.reg_a = self.reg_a.wrapping_add(self.reg_b);
+                let resultado = self.flags.flags_acarreo(self.reg_a, self.reg_b);
+                self.reg_a = resultado;
+                self.flags.flags_paridad(resultado);
+                self.flags.flags_acarreo_auxiliar(resultado);
+                self.flags.flags_zero(resultado);
                 unsafe {
                     MNEMONICO_OPCODE = Some(Mutex::new(String::from("ADD A,B")));
                 }
                 self.program_counter += 1;
                 self.contador_de_programa += 1;
-                /* 0x80 Sin propagación de acarreo
-                let a: u8 = get_register_value(Register::A);    // obtener el valor del registro A
-                let b: u8 = get_register_value(Register::B);    // obtener el valor del registro B
-                let result = a.wrapping_add(b);                 // suma sin propagación de acarreo (wrapping add)
-                set_register_value(Register::A, result);        // guardar el resultado en el registro A
-                */
-                /* 0x88 Con propagación de acarreo
-                let a: u8 = get_register_value(Register::A);    // obtener el valor del registro A
-                let b: u8 = get_register_value(Register::B);    // obtener el valor del registro B
-                let (result, carry) = a.overflowing_add(b);     // suma con propagación de acarreo (overflowing add)
-                set_register_value(Register::A, result);        // guardar el resultado en el registro A
-                if carry {
-                    set_flag(Flag::C);      // establecer la bandera de acarreo si se produce acarreo
-                } else {
-                    clear_flag(Flag::C);    // borrar la bandera de acarreo si no se produce acarreo
-                }
-                */
-                /* Control de todos los flags
-                La bandera de acarreo (C) se establece si se produce un acarreo en la operación.
-                La bandera de signo (S) se establece si el resultado de la suma tiene el bit más
-                significativo (MSB) encendido, lo que indica que el resultado es negativo.
-                La bandera de cero (Z) se establece si el resultado de la suma es cero.
-                La bandera de paridad (P) se establece si el resultado de la suma tiene un número par de
-                bits encendidos.
-
-                El código en Rust para implementar la instrucción "ADD A, B" con propagación de acarreo
-                y control de todos los flags afectados sería el siguiente:
-
-                let a: u8 = get_register_value(Register::A); // obtener el valor del registro A
-                let b: u8 = get_register_value(Register::B); // obtener el valor del registro B
-
-                let (result, carry) = a.overflowing_add(b); // suma con propagación de acarreo (overflowing add)
-
-                set_register_value(Register::A, result); // guardar el resultado en el registro A
-
-                // Establecer los flags afectados
-                if result == 0 {
-                    set_flag(Flag::Z);
-                } else {
-                    clear_flag(Flag::Z);
-                }
-
-                if (result & 0x80) == 0x80 {
-                    set_flag(Flag::S);
-                } else {
-                    clear_flag(Flag::S);
-                }
-
-                if parity(result) {
-                    set_flag(Flag::P);
-                } else {
-                    clear_flag(Flag::P);
-                }
-
-                if carry {
-                    set_flag(Flag::C);
-                } else {
-                    clear_flag(Flag::C);
-                }
-
-                En este código, la función overflowing_add se utiliza para realizar la suma con propagación
-                de acarreo y se obtienen tanto el resultado de la suma como el booleano que indica si se
-                produjo un acarreo. Luego, se guarda el resultado en el registro A y se establecen o borran
-                las banderas de acuerdo con el valor del resultado y el booleano.
-
-                La función parity se utiliza para determinar si el número de bits encendidos en el resultado
-                es par. El código de la función parity es el siguiente:
-
-                fn parity(value: u8) -> bool {
-                    let mut count = 0;
-                    for i in 0..8 {
-                        if (value & (1 << i)) != 0 {
-                            count += 1;
-                        }
-                    }
-                    count % 2 == 0
-                }
-
-                En este código, se cuentan los bits encendidos en el valor y se devuelve true si el número
-                de bits es par o false si es impar.
-                */
             }
 
 // Revisar implementar manejo de direccionamiento de 16 bit *****
@@ -582,7 +510,7 @@ impl CPU {
                 // JMP nn marca PC con la dirección indicada por los dos siguientes bytes
                 self.program_counter = self.memory[(self.program_counter + 1) as usize];
                 self.contador_de_programa =
-                    self.memoria.leer_memoria(self.contador_de_programa + 1) as u16;
+                self.memoria.leer_memoria(self.contador_de_programa + 1) as u16;
                 //self.contador_de_programa = self.program_counter as u16;
 
                 //self.registro[0] = self.memory[self.program_counter as usize];
@@ -717,14 +645,17 @@ pub fn cpu_generica_0() {
     //**************************************
     let mut cpu = CPU::new();
     let programa = vec![
-        0x00, // NOP
-        0x3E, 0x04, // Almacenar el valor 4 en el registro 0 (A)
-        0x00, // NOP
-        0x06, 0x0a, // Almacenar el valor 0x0a en el registro 0 (B)
-        0x04, // Incrementa registro 1 (B)
-        0x80, // Suma el contenido del Registro 1 (B) al registro 0 (A)
-        0xC3, 0x00, // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
-        0xFF, // Marca fin de programa
+        0x00,           // NOP
+        0x3E, 0x04,     // Almacenar el valor 4 en el registro 0 (A)
+        0x00,           // NOP
+        0x06, 0x0a,     // Almacenar el valor 0x0a en el registro 0 (B)
+        0x04,           // Incrementa registro 1 (B)
+        0x80,           // Suma el contenido del Registro 1 (B) al registro 0 (A)
+        0x3E, 0xff,     // Almacenar el valor 0xff en el registro 0 (A)
+        0x06, 0xe0,     // Almacenar el valor 0xe0 en el registro 0 (B)
+        0x80,           // Suma el contenido del Registro 1 (B) al registro 0 (A)
+        0xC3, 0x00,     // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
+        0xFF,           // Marca fin de programa
     ];
     cpu.cargar_programa(programa.clone());
     cpu.cargar_programa0(programa);
@@ -783,18 +714,16 @@ impl CPU {                                   // Funciones de manejo de ventanas
         comentarios_window.mvprintw( pos_y + 2, pos_x, format!("Contenido en la direccion a la que apunta PC: {:02X}", self.memoria.leer_memoria(self.contador_de_programa)),);
         comentarios_window.mvprintw( pos_y + 3, pos_x, format!("Contenido Reg. A: {:02X}", self.reg_a),);
         comentarios_window.mvprintw( pos_y + 4, pos_x, format!("Contenido Reg. B: {:02X}", self.reg_b),);
+        comentarios_window.mvprintw( pos_y + 5, pos_x, format!("Acarreo {}, Paridad: {}, Acarreo Auxiliar {}, Zero {}"
+                                   ,self.flags.get_bit(0), self.flags.get_bit(2), self.flags.get_bit(4), self.flags.get_bit(6)),);
 
         comentarios_window.attrset(ColorPair(2));
-        comentarios_window.mvprintw(
-            pos_y + 5,
-            pos_x,
-            "********************************************************",
-        );
+        comentarios_window.mvprintw( pos_y + 6, pos_x, "********************************************************", );
 
         
         //let var_a_array: [u8; 8] = [1, 2, 4, 8, 16, 32, 64, 128];
         let mut var_a_array = &self.memoria.segmento_memoria[*(&self.memoria.get_banco_activo()) as usize];
-        muestra_mem(&comentarios_window, 9, 2, var_a_array);
+        muestra_mem(&comentarios_window, 10, 2, var_a_array);
         //muestra_mem_obj(&comentarios_window, 8, 2, var_a_array);
         //muestra_mem_obj(&comentarios_window, 8, 2, (&self).memoria.segmento_memoria.clone());
 

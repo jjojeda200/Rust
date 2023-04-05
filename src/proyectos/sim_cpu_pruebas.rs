@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          13-03-2023
+    Fecha:          05-04-2023
     Titulo:         Simulación CPU
     Descripción:    
     Referencias:
@@ -29,6 +29,7 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 #![allow(unused_assignments)]
+#![allow(unused_imports)]       // Por el "use super::*;" de los test
 
 use crate::proyectos::{sim_cpu_registros::{self}, sim_cpu_memoria::*};
 
@@ -250,91 +251,43 @@ pub fn cpu_sim_0() {
 /* 
 
 */
-    println!("************");
+    println!("");
+    println!("Pruebas calculo de flags");
     println!("");
     cpu_reg.set_a(0xff);
-    cpu_reg.set_b(0x0f);
-    println!("A: {:02x}, B: {:02x}", cpu_reg.get_a(), cpu_reg.get_b());
-    // Ejecutar la instrucción "ADD A, B"    add_a_b_with_carry();
-    let carry = cpu_flags.get_bit(0);
-    let result = cpu_reg.get_a().wrapping_add(cpu_reg.get_b().wrapping_add(carry)); // suma sin propagación de acarreo (wrapping add)
-    println!("Carry {}, Result {}", carry, result);
-    cpu_reg.set_a(result);
-    // Imprimir el valor del registro A y los flags
-    println!("A: {:02x}", cpu_reg.get_a());
-    println!("Carry: {:08b}, {}", cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
+    cpu_reg.set_b(0xe0);
+    // println!("Registro A: 0x{:02x}, Registro B: 0x{:02x}", cpu_reg.get_a(), cpu_reg.get_b());
+    // let carry = cpu_flags.get_bit(0);
+    // let result = cpu_reg.get_a().wrapping_add(cpu_reg.get_b().wrapping_add(carry)); // suma sin propagación de acarreo (wrapping add)
+    // println!("Carry {}, Result {}", carry, result);
+    // cpu_reg.set_a(result);
 
+
+    // Ejecutar la instrucción "ADD A, B" y calcila el acarreo
     println!("");
-    cpu_reg.set_a(0xff);
-    println!("A: {:02x}, B: {:02x}", cpu_reg.get_a(), cpu_reg.get_b());
-    let (result, carry) = cpu_reg.get_a().overflowing_add(cpu_reg.get_b()); // suma con propagación de acarreo (overflowing add)
-    if carry == true {cpu_flags.set_bit(0, true)} else {cpu_flags.set_bit(0, false)}
-
-    println!("Carry {}, Result {}", carry, result);
-    cpu_reg.set_a(result);
-    // Imprimir el valor del registro A y los flags
-    println!("A: {:02x}", cpu_reg.get_a());
-    println!("Carry: {:08b}, {}", cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
-
+    println!("Registro A: 0x{:02x}, Registro B: 0x{:02x}, Carry: {:08b}, {}"
+            , cpu_reg.get_a(), cpu_reg.get_b(), cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
+    let resultado = cpu_flags.flags_acarreo(cpu_reg.get_a(), cpu_reg.get_b());
+    cpu_reg.set_a(resultado);
+    println!("Registro A: 0x{:02x}, Registro B: 0x{:02x}, Carry: {:08b}, {}"
+            , cpu_reg.get_a(), cpu_reg.get_b(), cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
     println!("");
-    // 
-    if (result & 0x0F) + (carry as u8) > 0x0F { cpu_flags.set_bit(4,true)}
+
+    cpu_flags.flags_paridad(cpu_reg.get_a());
+    println!("Flags de paridad (par = True, impar = False): {}", cpu_flags.get_bit(2));
+    println!("");
+
     println!("Half-carry: {}, {}", cpu_flags.get_bit(4), cpu_flags.get_bit_1(4));
-
+    println!("Registro A: 0x{:02x}, Registro B: 0x{:02x}, Carry: {:08b}, {}"
+            , cpu_reg.get_a(), cpu_reg.get_b(), cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
+    cpu_flags.flags_acarreo_auxiliar(resultado);
+    println!("Half-carry: {}, {}", cpu_flags.get_bit(4), cpu_flags.get_bit_1(4));
     println!("");
+
+    cpu_flags.flags_zero(resultado);
     // Bit Cero, true si el resultado de la suma es 0
-    if result == 0 {cpu_flags.set_bit(6, true)} else {cpu_flags.set_bit(6, false)}
     println!("Zero: {}, {}", cpu_flags.get_bit(6), cpu_flags.get_bit_1(6));
-
     println!("");
-    println!("Nº par = True, impar = False: {}", parity(cpu_reg.get_a()));
-    cpu_flags.set_bit(2, parity(cpu_reg.get_a()));
-    println!("Parity: {}, {}", cpu_flags.get_bit(2), cpu_flags.get_bit_1(2));
 
 }
 
-fn parity(value: u8) -> bool {
-	let mut count = 0;
-	for i in 0..8 {
-    	if (value & (1 << i)) != 0 {
-        	count += 1;
-    	}
-	}
-	count % 2 != 0
-}
-
-fn add_a_b_with_carry() {
-/*
-auxiliary_carry = (result & 0x0F) + (carry as u8) > 0x0F;
-
-La instrucción que mencionas parece estar escrita en un lenguaje de programación que utiliza operaciones
-binarias y de bits. Sin embargo, a pesar de que no conozco el contexto completo, puedo inferir algunas
-cosas sobre lo que hace.
-
-La instrucción se divide en dos partes:
-
-    (result & 0x0F) + (carry as u8)
-    > 0x0F
-
-La primera parte de la instrucción está sumando dos valores:
-
-    (result & 0x0F): Este es el resultado de aplicar una operación AND entre el valor result y la máscara
-    de bits 0x0F. La máscara de bits se utiliza para eliminar todos los bits que no estén en las posiciones
-    0 a 3. Esto significa que solo se sumarán los 4 bits menos significativos del valor de result.
-    (carry as u8): Este valor representa el valor del acarreo (carry) de una operación anterior. En este
-    caso, la instrucción está tratando de determinar si hubo un acarreo de la suma anterior, lo que podría
-    indicar que hay un bit de overflow en la operación actual.
-
-La segunda parte de la instrucción está realizando una comparación:
-
-    > 0x0F: Esta parte de la instrucción está comparando la suma anterior con el valor 0x0F. 0x0F representa
-    el valor decimal 15 en hexadecimal. Si la suma anterior es mayor que 0x0F, entonces la instrucción devuelve
-    el valor booleano true, lo que indica que hubo un acarreo.
-
-En resumen, esta instrucción está tratando de determinar si hubo un acarreo en la operación anterior de suma,
-al evaluar los 4 bits menos significativos del valor resultante de la suma y el valor del acarreo. Si la suma
-de ambos valores supera el valor de 15, entonces se devuelve true, lo que indica que hubo un acarreo. El
-resultado de esta instrucción se almacena en la variable auxiliary_carry.
-
-    */
-}
