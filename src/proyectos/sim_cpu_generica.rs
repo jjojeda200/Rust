@@ -498,6 +498,7 @@ impl CPU {
                 self.flags.flags_paridad(resultado);
                 self.flags.flags_acarreo_auxiliar(resultado);
                 self.flags.flags_cero(resultado);
+                self.flags.flags_signo(resultado);
                 unsafe {
                     MNEMONICO_OPCODE = Some(Mutex::new(String::from("ADD A,B")));
                 }
@@ -654,8 +655,10 @@ pub fn cpu_generica_0() {
         0x3E, 0xff,     // Almacenar el valor 0xff en el registro 0 (A)
         0x06, 0xe0,     // Almacenar el valor 0xe0 en el registro 0 (B)
         0x80,           // Suma el contenido del Registro 1 (B) al registro 0 (A)
+        0x00,           // NOP
+        0x00,           // NOP
         0xC3, 0x00,     // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
-        0xFF, 0xFF, 0xFF// Marca fin de programa
+        0xFF, 0xFF,     // Marca fin de programa
     ];
     cpu.cargar_programa(programa.clone());
     cpu.cargar_programa0(programa);
@@ -714,11 +717,15 @@ impl CPU {                                   // Funciones de manejo de ventanas
         comentarios_window.mvprintw( pos_y + 2, pos_x, format!("Contenido en la direccion a la que apunta PC: {:02X}", self.memoria.leer_memoria(self.contador_de_programa)),);
         comentarios_window.mvprintw( pos_y + 3, pos_x, format!("Contenido Reg. A: {:02X}", self.reg_a),);
         comentarios_window.mvprintw( pos_y + 4, pos_x, format!("Contenido Reg. B: {:02X}", self.reg_b),);
-        comentarios_window.mvprintw( pos_y + 5, pos_x, format!("Acarreo {}, Paridad: {}, Acarreo Auxiliar {}, Zero {}"
-                                   ,self.flags.get_bit(0), self.flags.get_bit(2), self.flags.get_bit(4), self.flags.get_bit(6)),);
+        comentarios_window.mvprintw( pos_y + 5, pos_x, format!("Acarreo {}, Paridad: {}, Acarreo Auxiliar {}, Zero {}, Signo {}"
+                                   ,self.flags.get_bit(0)
+                                   , self.flags.get_bit(2)
+                                   , self.flags.get_bit(4)
+                                   , self.flags.get_bit(6)
+                                   , self.flags.get_bit(7)),);
 
         comentarios_window.attrset(ColorPair(2));
-        comentarios_window.mvprintw( pos_y + 6, pos_x, "********************************************************", );
+        comentarios_window.mvprintw( pos_y + 6, pos_x, "*****************************************************************", );
 
         
         //let var_a_array: [u8; 8] = [1, 2, 4, 8, 16, 32, 64, 128];
@@ -931,9 +938,9 @@ fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec:
             condición es falsa, byte_str permanece sin cambios y se agregará a fila y buffer sin ningún
             espacio adicional.
             */
-            //if i < group.len() - 2 && byte == group[i + 1] && byte == group[i + 2] {
-            //    byte_str = format!("{}", byte_str);
-            //}
+            if i < group.len() - 2 && byte == group[i + 1] && byte == group[i + 2] {
+                byte_str = format!("{}", byte_str);
+            }
 
             /*
             Esta línea de código es una condición que verifica si el byte actual es igual a 0xff y si el
@@ -959,14 +966,14 @@ fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec:
             buffer.push_str(&byte_str);
         }
         // Imprimir los bytes anteriores y la fila en la ventana
-        comentarios_window.mvprintw(pos_y as i32, pos_x, &bytes_anteriores);
+        //comentarios_window.mvprintw(pos_y as i32, pos_x, &bytes_anteriores);
         comentarios_window.mvprintw(pos_y as i32, pos_x + bytes_anteriores.len() as i32, &fila);
         // Incrementar la posición vertical
         pos_y += 1;
     }
 
     comentarios_window.refresh();
-    //comentarios_window.mvprintw(19, 2, format!("-----------------------------------------------------------------" ));
+
 }
 
 //*****************************************************************************

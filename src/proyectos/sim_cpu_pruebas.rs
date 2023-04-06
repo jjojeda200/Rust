@@ -29,7 +29,8 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 #![allow(unused_assignments)]
-#![allow(unused_imports)]       // Por el "use super::*;" de los test
+//#![allow(unused_imports)]       // Por el "use super::*;" de los test
+//#![allow(unused_mut)]           // Por el uso de los test
 
 use crate::proyectos::{sim_cpu_registros::{self}, sim_cpu_memoria::*};
 
@@ -247,10 +248,8 @@ pub fn cpu_sim_0() {
 
     resultado = memoria.eliminar_segmento(0);
     println!(" {:?}", resultado);
-    
-/* 
 
-*/
+//************************************* Pruebas calculo de flags
     println!("");
     println!("Pruebas calculo de flags");
     println!("");
@@ -263,7 +262,6 @@ pub fn cpu_sim_0() {
     // cpu_reg.set_a(result);
 
     // Ejecutar la instrucción "ADD A, B" y calcula Flags
-    println!("");
     println!("Registro A: 0x{:02x}, Registro B: 0x{:02x},      Carry: {}, {}"
             , cpu_reg.get_a(), cpu_reg.get_b(), cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
     let resultado = cpu_flags.flags_acarreo(cpu_reg.get_a(), cpu_reg.get_b());
@@ -284,6 +282,140 @@ pub fn cpu_sim_0() {
     cpu_flags.flags_signo(resultado);
     println!("          Registro A: 0b{:08b},        Signo: {}, {}", cpu_reg.get_a(), cpu_flags.get_bit(7), cpu_flags.get_bit_1(7));
     println!("");
+
+
+//************************************* 
+
+    let mut vec: [u8; 45] = [0;45];
+    for i in 0..vec.len() {
+        vec[i] = (i+10) as u8;
+    }
+
+    vec[10] = 0xFF;
+    vec[11] = 0xFF;
+
+    muestra_mem(&vec);
     
 }
 
+fn muestra_mem(vec: &[u8]) {
+
+    let mut lineas = vec.len() / 16;
+    if (vec.len() & 0xf) != 0 {
+        lineas += 1;
+    }
+
+    //    let lineas = vec.len() / 16 + if vec.len() % 16 != 0 { 1 } else { 0 };
+    println!(" Dir. Memoria  || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
+    println!("-------------- || ------------------------------------------------");
+    println!("");
+
+
+/* Alternativa dos   (Análisis Lógico)      
+    1-  Iniciamos creando una variable mutable buffer que utilizaremos para almacenar los bytes antes
+        de un byte 0xff.
+    2-  Utilizamos un bucle for con el método chunks() para dividir el vector en grupos de 16 bytes.
+        Utilizamos una etiqueta 'outer' para que podamos salir de ambos ciclos si encontramos un byte 0xff.
+    3-  Creamos una variable mutable fila que utilizaremos para construir una cadena de caracteres para
+        cada fila de bytes. Creamos otra variable mutable bytes_anteriores que se utiliza para almacenar
+        una copia de los bytes en buffer antes de que se limpie el buffer. Finalmente, limpiamos buffer para
+        que pueda almacenar los bytes para el próximo grupo de bytes.
+    4-  Creamos un bucle for interno para iterar a través de cada byte en el grupo actual. Usamos un índice
+        i para acceder a cada byte en el grupo. Luego, creamos una variable byte que se utiliza para
+        almacenar el byte actual. Creamos otra variable mutable byte_str que se utiliza para almacenar
+        una cadena de caracteres que representa el byte actual.
+    5-  Comprobamos si el byte actual es 0xff y si el siguiente byte es también 0xff. Si es así, salimos
+        de ambos ciclos utilizando la etiqueta 'outer para detener la iteración.
+    6-  Agregamos byte_str a fila y buffer para que se incluya en la salida.
+    7-  Imprimimos los bytes anteriores y la fila actual en la ventana. Utilizamos mvprintw() para imprimir
+        las cadenas de caracteres en la posición correcta en la ventana.
+    8-  Incrementamos pos_y para que la siguiente fila se imprima en la siguiente posición vertical en la
+        ventana.
+    9-  Continuamos iterando hasta que se hayan procesado todos los grupos de bytes o se haya encontrado un
+        byte 0xff.
+
+*/
+    /*
+    Creamos una variable mutable buffer que utilizaremos para almacenar los bytes. Luego, estamos iterando
+    sobre el vector vec utilizando el método chunks() que divide el vector en grupos de 16 bytes. Utilizamos
+    una etiqueta 'outer para que podamos salir de ambos ciclos si encontramos un byte 0xff.
+    */
+    let mut buffer = String::new();
+    'outer: for group in vec.chunks(16) {
+        /*
+        Creamos una variable mutable fila que utilizaremos para construir una cadena de caracteres para cada
+        fila de bytes. Creamos otra variable mutable bytes_anteriores que se utiliza para almacenar una copia
+        de los bytes en buffer antes de que se limpie buffer. Finalmente, limpiamos buffer para que pueda
+        almacenar los bytes para el próximo grupo de 16 bytes.
+        */
+        let mut fila = String::new();
+        let mut bytes_anteriores = buffer.clone();      // Copiar los bytes anteriores del buffer
+        buffer.clear();                                         // Limpiar el buffer para el nuevo grupo
+        /*
+        Creamos un bucle for para iterar a través de cada byte en el grupo actual. Usamos un índice i para
+        acceder a cada byte en el grupo. Luego, creamos una variable byte que se utiliza para almacenar el
+        byte actual. Creamos otra variable mutable byte_str que se utiliza para almacenar una cadena de
+        caracteres que representa el byte actual.
+        */
+        for i in 0..group.len() {
+            let byte = group[i];
+            let mut byte_str = format!("{:02X} ", byte);
+
+            /*
+            La declaración condicional if que verifica si el índice i es menor que la longitud
+            del grupo menos 2, y si el byte actual es igual al byte siguiente y al byte después del
+            siguiente. En otras palabras, esta condición comprueba si hay tres bytes consecutivos iguales
+            en el grupo.
+            Si la condición es verdadera, entonces utilizamos format!() para crear una nueva cadena de
+            caracteres byte_str que incluye un espacio adicional al final de la cadena original. Esto se
+            hace para que cuando imprimamos la salida, la cadena de caracteres con los tres bytes
+            consecutivos iguales esté separada visualmente del resto de los bytes en la fila. Si la
+            condición es falsa, byte_str permanece sin cambios y se agregará a fila y buffer sin ningún
+            espacio adicional.
+            */
+            if i < group.len() - 2 && byte == group[i + 1] && byte == group[i + 2] {
+                byte_str = format!("{}", byte_str);
+            }
+
+            /*
+            Esta línea de código es una condición que verifica si el byte actual es igual a 0xff y si el
+            siguiente byte también es igual a 0xff. Si se cumple esta condición, la declaración break se
+            ejecutará, lo que saldrá del bucle exterior con la etiqueta 'outer.
+            Aquí hay una explicación más detallada de cada parte de esta condición:
+            ->  byte == 0xff: Esta parte verifica si el byte actual es igual a 0xff.
+            ->  i < group.len() - 1: Esta parte verifica si i (el índice actual del byte en el grupo) es
+                menor que la longitud del grupo menos 1. La razón por la que se usa group.len() - 1 es
+                porque si estamos en el último byte del grupo, entonces no habrá un siguiente byte para
+                verificar. Por lo tanto, la verificación group[i + 1] == 0xFF resultaría en un error fuera
+                de los límites.
+            ->  group[i + 1] == 0xFF: Esta parte verifica si el siguiente byte después del byte actual
+                también es igual a 0xff.
+            */
+            if byte == 0xff && i < group.len() - 1 && group[i + 1] == 0xFF {
+                break 'outer;
+            }
+            /*
+            Finalmente, agregamos byte_str a fila y buffer para que se incluya en la salida.
+            */
+            fila.push_str(&byte_str);
+            buffer.push_str(&byte_str);
+        }
+        // Imprimir los bytes anteriores y la fila en la ventana
+        //println!("{}", &bytes_anteriores);
+        println!("{}", &fila);
+        // Incrementar la posición vertical
+    }
+}
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_muestra_memm() {
+        // Test para comprobar si la función se detiene correctamente cuando se encuentra el valor hexadecimal "0xFFFF".
+        let mut vec: [u8; 30] = [0;30];
+        vec[10] = 0xFF;
+        vec[11] = 0xFF;
+        muestra_mem(&vec);
+    }
+}
