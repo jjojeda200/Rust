@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          05-04-2023
+    Fecha:          06-04-2023
     Titulo:         Simulación CPU Genérica
     Descripción:    CPU con direccionamiento de 8 bit (por ahora) y opcode del Intel 8080
     Referencias:
@@ -497,7 +497,7 @@ impl CPU {
                 self.reg_a = resultado;
                 self.flags.flags_paridad(resultado);
                 self.flags.flags_acarreo_auxiliar(resultado);
-                self.flags.flags_zero(resultado);
+                self.flags.flags_cero(resultado);
                 unsafe {
                     MNEMONICO_OPCODE = Some(Mutex::new(String::from("ADD A,B")));
                 }
@@ -655,7 +655,7 @@ pub fn cpu_generica_0() {
         0x06, 0xe0,     // Almacenar el valor 0xe0 en el registro 0 (B)
         0x80,           // Suma el contenido del Registro 1 (B) al registro 0 (A)
         0xC3, 0x00,     // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
-        0xFF,           // Marca fin de programa
+        0xFF, 0xFF, 0xFF// Marca fin de programa
     ];
     cpu.cargar_programa(programa.clone());
     cpu.cargar_programa0(programa);
@@ -837,97 +837,133 @@ fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec:
 
     comentarios_window.mv(pos_y, pos_x);
     comentarios_window.mvprintw( pos_y, pos_x,format!(" Dir. Memoria  || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F"),);
-    comentarios_window.mvprintw( pos_y + 1, pos_x,format!("-------------- || ----------------------------------------------"),);
+    comentarios_window.mvprintw( pos_y + 1, pos_x,format!("-------------- || -----------------------------------------------"),);
     pos_y = pos_y + 2;
     pos_x = 20;
     comentarios_window.mv(pos_y, pos_x);
 
-/*  Alternativa uno                         
-
-    'etiqueta: for group in vec.chunks(16) {
+/* Alternativa uno                          
+    let mut buffer = String::new();                 // Variable para guardar los bytes antes del 0xff
+    'outer: for group in vec.chunks(16) {
         // Construir la cadena de caracteres para la fila
         let mut fila = String::new();
+        let mut bytes_anteriores = buffer.clone();  // Copiar los bytes anteriores del buffer
+        buffer.clear();                                     // Limpiar el buffer para el nuevo grupo
         for byte in group {
-            fila.push_str(&format!("{:02X} ", byte));
-        }
-            if *byte == 0xff {
-                // Salir del ciclo si el byte es igual a 0xff
-                break 'etiqueta;
+            if *byte == 0xff {   // Salir de ambos ciclos si el byte es igual a 0xff
+                break 'outer;
             }
-        // Imprimir la fila en la ventana
-        comentarios_window.mvprintw(pos_y as i32, pos_x, &fila);
+            fila.push_str(&format!("{:02X} ", byte));
+            buffer.push_str(&format!("{:02X} ", byte));
+        }
+        // Imprimir los bytes anteriores y la fila en la ventana
+        comentarios_window.mvprintw(pos_y as i32, pos_x, &bytes_anteriores);
+        comentarios_window.mvprintw(pos_y as i32, pos_x + bytes_anteriores.len() as i32, &fila);
         // Incrementar la posición vertical
+        pos_y += 1;
+    }
+    // Imprimir los bytes restantes en el buffer
+    if !buffer.is_empty() {
+        comentarios_window.mvprintw(pos_y as i32, pos_x, &buffer);
         pos_y += 1;
     }
 */
 
-/* Alternativa dos                          
+/* Alternativa dos   (Análisis Lógico)      
+    1-  Iniciamos creando una variable mutable buffer que utilizaremos para almacenar los bytes antes
+        de un byte 0xff.
+    2-  Utilizamos un bucle for con el método chunks() para dividir el vector en grupos de 16 bytes.
+        Utilizamos una etiqueta 'outer para que podamos salir de ambos ciclos si encontramos un byte 0xff.
+    3-  Creamos una variable mutable fila que utilizaremos para construir una cadena de caracteres para
+        cada fila de bytes. Creamos otra variable mutable bytes_anteriores que se utiliza para almacenar
+        una copia de los bytes en buffer antes de que se limpie buffer. Finalmente, limpiamos buffer para
+        que pueda almacenar los bytes para el próximo grupo de bytes.
+    4-  Creamos un bucle for interno para iterar a través de cada byte en el grupo actual. Usamos un índice
+        i para acceder a cada byte en el grupo. Luego, creamos una variable byte que se utiliza para
+        almacenar el byte actual. Creamos otra variable mutable byte_str que se utiliza para almacenar
+        una cadena de caracteres que representa el byte actual.
+    5-  Comprobamos si el byte actual es 0xff y si el siguiente byte es también 0xff. Si es así, salimos
+        de ambos ciclos utilizando la etiqueta 'outer para detener la iteración.
+    6-  Agregamos byte_str a fila y buffer para que se incluya en la salida.
+    7-  Imprimimos los bytes anteriores y la fila actual en la ventana. Utilizamos mvprintw() para imprimir
+        las cadenas de caracteres en la posición correcta en la ventana.
+    8-  Incrementamos pos_y para que la siguiente fila se imprima en la siguiente posición vertical en la
+        ventana.
+    9-  Continuamos iterando hasta que se hayan procesado todos los grupos de bytes o se haya encontrado un
+        byte 0xff.
+
 */
-let mut buffer = String::new();                 // Variable para guardar los bytes antes del 0xff
-'outer: for group in vec.chunks(16) {
-    // Construir la cadena de caracteres para la fila
-    let mut fila = String::new();
-    let mut bytes_anteriores = buffer.clone();  // Copiar los bytes anteriores del buffer
-    buffer.clear();                                     // Limpiar el buffer para el nuevo grupo
-    for byte in group {
-        if *byte == 0xff {                              // Salir de ambos ciclos si el byte es igual a 0xff
-            break 'outer;
-        }
-        fila.push_str(&format!("{:02X} ", byte));
-        buffer.push_str(&format!("{:02X} ", byte));
-    }
-    // Imprimir los bytes anteriores y la fila en la ventana
-    comentarios_window.mvprintw(pos_y as i32, pos_x, &bytes_anteriores);
-    comentarios_window.mvprintw(pos_y as i32, pos_x + bytes_anteriores.len() as i32, &fila);
-    // Incrementar la posición vertical
-    pos_y += 1;
-}
-// Imprimir los bytes restantes en el buffer
-if !buffer.is_empty() {
-    comentarios_window.mvprintw(pos_y as i32, pos_x, &buffer);
-    pos_y += 1;
-}
+    /*
+    Creamos una variable mutable buffer que utilizaremos para almacenar los bytes. Luego, estamos iterando
+    sobre el vector vec utilizando el método chunks() que divide el vector en grupos de 16 bytes. Utilizamos
+    una etiqueta 'outer para que podamos salir de ambos ciclos si encontramos un byte 0xff.
+    */
+    let mut buffer = String::new();
+    'outer: for group in vec.chunks(16) {
+        /*
+        Creamos una variable mutable fila que utilizaremos para construir una cadena de caracteres para cada
+        fila de bytes. Creamos otra variable mutable bytes_anteriores que se utiliza para almacenar una copia
+        de los bytes en buffer antes de que se limpie buffer. Finalmente, limpiamos buffer para que pueda
+        almacenar los bytes para el próximo grupo de 16 bytes.
+        */
+        let mut fila = String::new();
+        let mut bytes_anteriores = buffer.clone();      // Copiar los bytes anteriores del buffer
+        buffer.clear();                                         // Limpiar el buffer para el nuevo grupo
+        /*
+        Creamos un bucle for para iterar a través de cada byte en el grupo actual. Usamos un índice i para
+        acceder a cada byte en el grupo. Luego, creamos una variable byte que se utiliza para almacenar el
+        byte actual. Creamos otra variable mutable byte_str que se utiliza para almacenar una cadena de
+        caracteres que representa el byte actual.
+        */
+        for i in 0..group.len() {
+            let byte = group[i];
+            let mut byte_str = format!("{:02X} ", byte);
 
+            /*
+            La declaración condicional if que verifica si el índice i es menor que la longitud
+            del grupo menos 2, y si el byte actual es igual al byte siguiente y al byte después del
+            siguiente. En otras palabras, esta condición comprueba si hay tres bytes consecutivos iguales
+            en el grupo.
+            Si la condición es verdadera, entonces utilizamos format!() para crear una nueva cadena de
+            caracteres byte_str que incluye un espacio adicional al final de la cadena original. Esto se
+            hace para que cuando imprimamos la salida, la cadena de caracteres con los tres bytes
+            consecutivos iguales esté separada visualmente del resto de los bytes en la fila. Si la
+            condición es falsa, byte_str permanece sin cambios y se agregará a fila y buffer sin ningún
+            espacio adicional.
+            */
+            //if i < group.len() - 2 && byte == group[i + 1] && byte == group[i + 2] {
+            //    byte_str = format!("{}", byte_str);
+            //}
 
-/*   Alternativa tres                       
-    let mut output = String::new();
-    let mut lines_printed = 0;
-
-    while lineas > 0 {
-        for (i, byte) in vec.iter().enumerate() {
-            output.push_str(&format!("{:02X} ", byte));
-            if (i + 1) % 16 == 0 {
-                if lines_printed == 8 {
-                    comentarios_window.getch();
-                    pos_y = 11;
-                    comentarios_window.mv(pos_y, pos_x);
-                    lines_printed = 0;
-                } else {
-                    lines_printed += 1;
-                }
-                comentarios_window.printw(&output);
-                pos_y += 1;
-                comentarios_window.mv(pos_y, pos_x);
-                output.clear();
+            /*
+            Esta línea de código es una condición que verifica si el byte actual es igual a 0xff y si el
+            siguiente byte también es igual a 0xff. Si se cumple esta condición, la declaración break se
+            ejecutará, lo que saldrá del bucle exterior con la etiqueta 'outer.
+            Aquí hay una explicación más detallada de cada parte de esta condición:
+            ->  byte == 0xff: Esta parte verifica si el byte actual es igual a 0xff.
+            ->  i < group.len() - 1: Esta parte verifica si i (el índice actual del byte en el grupo) es
+                menor que la longitud del grupo menos 1. La razón por la que se usa group.len() - 1 es
+                porque si estamos en el último byte del grupo, entonces no habrá un siguiente byte para
+                verificar. Por lo tanto, la verificación group[i + 1] == 0xFF resultaría en un error fuera
+                de los límites.
+            ->  group[i + 1] == 0xFF: Esta parte verifica si el siguiente byte después del byte actual
+                también es igual a 0xff.
+            */
+            if byte == 0xff && i < group.len() - 1 && group[i + 1] == 0xFF {
+                break 'outer;
             }
+            /*
+            Finalmente, agregamos byte_str a fila y buffer para que se incluya en la salida.
+            */
+            fila.push_str(&byte_str);
+            buffer.push_str(&byte_str);
         }
-        if output.len() > 0 {
-            if lines_printed == 8 {
-                comentarios_window.getch();
-                pos_y = 11;
-                comentarios_window.mv(pos_y, pos_x);
-                lines_printed = 0;
-            } else {
-                lines_printed += 1;
-            }
-            comentarios_window.printw(&output);
-            pos_y += 1;
-            comentarios_window.mv(pos_y, pos_x);
-            output.clear();
-        }
-        lineas -= 1;
+        // Imprimir los bytes anteriores y la fila en la ventana
+        comentarios_window.mvprintw(pos_y as i32, pos_x, &bytes_anteriores);
+        comentarios_window.mvprintw(pos_y as i32, pos_x + bytes_anteriores.len() as i32, &fila);
+        // Incrementar la posición vertical
+        pos_y += 1;
     }
-*/
 
     comentarios_window.refresh();
     //comentarios_window.mvprintw(19, 2, format!("-----------------------------------------------------------------" ));

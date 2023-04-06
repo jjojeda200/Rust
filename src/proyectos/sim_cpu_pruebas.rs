@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          05-04-2023
+    Fecha:          06-04-2023
     Titulo:         Simulación CPU
     Descripción:    
     Referencias:
@@ -262,32 +262,28 @@ pub fn cpu_sim_0() {
     // println!("Carry {}, Result {}", carry, result);
     // cpu_reg.set_a(result);
 
-
-    // Ejecutar la instrucción "ADD A, B" y calcila el acarreo
+    // Ejecutar la instrucción "ADD A, B" y calcula Flags
     println!("");
-    println!("Registro A: 0x{:02x}, Registro B: 0x{:02x}, Carry: {:08b}, {}"
+    println!("Registro A: 0x{:02x}, Registro B: 0x{:02x},      Carry: {}, {}"
             , cpu_reg.get_a(), cpu_reg.get_b(), cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
     let resultado = cpu_flags.flags_acarreo(cpu_reg.get_a(), cpu_reg.get_b());
     cpu_reg.set_a(resultado);
-    println!("Registro A: 0x{:02x}, Registro B: 0x{:02x}, Carry: {:08b}, {}"
+    println!("Registro A: 0x{:02x}, Registro B: 0x{:02x},      Carry: {}, {}"
             , cpu_reg.get_a(), cpu_reg.get_b(), cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
     println!("");
 
     cpu_flags.flags_paridad(cpu_reg.get_a());
-    println!("Flags de paridad (par = True, impar = False): {}", cpu_flags.get_bit(2));
-    println!("");
+    println!("          Registro A: 0b{:08b},      Paridad: {}, {}", cpu_reg.get_a(), cpu_flags.get_bit(4), cpu_flags.get_bit_1(4));
 
-    println!("Half-carry: {}, {}", cpu_flags.get_bit(4), cpu_flags.get_bit_1(4));
-    println!("Registro A: 0x{:02x}, Registro B: 0x{:02x}, Carry: {:08b}, {}"
-            , cpu_reg.get_a(), cpu_reg.get_b(), cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
     cpu_flags.flags_acarreo_auxiliar(resultado);
-    println!("Half-carry: {}, {}", cpu_flags.get_bit(4), cpu_flags.get_bit_1(4));
-    println!("");
+    println!("          Registro A: 0b{:08b},   Half-Carry: {}, {}", cpu_reg.get_a(), cpu_flags.get_bit(4), cpu_flags.get_bit_1(4));
 
-    cpu_flags.flags_zero(resultado);
-    // Bit Cero, true si el resultado de la suma es 0
-    println!("Zero: {}, {}", cpu_flags.get_bit(6), cpu_flags.get_bit_1(6));
+    cpu_flags.flags_cero(resultado);
+    println!("          Registro A: 0b{:08b},         Cero: {}, {}", cpu_reg.get_a(), cpu_flags.get_bit(6), cpu_flags.get_bit_1(6));
+    
+    cpu_flags.flags_signo(resultado);
+    println!("          Registro A: 0b{:08b},        Signo: {}, {}", cpu_reg.get_a(), cpu_flags.get_bit(7), cpu_flags.get_bit_1(7));
     println!("");
-
+    
 }
 

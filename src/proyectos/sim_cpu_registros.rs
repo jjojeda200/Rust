@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          05-04-2023
+    Fecha:          06-04-2023
     Titulo:         Simulación CPU
     Descripción:    
     Referencias:
@@ -170,12 +170,35 @@ impl Flags {
         if count % 2 == 0 {self.set_bit(2, true)} else {self.set_bit(2, false)}
     }
 
+    /* (result & 0x0F) + (carry as u8) > 0x0F;
+    La instrucción se divide en dos partes:
+        (result & 0x0F) + (carry as u8)
+        > 0x0F
+    La primera parte de la instrucción está sumando dos valores:
+    ->  (result & 0x0F): Este es el resultado de aplicar una operación AND entre el valor result y la máscara
+        de bits 0x0F. La máscara de bits se utiliza para eliminar todos los bits que no estén en las posiciones
+        0 a 3. Esto significa que solo se sumarán los 4 bits menos significativos del valor de result.
+    ->  (carry as u8): Este valor representa el valor del acarreo (carry) de una operación anterior. En este
+        caso, la instrucción está tratando de determinar si hubo un acarreo de la suma anterior, lo que podría
+        indicar que hay un bit de overflow en la operación actual.
+    La segunda parte de la instrucción está realizando una comparación:
+    ->  > 0x0F: Esta parte de la instrucción está comparando la suma anterior con el valor 0x0F. 0x0F representa
+        el valor decimal 15 en hexadecimal. Si la suma anterior es mayor que 0x0F, entonces la instrucción devuelve
+        el valor booleano true, lo que indica que hubo un acarreo.
+    En resumen, esta instrucción está tratando de determinar si hubo un acarreo en la operación anterior de suma,
+    al evaluar los 4 bits menos significativos del valor resultante de la suma y el valor del acarreo. Si la suma
+    de ambos valores supera el valor de 15, entonces se devuelve true, lo que indica que hubo un acarreo.
+    */
     pub fn flags_acarreo_auxiliar(&mut self, resultado: u8) {
         if (resultado & 0x0F) + (self.get_bit(0)) > 0x0F { self.set_bit(4,true)} else {self.set_bit(4, false)}
     }
 
-    pub fn flags_zero(&mut self, resultado: u8) {
+    pub fn flags_cero(&mut self, resultado: u8) {
         if resultado == 0 {self.set_bit(6, true)} else {self.set_bit(6, false)}
+    }
+
+    pub fn flags_signo(&mut self, resultado: u8) {
+        if (resultado & 0x80) == 0x80 {self.set_bit(7, true)} else {self.set_bit(7, false)}
     }
 
 }
@@ -394,9 +417,31 @@ mod tests {
         flags.flags_acarreo_auxiliar(0x1F);
         assert_eq!(flags.half_carry, true);
         
+        flags.flags_acarreo_auxiliar(0x5F);
+        assert_eq!(flags.half_carry, true);
+
+        flags.flags_acarreo_auxiliar(0xAF);
+        assert_eq!(flags.half_carry, true);
+
         flags.flags_acarreo_auxiliar(0x1B);
         assert_eq!(flags.half_carry, false);
+
+        flags.flags_acarreo_auxiliar(0x9F);
+        assert_eq!(flags.half_carry, true);
+
     }
+
+    #[test]
+    fn test_flags_signo() {
+        let mut flags = Flags::new_flags();
+        
+        flags.flags_signo(0x7F);
+        assert_eq!(flags.sign, false);
+        
+        flags.flags_signo(0x80);
+        assert_eq!(flags.sign, true);
+    }
+
 }
 
 //*****************************************************************************
