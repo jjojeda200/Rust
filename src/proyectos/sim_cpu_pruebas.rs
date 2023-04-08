@@ -304,9 +304,9 @@ fn muestra_mem(vec: &[u8]) {
     //    let lineas = vec.len() / 16 + if vec.len() % 16 != 0 { 1 } else { 0 };
     println!(" Dir. Memoria  || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
     println!("-------------- || ------------------------------------------------");
-    // println!("");
+    
     let mut found_pair = false;
-    let mut dir: u16 = 0;
+    //let mut dir: u16 = 0;
     let mut ultimo_byte: u8 = 0;
     let mut buffer = String::with_capacity(16);
     //let mut buffer = String::new();
@@ -319,24 +319,22 @@ fn muestra_mem(vec: &[u8]) {
 /*
         for i in 0..group.len() {
             let byte = group[i];
-            //byte_str = format!("{:02X} ", byte);
             
             if i == 0 && byte == 0xff && ultimo_byte == 0xff {
                 found_pair = true;
                 break;
             }
             
-            if i == (group.len() - 1)  && group[i] == 0xff {
-                ultimo_byte = byte;
-            }
+            if i == (group.len() - 1)  && group[i] == 0xff { ultimo_byte = byte; }
 
             if byte == 0xff && i < group.len() - 1 && group[i + 1] == 0xFF {
                 found_pair = true;
                 break;
             }
             buffer.push_str(&format!("{:02X} ", byte));
-            //buffer.push_str(&byte_str);
         }
+        //println!("       {:04x}    || {}", dir, &buffer.trim_end());
+        //dir += 0x10;
 */
 
         for (i, byte) in group.iter().enumerate() {
@@ -359,8 +357,6 @@ fn muestra_mem(vec: &[u8]) {
         }
 
         println!("{}", &buffer.trim_end());
-        //println!("       {:04x}    || {}", dir, &buffer.trim_end());
-        dir += 0x10;
     }
 }
 
