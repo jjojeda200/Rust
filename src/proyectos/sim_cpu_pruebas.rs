@@ -288,11 +288,11 @@ pub fn cpu_sim_0() {
 
     let mut vec: [u8; 45] = [0;45];
     for i in 0..vec.len() {
-        vec[i] = (i+10) as u8;
+        vec[i] = (i+0) as u8;
     }
 
-    vec[10] = 0xFF;
-    vec[11] = 0xFF;
+    vec[32] = 0xFF;
+    vec[33] = 0xFF;
 
     muestra_mem(&vec);
     
@@ -308,7 +308,6 @@ fn muestra_mem(vec: &[u8]) {
     //    let lineas = vec.len() / 16 + if vec.len() % 16 != 0 { 1 } else { 0 };
     println!(" Dir. Memoria  || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
     println!("-------------- || ------------------------------------------------");
-    println!("");
 
 
 /* Alternativa dos   (Análisis Lógico)      
@@ -340,8 +339,12 @@ fn muestra_mem(vec: &[u8]) {
     sobre el vector vec utilizando el método chunks() que divide el vector en grupos de 16 bytes. Utilizamos
     una etiqueta 'outer para que podamos salir de ambos ciclos si encontramos un byte 0xff.
     */
+    let mut doble_ff = false;
     let mut buffer = String::new();
-    'outer: for group in vec.chunks(16) {
+    for group in vec.chunks(16) {
+        if doble_ff == true {
+            break;
+        }
         /*
         Creamos una variable mutable fila que utilizaremos para construir una cadena de caracteres para cada
         fila de bytes. Creamos otra variable mutable bytes_anteriores que se utiliza para almacenar una copia
@@ -373,9 +376,9 @@ fn muestra_mem(vec: &[u8]) {
             condición es falsa, byte_str permanece sin cambios y se agregará a fila y buffer sin ningún
             espacio adicional.
             */
-            if i < group.len() - 2 && byte == group[i + 1] && byte == group[i + 2] {
-                byte_str = format!("{}", byte_str);
-            }
+            // if i < group.len() - 2 && byte == group[i + 1] && byte == group[i + 2] {
+            //     byte_str = format!("{}", byte_str);
+            // }
 
             /*
             Esta línea de código es una condición que verifica si el byte actual es igual a 0xff y si el
@@ -392,7 +395,8 @@ fn muestra_mem(vec: &[u8]) {
                 también es igual a 0xff.
             */
             if byte == 0xff && i < group.len() - 1 && group[i + 1] == 0xFF {
-                break 'outer;
+                doble_ff = true;
+                break;
             }
             /*
             Finalmente, agregamos byte_str a fila y buffer para que se incluya en la salida.
@@ -402,20 +406,15 @@ fn muestra_mem(vec: &[u8]) {
         }
         // Imprimir los bytes anteriores y la fila en la ventana
         //println!("{}", &bytes_anteriores);
-        println!("{}", &fila);
-        // Incrementar la posición vertical
+        println!("               || {}", &fila);
     }
 }
 
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_muestra_memm() {
-        // Test para comprobar si la función se detiene correctamente cuando se encuentra el valor hexadecimal "0xFFFF".
-        let mut vec: [u8; 30] = [0;30];
-        vec[10] = 0xFF;
-        vec[11] = 0xFF;
-        muestra_mem(&vec);
-    }
+#[test]
+fn test_muestra_memm() {
+    // Test para comprobar si la función se detiene correctamente cuando se encuentra el valor hexadecimal "0xFFFF".
+    let mut vec: [u8; 40] = [0;40];
+    vec[28] = 0xFF;
+    vec[29] = 0xFF;
+    muestra_mem(&vec);
 }

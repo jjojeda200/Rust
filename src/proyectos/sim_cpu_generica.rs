@@ -655,8 +655,6 @@ pub fn cpu_generica_0() {
         0x3E, 0xff,     // Almacenar el valor 0xff en el registro 0 (A)
         0x06, 0xe0,     // Almacenar el valor 0xe0 en el registro 0 (B)
         0x80,           // Suma el contenido del Registro 1 (B) al registro 0 (A)
-        0x00,           // NOP
-        0x00,           // NOP
         0xC3, 0x00,     // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
         0xFF, 0xFF,     // Marca fin de programa
     ];
@@ -905,8 +903,12 @@ fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec:
     sobre el vector vec utilizando el método chunks() que divide el vector en grupos de 16 bytes. Utilizamos
     una etiqueta 'outer para que podamos salir de ambos ciclos si encontramos un byte 0xff.
     */
+    let mut doble_ff = false;
     let mut buffer = String::new();
-    'outer: for group in vec.chunks(16) {
+    for group in vec.chunks(16) {
+        if doble_ff == true {
+            break;
+        }
         /*
         Creamos una variable mutable fila que utilizaremos para construir una cadena de caracteres para cada
         fila de bytes. Creamos otra variable mutable bytes_anteriores que se utiliza para almacenar una copia
@@ -938,9 +940,9 @@ fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec:
             condición es falsa, byte_str permanece sin cambios y se agregará a fila y buffer sin ningún
             espacio adicional.
             */
-            if i < group.len() - 2 && byte == group[i + 1] && byte == group[i + 2] {
-                byte_str = format!("{}", byte_str);
-            }
+            // if i < group.len() - 2 && byte == group[i + 1] && byte == group[i + 2] {
+            //     byte_str = format!("{}", byte_str);
+            // }
 
             /*
             Esta línea de código es una condición que verifica si el byte actual es igual a 0xff y si el
@@ -956,8 +958,13 @@ fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec:
             ->  group[i + 1] == 0xFF: Esta parte verifica si el siguiente byte después del byte actual
                 también es igual a 0xff.
             */
-            if byte == 0xff && i < group.len() - 1 && group[i + 1] == 0xFF {
-                break 'outer;
+            if byte == 0xff && i < group.len() - 1 && group[i + 1] == 0xff {
+                doble_ff = true;
+                pos_y +=1;
+                comentarios_window.printw(format!("{}, {}", comentarios_window.get_max_y(), comentarios_window.get_max_x()));
+                comentarios_window.refresh();
+                comentarios_window.getch();
+                break;
             }
             /*
             Finalmente, agregamos byte_str a fila y buffer para que se incluya en la salida.
@@ -966,8 +973,9 @@ fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec:
             buffer.push_str(&byte_str);
         }
         // Imprimir los bytes anteriores y la fila en la ventana
-        //comentarios_window.mvprintw(pos_y as i32, pos_x, &bytes_anteriores);
-        comentarios_window.mvprintw(pos_y as i32, pos_x + bytes_anteriores.len() as i32, &fila);
+        comentarios_window.mvprintw(pos_y as i32, pos_x, &bytes_anteriores);
+        comentarios_window.mvprintw(pos_y as i32, pos_x, &fila);
+        //comentarios_window.mvprintw(pos_y as i32, pos_x + bytes_anteriores.len() as i32, &fila);
         // Incrementar la posición vertical
         pos_y += 1;
     }
