@@ -140,111 +140,53 @@ impl CPU {
         }
     }
 
-    /* Descripción:
-        Función de cargar del programa en la memoria del CPU. Toma como entrada un vector de bytes llamado
-        program y usa el método iter() para obtener un iterador sobre los elementos del vector. Luego,
-        utiliza el método enumerate() para obtener una tupla que contiene el índice i y una referencia
-        &instruction a cada elemento del vector.
-        Dentro del cuerpo del for, se asigna el valor de instruction en la posición i de la memoria del
-        CPU. En otras palabras, está copiando cada elemento del programa en la memoria del CPU. El índice
-        i aumenta en cada iteración para asegurarse de que los elementos se copien en la posición correcta
-        de la memoria.
-        */
     fn cargar_programa(&mut self, programa: &Vec<u8>) {
+        // Iterar a través de cada instrucción del programa proporcionado.
         for (i, &instruccion) in programa.iter().enumerate() {
+            // Escribir cada instrucción en la memoria en la posición de memoria correspondiente.
+            // La posición de memoria se determina por el índice actual de iteración `i`.
+            // Se convierte a u16 para garantizar que sea una dirección de memoria válida.
             self.memoria.escribir_memoria(i as u16, instruccion);
         }
     }
 
-    fn cargar_programa0(&mut self, programa: Vec<u8>) {
-        for (i, &instruction) in programa.iter().enumerate() {
-            self.memory[i] = instruction;
-        }
-    }
-
-    fn fetch_instruccion(&mut self) -> u8 { 
+    fn busca_instruccion(&mut self) -> u8 { 
         // Obtener la instrucción de la memoria en la dirección del contador de programa (1 byte)
         let instruccion = self.memoria.leer_memoria(self.contador_de_programa); 
-        // Incrementar el contador de programa para apuntar a la siguiente dirección de memoria
-        // self.contador_de_programa += 1;
         instruccion
     }
 
-    fn fetch_instruction(&mut self) -> u8 {
-        // Obtener la instrucción de la memoria en la dirección del contador de programa (1 byte)
-        let instruction = self.memory[self.program_counter as usize];
-        // let instruction = u16::from_le_bytes([self.memory[self.program_counter], self.memory[self.program_counter + 1]]);
-        // Incrementar el contador de programa para apuntar a la siguiente dirección de memoria
-        //self.contador_de_programa += 1;
-        instruction
-    }
-
-    fn decode_instruccion(&self, instruccion: u8) -> (u8, [u8; 2]) {
+    // Definición de la función 'decodifica_instruccion', que toma un byte 'instruccion' como
+    // argumento y devuelve una tupla de un byte 'opcode' y una matriz de dos bytes 'operandos'.
+    fn decodifica_instruccion(&self, instruccion: u8) -> (u8, [u8; 2]) {
+        // Asignación del byte 'instruccion' a la variable 'opcode'.
         let opcode = instruccion;
-        let operandos = [
+        // Definición de la matriz 'operandos', que se compone de los dos bytes siguientes en la
+        // memoria en las posiciones de memoria 'contador_de_programa +1' y 'contador_de_programa +2'.
+    let operandos = [
             self.memoria.leer_memoria(self.contador_de_programa +1),
             self.memoria.leer_memoria(self.contador_de_programa +2),
-            //self.memory[(self.program_counter + 1) as usize],
-            //self.memory[(self.program_counter + 2) as usize],
         ];
+        // Devuelve la tupla 'opcode' y 'operandos'.
         (opcode, operandos)
     }
-
-    fn decode_instruction(&self, instruction: u8) -> (u8, [u8; 2]) {
-        /* let opcode = instruction >> 4;
-        El código instruction >> 4 es una operación de desplazamiento a la derecha a nivel de bits.
-        El operador >> desplaza los bits de la variable instruction hacia la derecha en 4 posiciones.
-        El resultado de la operación se asigna luego a la variable opcode.
-        Esto asume que la variable instruction contiene un valor que representa una instrucción de en
-        formato binario, donde los primeros cuatro bits especifican el opcode.
-        Ejemplo:
-            let inst0: u8 = 0b10110100;
-            println!("El valor de inst0 es: {:b}", inst0);  // El valor de inst0 es: 10110100
-            let inst1 = inst0 >> 4;
-            println!("El valor de inst1 es: {:b}", inst1);  // El valor de inst1 es: 1011
-        */
-        let opcode = instruction;
-
-        // let operands = [instruction & 0x0F, self.memory[self.program_counter as usize]];
-        /* instruction & 0x0F             ^^
-        La instrucción que se presenta en la pregunta utiliza el operador "&" (AND binario) para
-        hacer una operación bit a bit entre la variable "instruction" y el valor hexadecimal "0x0F".
-        "0x0F" en hexadecimal representa el número 00001111 en binario. Al utilizar el operador "&"
-        entre "instruction" y "0x0F", se realiza una operación lógica AND entre los bits de cada
-        número en la misma posición, de la siguiente manera:
-            let inst0: u8 = 0b11011010;     // variable con valor binario 11011010
-            let inst1: u8 = inst0 & 0x0F;   // operación AND con 0x0F (00001111)
-            println!("Inst0: {:08b}", inst0);   // imprime Inst0: 11011010
-            println!("Inst1: {:08b}", inst1);   // imprime Inst1: 00001010
-        */
-
-        let operands = [
-            self.memory[(self.program_counter + 1) as usize],
-            self.memory[(self.program_counter + 2) as usize],
-        ];
-        (opcode, operands)
-    }
-
-    fn execute_instruction(&mut self, opcode: u8, operands: [u8; 2]) {
+    
+    fn ejecuta_instruccion(&mut self, opcode: u8, operands: [u8; 2]) {
         match opcode {
             0x00 => { // NOP: No hace nada
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("NOP"))); }
-//self.program_counter += 1;
                 self.contador_de_programa += 1;
             }
 
             0x04 => { // INR B incrementa el contenido en el Registro (B)
                 self.reg_b += 1;
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("INR B"))); }
-//self.program_counter += 1;
                 self.contador_de_programa += 1;
             }
 
             0x05 => { // DCR B decrementa el contenido en el Registro (B)
-//self.registro[1] -= 1;
                 self.reg_b -= 1;
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("DCR B"))); }
-//self.program_counter += 1;
                 self.contador_de_programa += 1;
                 /* 0x054 sin control de desbordamiento
                     let b = get_register_value(Register::B);
@@ -280,26 +222,20 @@ impl CPU {
             }
 
             0x06 => { // MVI B,d8 cargar un valor de 8 bits en el Registro (B)
-//self.registro[1] = self.memory[(self.program_counter + 1) as usize];
                 self.reg_b = self.memoria.leer_memoria(self.contador_de_programa + 1);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI B,d8"))); }
-//self.program_counter += 2;
                 self.contador_de_programa += 2;
             }
 
 // Pendiente implementar acceso a 16 bit ***
             0x0A => { // LDAX A,(BC) cargar el valor contenido en la dirección BC bits en el acumulador (A)
                 self.reg_a = operands[0];
-                unsafe {
-                    MNEMONICO_OPCODE = Some(Mutex::new(String::from("LDAX A,[BC]")));
-                }
+                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("LDAX A,[BC]"))); }
             }
 
             0x3C => { // INR A incrementa el contenido en el Registro (A)
-//self.registro[0] += 1;
                 self.reg_a += 1;
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("INR A"))); }
-//self.program_counter += 1;
                 self.contador_de_programa += 1;
                 /* 0x3C sin control de desbordamiento
                 let a = registers.get_a();
@@ -338,13 +274,11 @@ impl CPU {
             }
 
             0x3D => { // DCR A decrementa el contenido en el Registro (A)
-//self.registro[0] -= 1;
                 self.reg_a -= 1;
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("DCR A"))); }
-//self.program_counter += 1;
                 self.contador_de_programa += 1;
                 /*
-                El acumulador en la arquitectura 8080 es un registro especial de 8 bits que almacena los resultados de las operaciones aritméticas y lógicas realizadas por el procesador. Si se decrementa el acumulador en 8080 hasta que llega a 0, esto provocará un desbordamiento (overflow) en el registro, es decir, que el valor almacenado en el acumulador pasará de 0xFF (255 en decimal) a 0x00 (0 en decimal).
+                Si se decrementa el acumulador en 8080 hasta que llega a 0, esto provocará un desbordamiento (overflow) en el registro, es decir, que el valor almacenado en el acumulador pasará de 0xFF (255 en decimal) a 0x00 (0 en decimal).
                 Además, al realizar una operación que decrementa el valor del acumulador, se establecerá la bandera de cero (Z) en 1 si el resultado es 0, o en 0 en caso contrario. También se establecerá la bandera de signo (S) si el bit más significativo del resultado es 1.
                 */
 
@@ -397,17 +331,14 @@ impl CPU {
             }
 
             0x3E => { // MVI A,n cargar un valor de 8 bits en el acumulador (A)
-//self.registro[0] = self.memory[(self.program_counter + 1) as usize];
                 self.reg_a = self.memoria.leer_memoria(self.contador_de_programa + 1);
                 // La siguiente linea para pruebas (borrar) -> 
                 // self.flags.flags_paridad(self.reg_a);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI A,d8"))); }
-//self.program_counter += 2;
                 self.contador_de_programa += 2;
             }
 
             0x80 => { // ADD A,B suma el contenido del Registro B al acumulador (A)
-//self.registro[0] = self.registro[0].wrapping_add(self.registro[1]);
                 //self.reg_a = self.reg_a.wrapping_add(self.reg_b);
                 let resultado = self.flags.flags_acarreo(self.reg_a, self.reg_b);
                 self.reg_a = resultado;
@@ -416,13 +347,11 @@ impl CPU {
                 self.flags.flags_cero(resultado);
                 self.flags.flags_signo(resultado);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("ADD A,B"))); }
-//self.program_counter += 1;
                 self.contador_de_programa += 1;
             }
 
 // Revisar implementar manejo de direccionamiento de 16 bit *****
             0xC3 => { // JMP nn marca PC con la dirección indicada por los dos siguientes bytes
-//self.program_counter = self.memory[(self.program_counter + 1) as usize];
                 self.contador_de_programa = self.memoria.leer_memoria(self.contador_de_programa + 1) as u16;
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("JMP nn"))); }
                 /* Instrucción 0xC3 manejando direcciones de 16 bits
@@ -462,11 +391,9 @@ impl CPU {
     }
 
     fn step(&mut self) {
-        let instruccion = self.fetch_instruccion();
-        let (opcode, operands) = self.decode_instruccion(instruccion);
-        //let instruction = self.fetch_instruction();
-        //let (opcode, operands) = self.decode_instruction(instruction);
-        self.execute_instruction(opcode, operands);
+        let instruccion = self.busca_instruccion();
+        let (opcode, operands) = self.decodifica_instruccion(instruccion);
+        self.ejecuta_instruccion(opcode, operands);
 
         /* (&self).info_registros()
         El paréntesis es necesario para asegurar que se tome la referencia de self antes de llamar al método
@@ -486,7 +413,7 @@ impl CPU {
             window.mv(pos_y, 2);
             window.printw(format!( "Contador: 0x{:04X}, Instruccion: {:02x}"
                 , self.contador_de_programa
-                , self.memory[self.contador_de_programa as usize] ));
+                , self.memoria.leer_memoria(self.contador_de_programa) ));
             window.printw(format!( " Reg A: {:02x}, Reg B: {:02x}"
                 , self.reg_a
                 , self.reg_b ));
@@ -564,7 +491,7 @@ pub fn cpu_generica_0() {
         0xFF, 0xFF,     // Marca fin de programa
     ];
     cpu.cargar_programa(&programa);
-    cpu.cargar_programa0(programa.clone());
+    //cpu.cargar_programa0(programa.clone());
     //cpu.info_pruebas(0000);
 
     cpu.run(&ventana_principal);
@@ -616,12 +543,13 @@ impl CPU {                                   // Funciones de manejo de ventanas
         let pos_x = 2;
         comentarios_window.mv(pos_y, pos_x);
 
-        comentarios_window.mvprintw( pos_y + 0, pos_x, format!("Direccion a la que apunta PC de memoria: {:04X}", self.program_counter));
-        comentarios_window.mvprintw( pos_y + 1, pos_x, format!("Contenido en memory a la que apunta PC : {:02X}", self.memory[(self.program_counter) as usize]));
-        comentarios_window.mvprintw( pos_y + 2, pos_x, format!("Contenido registro[0]: {:02X}", self.registro[0]));
-        comentarios_window.mvprintw( pos_y + 3, pos_x, format!("Contenido registro[1]: {:02X}", self.registro[1]));
+        comentarios_window.mvprintw( pos_y + 0, pos_x, format!("Contenido registro A : {:08b}   Contenido registro B : {:08b}", self.reg_a, self.reg_b));
+        let byte_menor = self.contador_de_programa as u8;
+        let byte_mayor = (self.contador_de_programa >> 8) as u8;
 
-        comentarios_window.mvprintw( pos_y + 5, pos_x, format!("Acarreo {}, Paridad: {}, Acarreo Auxiliar {}, Zero {}, Signo {}"
+        comentarios_window.mvprintw( pos_y + 1, pos_x, format!("Contador de programas (BigEndian): {:08b}-{:08b}", byte_mayor, byte_menor));
+
+        comentarios_window.mvprintw( pos_y + 3, pos_x, format!("Acarreo {}, Paridad: {}, Acarreo Auxiliar {}, Zero {}, Signo {}"
                                    , self.flags.get_bit(0)
                                    , self.flags.get_bit(2)
                                    , self.flags.get_bit(4)
@@ -635,10 +563,9 @@ impl CPU {                                   // Funciones de manejo de ventanas
         //let var_a_array: [u8; 8] = [1, 2, 4, 8, 16, 32, 64, 128];
         let mut var_a_array = &self.memoria.segmento_memoria[*(&self.memoria.get_banco_activo()) as usize];
         muestra_mem(&comentarios_window, 9, 2, var_a_array);
-        //muestra_mem_obj(&comentarios_window, 8, 2, var_a_array);
-        //muestra_mem_obj(&comentarios_window, 8, 2, (&self).memoria.segmento_memoria.clone());
 
         /*
+        comentarios_window.mvprintw(pos_y,  pos_x, format!("", ));
         comentarios_window.mvprintw(pos_y+1,  pos_x, format!("", ));
         comentarios_window.mvprintw(pos_y+2,  pos_x, format!("", ));
         comentarios_window.mvprintw(pos_y+3,  pos_x, format!("", ));
@@ -659,7 +586,6 @@ impl CPU {                                   // Funciones de manejo de ventanas
         */
 
         // pruebas_00(&comentarios_window, pos_y, pos_x);
-
         comentarios_window.attrset(Attribute::Normal);
         comentarios_window.refresh();
     }
@@ -848,8 +774,5 @@ fn pruebas_00(comentarios_window: &Window, pos_y: i32, pos_x: i32) {
     comentarios_window.mvprintw( pos_y + 15, pos_x, format!( "Esta activo el bit 1? con & (1<<1)          : {}", (num & (1 << 1)) != 0),);
     comentarios_window.attrset(Attribute::Normal);
 }
-
-//*****************************************************************************
-
 
 //*****************************************************************************

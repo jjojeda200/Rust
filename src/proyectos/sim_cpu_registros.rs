@@ -290,6 +290,122 @@ impl RegistrosCPU {
 
 }
 
+
+//*****************************************************************************
+
+/* ALU
+
+pub struct Alu {
+    a: u8, // Registro A
+    flags: Flags, // Registro de banderas
+}
+
+
+
+
+Las operaciones que utiliza la ALU en el procesador Intel 8080 incluyen:
+
+    ADD: Suma el valor especificado con el valor actual en el registro A.
+    ADC: Suma el valor especificado y la bandera de acarreo con el valor actual en el registro A.
+    SUB: Resta el valor especificado del valor actual en el registro A.
+    SBB: Resta el valor especificado y la bandera de acarreo del valor actual en el registro A.
+    AND: Realiza una operación lógica AND entre el valor especificado y el valor actual en el registro A.
+    OR: Realiza una operación lógica OR entre el valor especificado y el valor actual en el registro A.
+    XOR: Realiza una operación lógica XOR entre el valor especificado y el valor actual en el registro A.
+    CMP: Compara el valor especificado con el valor actual en el registro A, actualizando las banderas según corresponda.
+
+impl Alu {
+    fn add(&mut self, value: u8) {
+        let (result, carry) = self.a.overflowing_add(value);
+        self.flags.set_zero(result == 0);
+        self.flags.set_sign(result & 0x80 != 0);
+        self.flags.set_carry(carry);
+        self.flags.set_aux_carry((self.a & 0x0F) + (value & 0x0F) > 0x0F);
+        self.flags.set_parity(result);
+        self.a = result;
+    }
+
+    fn adc(&mut self, value: u8) {
+        let (result, carry) = self.a.overflowing_add(value);
+        let (result, carry2) = result.overflowing_add(self.flags.carry() as u8);
+        self.flags.set_zero(result == 0);
+        self.flags.set_sign(result & 0x80 != 0);
+        self.flags.set_carry(carry || carry2);
+        self.flags.set_aux_carry((self.a & 0x0F) + (value & 0x0F) + self.flags.carry() as u8 > 0x0F);
+        self.flags.set_parity(result);
+        self.a = result;
+    }
+
+    fn sub(&mut self, value: u8) {
+        let (result, carry) = self.a.overflowing_sub(value);
+        self.flags.set_zero(result == 0);
+        self.flags.set_sign(result & 0x80 != 0);
+        self.flags.set_carry(carry);
+        self.flags.set_aux_carry((self.a & 0x0F) < (value & 0x0F));
+        self.flags.set_parity(result);
+        self.a = result;
+    }
+
+    fn sbb(&mut self, value: u8) {
+        let (result, carry) = self.a.overflowing_sub(value);
+        let (result, carry2) = result.overflowing_sub(self.flags.carry() as u8);
+        self.flags.set_zero(result == 0);
+        self.flags.set_sign(result & 0x80 != 0);
+        self.flags.set_carry(carry || carry2);
+        self.flags.set_aux_carry((self.a & 0x0F) < ((value & 0x0F) + self.flags.carry() as u8));
+        self.flags.set_parity(result);
+        self.a = result;
+    }
+
+    fn and(&mut self, value: u8) {
+        let result = self.a & value;
+        self.flags.set_zero(result == 0);
+        self.flags.set_sign(result & 0x80 != 0);
+        self.flags.set_carry(false);
+        self.flags.set_aux_carry(true);
+        self.flags.set_parity(result);
+        self.a = result;
+    }
+
+    fn or(&mut self, value: u8) {
+        let result = self.a | value;
+        self.flags.set_zero(result == 0);
+        self.flags.set_sign(result & 0x80 != 0);
+        self.flags.set_carry(false);
+        self.flags.set_aux_carry(false);
+        self.flags.set_parity(result);
+        self.a = result;
+    }
+
+    fn xor(&mut self, value: u8) {
+        let result = self.a ^ value;
+        self.flags.set_zero(result == 0);
+        self.flags.set_sign(result & 0x80 != 0);
+        self.flags.set_carry(false);
+        self.flags.set_aux_carry(false);
+        self.flags.set_parity(result);
+        self.a = result;
+    }
+       
+    fn cmp(&mut self, value: u8) {
+        let (result, carry) = self.a.overflowing_sub(value);
+        self.flags.set_zero(result == 0);
+        self.flags.set_sign(result & 0x80 != 0);
+        self.flags.set_carry(carry);
+        self.flags.set_aux_carry((self.a & 0x0F) < (value & 0x0F));
+        self.flags.set_parity(result);
+    }
+*/
+
+//*****************************************************************************
+
+
+
+
+
+
+
+
 //*****************************************************************************
 #[cfg(test)]
 mod tests {
