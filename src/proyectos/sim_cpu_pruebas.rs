@@ -147,7 +147,6 @@ fn ejecutar_programa() -> u8 {
 }
 
 
-
 pub fn cpu_sim_0() {
     let titulo = String::from(" CPU - Simulación CPU - Aproximación de pruebas 1 ");
     imprime_titulo(&titulo);
@@ -285,7 +284,6 @@ pub fn cpu_sim_0() {
 
 
 //************************************* 
-
     let mut vec: [u8; 64] = [0;64];
     for i in 0..vec.len() {
         vec[i] = (i+0) as u8;
@@ -359,7 +357,6 @@ fn muestra_mem(vec: &[u8]) {
         println!("{}", &buffer.trim_end());
     }
 }
-
 
 #[test]
 fn test_muestra_memm() {
