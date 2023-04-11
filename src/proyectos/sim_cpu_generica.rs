@@ -340,7 +340,7 @@ impl CPU {
 
             0x80 => { // ADD A,B suma el contenido del Registro B al acumulador (A)
                 //self.reg_a = self.reg_a.wrapping_add(self.reg_b);
-                let resultado = self.flags.flags_acarreo(self.reg_a, self.reg_b);
+                let resultado = self.flags.flags_acarreo_add(self.reg_a, self.reg_b);
                 self.reg_a = resultado;
                 self.flags.flags_paridad(resultado);
                 self.flags.flags_acarreo_auxiliar(resultado);

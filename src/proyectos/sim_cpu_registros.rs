@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          06-04-2023
+    Fecha:          11-04-2023
     Titulo:         Simulación CPU
     Descripción:    
     Referencias:
@@ -152,8 +152,28 @@ impl Flags {
         }
     }
 
-    pub fn flags_acarreo(&mut self, valor_reg1: u8, valor_reg2: u8) -> u8 {
-        // suma con propagación de acarreo (overflowing add)
+/* Implementación ALU                       
+Las operaciones que utiliza la ALU en el procesador Intel 8080 incluyen:
+
+    ADD: Suma el valor especificado con el valor actual en el registro A.
+    ADC: Suma el valor especificado y la bandera de acarreo con el valor actual en el registro A.
+    SUB: Resta el valor especificado del valor actual en el registro A.
+    SBB: Resta el valor especificado y la bandera de acarreo del valor actual en el registro A.
+    AND: Realiza una operación lógica AND entre el valor especificado y el valor actual en el registro A.
+    OR: Realiza una operación lógica OR entre el valor especificado y el valor actual en el registro A.
+    XOR: Realiza una operación lógica XOR entre el valor especificado y el valor actual en el registro A.
+    CMP: Compara el valor especificado con el valor actual en el registro A, actualizando las banderas según corresponda.
+*/
+
+//***************************************************************************** cálculos de flags individuales
+    pub fn flags_acarreo_add(&mut self, valor_reg1: u8, valor_reg2: u8) -> u8 {
+        // suma sin propagación de acarreo
+        let (resultado, acarreo) = valor_reg1.overflowing_add(valor_reg2);
+        if acarreo == true {self.set_bit(0, true)} else {self.set_bit(0, false)}
+        resultado
+    }    
+    pub fn flags_acarreo_adc(&mut self, valor_reg1: u8, valor_reg2: u8) -> u8 {
+        // suma con propagación de acarreo
         let (resultado, acarreo) = valor_reg1.overflowing_add(valor_reg2);
         if acarreo == true {self.set_bit(0, true)} else {self.set_bit(0, false)}
         resultado
@@ -200,6 +220,36 @@ impl Flags {
     pub fn flags_signo(&mut self, resultado: u8) {
         if (resultado & 0x80) == 0x80 {self.set_bit(7, true)} else {self.set_bit(7, false)}
     }
+
+//*****************************************************************************
+
+    pub fn add(&mut self, val_reg_a: u8, val_reg_x: u8 ) -> u8 {
+        let (resultado, acarreo) = val_reg_a.overflowing_add(val_reg_x);
+        // println!("{:08b}, {}",resultado, acarreo);
+        if acarreo == true {self.set_bit(0, true)} else {self.set_bit(0, false)}
+        if resultado.count_ones() % 2 == 0 {self.set_bit(2, true)} else {self.set_bit(2, false)}
+        if (resultado & 0x0F) + (self.get_bit(0)) > 0x0F { self.set_bit(4,true)} else {self.set_bit(4, false)}
+        if resultado == 0 {self.set_bit(6, true)} else {self.set_bit(6, false)}
+        if (resultado & 0x80) == 0x80 {self.set_bit(7, true)} else {self.set_bit(7, false)}
+        return resultado;
+    }
+
+    pub fn adc(&mut self, val_reg_a: u8, val_reg_x: u8 ) -> u8 {
+        let val_acarreo:u8 = self.get_bit(0);
+        // println!("{:08b}",val_acarreo);
+        let (resultado_intermedio, acarreo_intermedio) = val_reg_a.overflowing_add(val_reg_x);
+        println!("{:08b}, {}",resultado_intermedio, acarreo_intermedio);
+        let (resultado, acarreo) = resultado_intermedio.overflowing_add(val_acarreo);
+        println!("{:08b}, {}",resultado, acarreo);
+        
+        if acarreo == true || acarreo_intermedio {self.set_bit(0, true)} else {self.set_bit(0, false)}
+        if resultado.count_ones() % 2 == 0 {self.set_bit(2, true)} else {self.set_bit(2, false)}
+        if (resultado & 0x0F) + (self.get_bit(0)) > 0x0F { self.set_bit(4,true)} else {self.set_bit(4, false)}
+        if resultado == 0 {self.set_bit(6, true)} else {self.set_bit(6, false)}
+        if (resultado & 0x80) == 0x80 {self.set_bit(7, true)} else {self.set_bit(7, false)}
+        return resultado;
+    }
+
 
 }
 
@@ -292,49 +342,8 @@ impl RegistrosCPU {
 
 
 //*****************************************************************************
-
-/* ALU
-
-pub struct Alu {
-    a: u8, // Registro A
-    flags: Flags, // Registro de banderas
-}
-
-
-
-
-Las operaciones que utiliza la ALU en el procesador Intel 8080 incluyen:
-
-    ADD: Suma el valor especificado con el valor actual en el registro A.
-    ADC: Suma el valor especificado y la bandera de acarreo con el valor actual en el registro A.
-    SUB: Resta el valor especificado del valor actual en el registro A.
-    SBB: Resta el valor especificado y la bandera de acarreo del valor actual en el registro A.
-    AND: Realiza una operación lógica AND entre el valor especificado y el valor actual en el registro A.
-    OR: Realiza una operación lógica OR entre el valor especificado y el valor actual en el registro A.
-    XOR: Realiza una operación lógica XOR entre el valor especificado y el valor actual en el registro A.
-    CMP: Compara el valor especificado con el valor actual en el registro A, actualizando las banderas según corresponda.
-
+/*
 impl Alu {
-    fn add(&mut self, value: u8) {
-        let (result, carry) = self.a.overflowing_add(value);
-        self.flags.set_zero(result == 0);
-        self.flags.set_sign(result & 0x80 != 0);
-        self.flags.set_carry(carry);
-        self.flags.set_aux_carry((self.a & 0x0F) + (value & 0x0F) > 0x0F);
-        self.flags.set_parity(result);
-        self.a = result;
-    }
-
-    fn adc(&mut self, value: u8) {
-        let (result, carry) = self.a.overflowing_add(value);
-        let (result, carry2) = result.overflowing_add(self.flags.carry() as u8);
-        self.flags.set_zero(result == 0);
-        self.flags.set_sign(result & 0x80 != 0);
-        self.flags.set_carry(carry || carry2);
-        self.flags.set_aux_carry((self.a & 0x0F) + (value & 0x0F) + self.flags.carry() as u8 > 0x0F);
-        self.flags.set_parity(result);
-        self.a = result;
-    }
 
     fn sub(&mut self, value: u8) {
         let (result, carry) = self.a.overflowing_sub(value);
@@ -409,6 +418,7 @@ impl Alu {
 //*****************************************************************************
 #[cfg(test)]
 mod tests {
+//***************************************************************************** Test manejo de bit de flags y calculo individual 
     use super::*;
 
     #[test]
@@ -496,17 +506,17 @@ mod tests {
     #[test]
     fn test_flags_acarreo() {
         let mut flags = Flags::new_flags();
-        let result = flags.flags_acarreo(255, 1);
+        let result = flags.flags_acarreo_add(255, 1);
         assert_eq!(result, 0);
         assert_eq!(flags.carry, true);
 
         flags = Flags::new_flags();
-        let result = flags.flags_acarreo(100, 20);
+        let result = flags.flags_acarreo_add(100, 20);
         assert_eq!(result, 120);
         assert_eq!(flags.carry, false);
 
         flags = Flags::new_flags();
-        let result = flags.flags_acarreo(200, 100);
+        let result = flags.flags_acarreo_add(200, 100);
         assert_eq!(result, 44);
         assert_eq!(flags.carry, true);
     }
@@ -524,6 +534,10 @@ mod tests {
         flags = Flags::new_flags();
         flags.flags_paridad(0b01100110);
         assert_eq!(flags.parity_overflow, true);
+
+        flags = Flags::new_flags();
+        flags.flags_paridad(0b00001000);
+        assert_eq!(flags.parity_overflow, false);
     }
 
     #[test]
@@ -544,7 +558,6 @@ mod tests {
 
         flags.flags_acarreo_auxiliar(0x9F);
         assert_eq!(flags.half_carry, true);
-
     }
 
     #[test]
@@ -558,7 +571,90 @@ mod tests {
         assert_eq!(flags.sign, true);
     }
 
+//***************************************************************************** Test manejo de flags - ALU
+    #[test]
+    fn test_add_overflow() {
+        let mut flags = Flags::new_flags();
+        assert_eq!(flags.add(250, 10), 4);
+        assert_eq!(flags.get_bit_1(0), true);
+
+        let mut flags = Flags::new_flags();
+        assert_eq!(flags.add(250, 2), 252);
+        assert_eq!(flags.get_bit_1(0), false);
+    }
+
+    #[test]
+    fn test_add_parity_flag() {
+        let mut flags = Flags::new_flags();
+        assert_eq!(flags.add(4, 4), 8);
+        assert_eq!(flags.get_bit_1(2), false);
+
+        assert_eq!(flags.add(4, 6), 10);
+        assert_eq!(flags.get_bit_1(2), true);
+    }
+
+    #[test]
+    fn test_add_half_carry_flag() {
+        let mut flags = Flags::new_flags();
+        assert_eq!(flags.add(15, 2), 17);
+        assert_eq!(flags.get_bit_1(4), true);
+        
+        assert_eq!(flags.add(15, 2), 17);
+        assert_eq!(flags.get_bit_1(4), true);
+    }
+
+    #[test]
+    fn test_add_zero_flag() {
+        let mut flags = Flags::new_flags();
+        assert_eq!(flags.add(0, 0), 0);
+        assert_eq!(flags.get_bit_1(6), true);
+    }
+
+    #[test]
+    fn test_add_sign_flag() {
+        let mut flags = Flags::new_flags();
+        assert_eq!(flags.add(0xFF, 1), 0);
+        assert_eq!(flags.get_bit_1(7), true);
+    }
+
+    #[test]
+    fn test_adc_carry_flag() {
+        let mut flags = Flags::new_flags();
+        flags.set_bit(0, true);
+        assert_eq!(flags.adc(250, 10), 5);
+        assert_eq!(flags.get_bit_1(0), true);
+    }
+
+    #[test]
+    fn test_adc_parity_flag() {
+        let mut flags = Flags::new_flags();
+        assert_eq!(flags.adc(4, 4), 9);
+        assert_eq!(flags.get_bit_1(2), false);
+    }
+
+    #[test]
+    fn test_adc_half_carry_flag() {
+        let mut flags = Flags::new_flags();
+        assert_eq!(flags.adc(15, 2), 18);
+        assert_eq!(flags.get_bit_1(4), false);
+    }
+
+    #[test]
+    fn test_adc_zero_flag() {
+        let mut flags = Flags::new_flags();
+        assert_eq!(flags.adc(0, 0), 0);
+        assert_eq!(flags.get_bit_1(6), true);
+    }
+
+    #[test]
+    fn test_adc_sign_flag() {
+        let mut flags = Flags::new_flags();
+        assert_eq!(flags.adc(0xFF, 1), 0);
+        assert_eq!(flags.get_bit_1(7), true);
+    }
+
 }
+
 
 //*****************************************************************************
 // Manejo de bit en un byte con operaciones lógicas y desplazamientos

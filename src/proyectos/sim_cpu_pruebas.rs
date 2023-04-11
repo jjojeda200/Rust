@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          06-04-2023
+    Fecha:          11-04-2023
     Titulo:         Simulación CPU
     Descripción:    
     Referencias:
@@ -157,6 +157,9 @@ pub fn cpu_sim_0() {
 
 
 //************************************* Prueba manejo registros
+    let titulo = String::from(" CPU - Simulación CPU - Prueba manejo registros ");
+    imprime_titulo(&titulo);
+
     println!("");
     // Inicializar la estructura de registros y de flags
     let mut cpu_reg = sim_cpu_registros::RegistrosCPU::new();
@@ -168,7 +171,6 @@ pub fn cpu_sim_0() {
     cpu_reg.set_a(0x12);
     println!("Registro A: 0x{:02x}", cpu_reg.get_a());
 
-
     // Registro BC al inicializar
     println!("Registro BC: 0x{:04x}", cpu_reg.get_bc());
     cpu_reg.set_b(0xff);
@@ -179,27 +181,9 @@ pub fn cpu_sim_0() {
     cpu_reg.set_reg_bc(0b0000111111110000);
     println!("Registro BC: 0x{:04x}", cpu_reg.get_reg_bc());
 
-//************************************* Prueba manejo flags
-    cpu_flags.set_flags(0b10110101);
-
-    // Nota: bit 3 y 5 no se utilizan
-    // Actualizar los flags con un valor de 0b11111111 (true)
-    cpu_flags.set_flags(0b11111111);
-
-    // Obtener el valor de los flags
-    let flags_value = cpu_flags.get_flags();
-    println!("Valor de los flags: 0b{:08b}", flags_value);
-
-    // Establecer el bit de signo a 0 (false)
-    println!("Valor del flags sign: {}", cpu_flags.get_bit(7));
-    cpu_flags.set_bit(7, false);
-    println!("Valor del flags sign: {}", cpu_flags.get_bit(7));
-    println!("Valor de los flags: 0b{:08b}", cpu_flags.get_flags());
-
-    cpu_flags.set_flags(0b00000000);
-    println!("Valor de los flags: 0b{:08b}", cpu_flags.get_flags_1());
-
 //************************************* Prueba manejo memoria
+    let titulo = String::from(" CPU - Simulación CPU - Prueba manejo memoria ");
+    imprime_titulo(&titulo);
 
     // Crea un banco de memoria por defecto de 16384 bytes (16Kb)
     let mut memoria = BancosMemoria::new();
@@ -230,13 +214,11 @@ pub fn cpu_sim_0() {
     memoria.set_banco_activo(0);
     num_banco_actual = memoria.get_banco_activo() as usize;
 
-
     // escribe un byte en la dirección 0x2000 del primer banco
     memoria.escribir_memoria(0x2000, 0x55);
     // lee el byte en la dirección 0x2000 del primer banco
     let byte1 = memoria.leer_memoria(10);
     println!("Byte leído en la dirección 0x2000 del primer banco: 0x{:02x}", byte1);
-
 
     println!(" {:?} ", memoria.segmento_memoria.len());
     let mut resultado = memoria.eliminar_segmento(1);
@@ -248,22 +230,43 @@ pub fn cpu_sim_0() {
     resultado = memoria.eliminar_segmento(0);
     println!(" {:?}", resultado);
 
-//************************************* Pruebas calculo de flags
+//************************************* Prueba manejo bit de flags
+    let titulo = String::from(" CPU - Simulación CPU - Prueba manejo bit de flags ");
+    imprime_titulo(&titulo);
+
+    cpu_flags.set_flags(0b10110101);
+
+    // Nota: bit 3 y 5 no se utilizan
+    // Actualizar los flags con un valor de 0b11111111 (true)
+    cpu_flags.set_flags(0b11111111);
+
+    // Obtener el valor de los flags
+    let flags_value = cpu_flags.get_flags();
+    println!("Valor de los flags: 0b{:08b}", flags_value);
+
+    // Establecer el bit de signo a 0 (false)
+    println!("Valor del flags sign: {}", cpu_flags.get_bit(7));
+    cpu_flags.set_bit(7, false);
+    println!("Valor del flags sign: {}", cpu_flags.get_bit(7));
+    println!("Valor de los flags: 0b{:08b}", cpu_flags.get_flags());
+
+    cpu_flags.set_flags(0b00000000);
+    println!("Valor de los flags: 0b{:08b}", cpu_flags.get_flags_1());
+
+//************************************* Pruebas cálculos de flags individuales
+    let titulo = String::from(" CPU - Simulación CPU - Prueba cálculos de flags individuales ");
+    imprime_titulo(&titulo);
+
     println!("");
     println!("Pruebas calculo de flags");
     println!("");
     cpu_reg.set_a(0xff);
     cpu_reg.set_b(0xe0);
-    // println!("Registro A: 0x{:02x}, Registro B: 0x{:02x}", cpu_reg.get_a(), cpu_reg.get_b());
-    // let carry = cpu_flags.get_bit(0);
-    // let result = cpu_reg.get_a().wrapping_add(cpu_reg.get_b().wrapping_add(carry)); // suma sin propagación de acarreo (wrapping add)
-    // println!("Carry {}, Result {}", carry, result);
-    // cpu_reg.set_a(result);
 
     // Ejecutar la instrucción "ADD A, B" y calcula Flags
     println!("Registro A: 0x{:02x}, Registro B: 0x{:02x},      Carry: {}, {}"
             , cpu_reg.get_a(), cpu_reg.get_b(), cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
-    let resultado = cpu_flags.flags_acarreo(cpu_reg.get_a(), cpu_reg.get_b());
+    let resultado = cpu_flags.flags_acarreo_add(cpu_reg.get_a(), cpu_reg.get_b());
     cpu_reg.set_a(resultado);
     println!("Registro A: 0x{:02x}, Registro B: 0x{:02x},      Carry: {}, {}"
             , cpu_reg.get_a(), cpu_reg.get_b(), cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
@@ -271,23 +274,48 @@ pub fn cpu_sim_0() {
 
     cpu_flags.flags_paridad(cpu_reg.get_a());
     println!("          Registro A: 0b{:08b},      Paridad: {}, {}", cpu_reg.get_a(), cpu_flags.get_bit(4), cpu_flags.get_bit_1(4));
-
     cpu_flags.flags_acarreo_auxiliar(resultado);
     println!("          Registro A: 0b{:08b},   Half-Carry: {}, {}", cpu_reg.get_a(), cpu_flags.get_bit(4), cpu_flags.get_bit_1(4));
-
     cpu_flags.flags_cero(resultado);
     println!("          Registro A: 0b{:08b},         Cero: {}, {}", cpu_reg.get_a(), cpu_flags.get_bit(6), cpu_flags.get_bit_1(6));
-    
-    cpu_flags.flags_signo(resultado);
+        cpu_flags.flags_signo(resultado);
     println!("          Registro A: 0b{:08b},        Signo: {}, {}", cpu_reg.get_a(), cpu_flags.get_bit(7), cpu_flags.get_bit_1(7));
     println!("");
 
+//************************************* Pruebas cálculos de flags - ALU
+    let titulo = String::from(" CPU - Simulación CPU - Prueba cálculos de flags - ALU ");
+    imprime_titulo(&titulo);
 
-//************************************* 
+    println!();
+    cpu_reg.set_a(0xfe);
+    cpu_reg.set_b(0x02);
+    println!("Registro A       {:08b}", cpu_reg.get_a());
+    println!("Registro B       {:08b}", cpu_reg.get_b());
+    let resultado_add = cpu_flags.add(cpu_reg.get_a(), cpu_reg.get_b());
+    println!("Resultado: 0x{:02x}, {:08b}", resultado_add, resultado_add);
+    println!("Banderas: S={} Z={} HC={} P={} C={}"
+            , cpu_flags.get_bit(7)
+            , cpu_flags.get_bit(6)
+            , cpu_flags.get_bit(4)
+            , cpu_flags.get_bit(2)
+            , cpu_flags.get_bit(0),);
+    println!();
+    let resultado_adc = cpu_flags.adc(cpu_reg.get_a(), cpu_reg.get_b());
+    println!("Resultado: 0x{:02x}, {:08b}", resultado_adc, resultado_adc);
+    println!("Banderas: S={} Z={} HC={} P={} C={}"
+            , cpu_flags.get_bit(7)
+            , cpu_flags.get_bit(6)
+            , cpu_flags.get_bit(4)
+            , cpu_flags.get_bit(2)
+            , cpu_flags.get_bit(0),);
+    println!();
+    println!();
+
+
+
+//************************************* Mostrar memoria
     let mut vec: [u8; 64] = [0;64];
-    for i in 0..vec.len() {
-        vec[i] = (i+0) as u8;
-    }
+    for i in 0..vec.len() { vec[i] = (i+0) as u8; }
 
     vec[30] = 0xAA;
     vec[31] = 0xFF;
