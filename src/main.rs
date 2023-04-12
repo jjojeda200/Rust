@@ -51,6 +51,7 @@ mod proyectos;
 mod rust_standard_library;
 mod lib_flujos;
 mod cap13;
+mod minifb;
 
 /* función imprime_titulo   
 La función imprime_titulo(titulo: &String) recibe como parámetro un puntero a
@@ -83,7 +84,7 @@ fn main() {
     }
 */
 
-    ejer_lets_get_rusty::vt_39::gate_bool();
+
 
     proyectos::sim_cpu_pruebas::cpu_sim_0();
 //    proyectos::sim_cpu_generica::cpu_generica_0();
@@ -251,4 +252,9 @@ fn main() {
     proyectos::sim_cpu_generica::cpu_generica_0();
 
     proyectos::pruebas_plotters::pru_ploter2();
+*/
+/* pruebas minifb               
+    minifb::pruebas_00::inicio();
+    minifb::pruebas_00::flags();
+    minifb::pruebas_01::gate_bool();
 */

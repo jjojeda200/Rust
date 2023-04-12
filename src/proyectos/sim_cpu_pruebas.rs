@@ -160,7 +160,6 @@ pub fn cpu_sim_0() {
     let titulo = String::from(" CPU - Simulación CPU - Prueba manejo registros ");
     imprime_titulo(&titulo);
 
-    println!("");
     // Inicializar la estructura de registros y de flags
     let mut cpu_reg = sim_cpu_registros::RegistrosCPU::new();
     let mut cpu_flags = sim_cpu_registros::Flags::new_flags();
@@ -257,64 +256,90 @@ pub fn cpu_sim_0() {
     let titulo = String::from(" CPU - Simulación CPU - Prueba cálculos de flags individuales ");
     imprime_titulo(&titulo);
 
-    println!("");
-    println!("Pruebas calculo de flags");
-    println!("");
-    cpu_reg.set_a(0xff);
-    cpu_reg.set_b(0xe0);
+    cpu_reg.set_a(0xfe);
+    cpu_reg.set_b(0x02);
 
     // Ejecutar la instrucción "ADD A, B" y calcula Flags
-    println!("Registro A: 0x{:02x}, Registro B: 0x{:02x},      Carry: {}, {}"
-            , cpu_reg.get_a(), cpu_reg.get_b(), cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
+    println!("Contenido inicial:
+    Registro A: 0x{:02X} {:08b}
+    Registro B: 0x{:02X} {:08b}
+    Carry     : {}, {}"
+    , cpu_reg.get_a(), cpu_reg.get_a()
+    , cpu_reg.get_b(), cpu_reg.get_b()
+    , cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
     let resultado = cpu_flags.flags_acarreo_add(cpu_reg.get_a(), cpu_reg.get_b());
-    cpu_reg.set_a(resultado);
-    println!("Registro A: 0x{:02x}, Registro B: 0x{:02x},      Carry: {}, {}"
-            , cpu_reg.get_a(), cpu_reg.get_b(), cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
-    println!("");
-
-    cpu_flags.flags_paridad(cpu_reg.get_a());
-    println!("          Registro A: 0b{:08b},      Paridad: {}, {}", cpu_reg.get_a(), cpu_flags.get_bit(4), cpu_flags.get_bit_1(4));
-    cpu_flags.flags_acarreo_auxiliar(resultado);
-    println!("          Registro A: 0b{:08b},   Half-Carry: {}, {}", cpu_reg.get_a(), cpu_flags.get_bit(4), cpu_flags.get_bit_1(4));
+    // cpu_reg.set_a(resultado);
+    println!("Contenido posterior:
+    Registro A: 0x{:02X} {:08b}
+    Carry     : {}, {}"
+    , resultado, resultado
+    , cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
+    cpu_flags.flags_paridad(resultado);
+    println!("    Paridad   : {}, {}", cpu_flags.get_bit(2), cpu_flags.get_bit_1(2));
+    cpu_flags.flags_acarreo_auxiliar(cpu_reg.get_a(), cpu_reg.get_b());
+    println!("    Half-Carry: {}, {}", cpu_flags.get_bit(4), cpu_flags.get_bit_1(4));
     cpu_flags.flags_cero(resultado);
-    println!("          Registro A: 0b{:08b},         Cero: {}, {}", cpu_reg.get_a(), cpu_flags.get_bit(6), cpu_flags.get_bit_1(6));
-        cpu_flags.flags_signo(resultado);
-    println!("          Registro A: 0b{:08b},        Signo: {}, {}", cpu_reg.get_a(), cpu_flags.get_bit(7), cpu_flags.get_bit_1(7));
+    println!("    Cero      : {}, {}", cpu_flags.get_bit(6), cpu_flags.get_bit_1(6));
+    cpu_flags.flags_signo(resultado);
+    println!("    Signo     : {}, {}", cpu_flags.get_bit(7), cpu_flags.get_bit_1(7));
+    cpu_reg.set_a(resultado);
     println!("");
 
 //************************************* Pruebas cálculos de flags - ALU
     let titulo = String::from(" CPU - Simulación CPU - Prueba cálculos de flags - ALU ");
     imprime_titulo(&titulo);
 
-    println!();
+    let test = false;
+
     cpu_reg.set_a(0xfe);
     cpu_reg.set_b(0x02);
-    println!("Registro A       {:08b}", cpu_reg.get_a());
-    println!("Registro B       {:08b}", cpu_reg.get_b());
-    let resultado_add = cpu_flags.add(cpu_reg.get_a(), cpu_reg.get_b());
-    println!("Resultado: 0x{:02x}, {:08b}", resultado_add, resultado_add);
+    //cpu_flags.set_bit(0, false);
+    println!("Contenido inicial:
+    Registro A: 0x{:02X} {:08b}
+    Registro B: 0x{:02X} {:08b}
+    Carry     : {}, {}"
+    , cpu_reg.get_a(), cpu_reg.get_a()
+    , cpu_reg.get_b(), cpu_reg.get_b()
+    , cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
+    //println!("Registro A       {:08b}", cpu_reg.get_a());
+    //println!("Registro B       {:08b}", cpu_reg.get_b());
+    let resultado_add = cpu_flags.add(cpu_reg.get_a(), cpu_reg.get_b(), test);
+    cpu_reg.set_a(resultado);
+    println!("Resultado ADD: 0x{:02x}, {:08b}", cpu_reg.get_a(), cpu_reg.get_a());
+    
     println!("Banderas: S={} Z={} HC={} P={} C={}"
             , cpu_flags.get_bit(7)
             , cpu_flags.get_bit(6)
             , cpu_flags.get_bit(4)
             , cpu_flags.get_bit(2)
             , cpu_flags.get_bit(0),);
-    println!();
-    let resultado_adc = cpu_flags.adc(cpu_reg.get_a(), cpu_reg.get_b());
-    println!("Resultado: 0x{:02x}, {:08b}", resultado_adc, resultado_adc);
-    println!("Banderas: S={} Z={} HC={} P={} C={}"
-            , cpu_flags.get_bit(7)
-            , cpu_flags.get_bit(6)
-            , cpu_flags.get_bit(4)
-            , cpu_flags.get_bit(2)
-            , cpu_flags.get_bit(0),);
-    println!();
     println!();
 
+    cpu_reg.set_a(0xfe);
+    cpu_reg.set_b(0x02);
+    println!("Contenido inicial:
+    Registro A: 0x{:02X} {:08b}
+    Registro B: 0x{:02X} {:08b}
+    Carry     : {}, {}"
+    , cpu_reg.get_a(), cpu_reg.get_a()
+    , cpu_reg.get_b(), cpu_reg.get_b()
+    , cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
+    let resultado_adc = cpu_flags.adc(cpu_reg.get_a(), cpu_reg.get_b(), test);
+    cpu_reg.set_a(resultado);
+    println!("Resultado ADC: 0x{:02x}, {:08b}", cpu_reg.get_a(), cpu_reg.get_a());
+    println!("Resultado ADC: 0x{:02x}, {:08b}", resultado_adc, resultado_adc);
+    println!("Banderas: S={} Z={} HC={} P={} C={}"
+            , cpu_flags.get_bit(7)
+            , cpu_flags.get_bit(6)
+            , cpu_flags.get_bit(4)
+            , cpu_flags.get_bit(2)
+            , cpu_flags.get_bit(0),);
+    println!();
+    println!();
 
 
 //************************************* Mostrar memoria
-    let mut vec: [u8; 64] = [0;64];
+    let mut vec: [u8; 128] = [0;128];
     for i in 0..vec.len() { vec[i] = (i+0) as u8; }
 
     vec[30] = 0xAA;
@@ -340,7 +365,6 @@ fn muestra_mem(vec: &[u8]) {
         if found_pair { break; }
         
         buffer.clear();
-        //let mut byte_str = format!("{:02X} ", 0);
         
 /*
         for i in 0..group.len() {

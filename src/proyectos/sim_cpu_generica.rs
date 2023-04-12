@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          08-04-2023
+    Fecha:          11-04-2023
     Titulo:         Simulación CPU Genérica
     Descripción:    CPU con direccionamiento de 8 bit (por ahora) y opcode del Intel 8080
     Referencias:
@@ -342,10 +342,10 @@ impl CPU {
                 //self.reg_a = self.reg_a.wrapping_add(self.reg_b);
                 let resultado = self.flags.flags_acarreo_add(self.reg_a, self.reg_b);
                 self.reg_a = resultado;
-                self.flags.flags_paridad(resultado);
-                self.flags.flags_acarreo_auxiliar(resultado);
-                self.flags.flags_cero(resultado);
-                self.flags.flags_signo(resultado);
+                self.flags.flags_paridad(self.reg_a);
+                self.flags.flags_acarreo_auxiliar(self.reg_a, self.reg_b);
+                self.flags.flags_cero(self.reg_a);
+                self.flags.flags_signo(self.reg_a);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("ADD A,B"))); }
                 self.contador_de_programa += 1;
             }
