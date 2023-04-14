@@ -214,6 +214,20 @@ impl CPU {
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("LDAX B"))); }
             }
 
+            0x32 => { // STA addr: carga el registro A en la dirección apuntada por HL
+                self.reg_h = self.memoria.leer_memoria(self.contador_de_programa + 1);
+                self.reg_l = self.memoria.leer_memoria(self.contador_de_programa + 2);
+                let bytes: [u8; 2] = [self.reg_h, self.reg_l];
+                let addr = u16::from_le_bytes([self.reg_h, self.reg_l]);
+                self.memoria.escribir_memoria(addr, self.reg_a);
+                //self.memory[addr] = self.registers[0];
+                //self.registers.set_hl(addr.wrapping_sub(1));
+
+                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("STA addr"))); }
+                self.contador_de_programa += 3;
+            },
+        
+            
             0x3A => { // LDA addr: carga el valor de la dirección de memoria apuntada po los dos siguientes bytes en el acumulador (A)
                 self.reg_a = self.memoria.leer_memoria(self.contador_de_programa + 1);
                 //let hl = self.registers.get_hl();
@@ -238,53 +252,6 @@ impl CPU {
                 /*
                 Si se decrementa el acumulador en 8080 hasta que llega a 0, esto provocará un desbordamiento (overflow) en el registro, es decir, que el valor almacenado en el acumulador pasará de 0xFF (255 en decimal) a 0x00 (0 en decimal).
                 Además, al realizar una operación que decrementa el valor del acumulador, se establecerá la bandera de cero (Z) en 1 si el resultado es 0, o en 0 en caso contrario. También se establecerá la bandera de signo (S) si el bit más significativo del resultado es 1.
-                */
-
-                /* 0x3D sin control de desbordamiento
-                let a = registers.get_a();
-                let result = a.wrapping_sub(1);
-                registers.set_a(result);
-                registers.set_flags(Flags::from_decrement(a, result));
-
-                ****************************
-                El flag de Carry (C) no se ve afectado por esta instrucción.
-                El flag de Signo (S) se establece si el resultado de la operación tiene el bit más
-                significativo (MSB) en 1, lo que indica que el resultado es negativo. En Rust, podemos
-                establecer el flag de Signo de la siguiente manera:
-
-                let sign = result & 0x80 != 0;
-                registers.set_sign(sign);
-
-                El flag de Paridad (P/V) se establece si el resultado de la operación tiene un número
-                par de bits en 1. En Rust, podemos establecer el flag de Paridad de la siguiente manera:
-
-                let parity = result.count_ones() % 2 == 0;
-                registers.set_parity(parity);
-
-                El flag de Ajuste/Substracción (A) se establece en 1 para indicar que se realizó una
-                operación de sustracción. En Rust, podemos establecer el flag de Ajuste/Substracción
-                de la siguiente manera:
-
-                registers.set_adjust(true);
-
-                El flag de Cero (Z) se establece si el resultado de la operación es cero. En Rust,
-                podemos establecer el flag de Cero de la siguiente manera:
-
-                let zero = result == 0;
-                registers.set_zero(zero);
-
-                El flag de Desbordamiento (V) se establece si la resta resulta en un valor fuera del
-                rango permitido por el tamaño del Registro (en este caso, 8 bits). En Rust, podemos
-                establecer el flag de Desbordamiento de la siguiente manera:
-
-                let overflow = a == 0x80;
-                registers.set_overflow(overflow);
-
-                Es importante tener en cuenta que, en Rust, la estructura Flags almacena los flags de
-                estado de la CPU como booleanos, donde true indica que el flag está activo y false
-                indica que el flag está inactivo. La función from_decrement() de la estructura Flags
-                se encarga de establecer los valores adecuados de estos booleanos para cada flag
-                afectado por la instrucción de decremento de Registro A.
                 */
             }
 
@@ -455,6 +422,11 @@ pub fn cpu_generica_0() {
         0x00,           // NOP
         0x3E, 0xff,     // Almacenar el valor 0xff en el Registro A
         0x3C,           // Incrementa Registro A
+        0x32, 0x00, 0x00,
+        0x00, 0x00,
+        0x00, 0x00,
+        0x00, 0x00,
+        0x00, 0x00,
         0xC3, 0x00,     // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
         0xFF, 0xFF,     // Marca fin de programa
     ];
