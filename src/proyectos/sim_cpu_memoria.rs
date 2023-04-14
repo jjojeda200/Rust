@@ -10,10 +10,35 @@
 #![allow(unused_variables)]
 #![allow(unused_assignments)]
 
+/* Little-endian - Big-endian               
+u16::from_le_bytes y u16::from_be_bytes son dos métodos en el tipo u16 de Rust que te permiten
+convertir un arreglo de bytes en un valor u16. La diferencia entre ellos está en el orden de
+los bytes utilizado para interpretar el arreglo.
+
+u16::from_le_bytes interpreta el arreglo en orden de bytes little-endian, lo que significa que
+el byte menos significativo está primero en el arreglo y el byte más significativo está último.
+Este es el orden de bytes utilizado por la mayoría de las computadoras basadas en Intel.
+
+u16::from_be_bytes interpreta el arreglo en orden de bytes big-endian, lo que significa que el
+byte más significativo está primero en el arreglo y el byte menos significativo está último. Este
+es el orden de bytes utilizado por la mayoría de los protocolos de red y algunas otras arquitecturas
+de computadora.
+
+Por ejemplo, si tienes un arreglo de bytes [0x78, 0x56], u16::from_le_bytes lo interpretará como el
+valor u16 0x5678, mientras que u16::from_be_bytes lo interpretará como el valor u16 0x7856.
+
+little endian 0xABCD =
+Dirección de memoria:  | 0x0000 | 0x0001 |
+                       +--------+--------+
+     Contenido (hex):  |  0xCD  |  0xAB  |
+                       +--------+--------+
+*/
+
 //***************************************************************************** Módulo de emulación
 pub struct BancosMemoria {
     pub segmento_memoria: Vec<Vec<u8>>,
     pub banco_actual: u8,
+    pub endianess: Endianess,
 }
 
 pub enum Endianess {
@@ -36,6 +61,7 @@ impl BancosMemoria {
         BancosMemoria {
             segmento_memoria: vec![vec![0; 16384]; 1],
             banco_actual: 0,
+            endianess: Endianess::LittleEndian,
         }
     }
 
@@ -63,7 +89,11 @@ impl BancosMemoria {
     pub fn set_banco_activo (&mut self, num_de_banco: u8) { self.banco_actual = num_de_banco; }
 
     pub fn escribir_memoria(&mut self, direccion: u16, val: u8) {
-        if /*direccion < 0 ||*/ usize::from(direccion) > self.segmento_memoria[self.banco_actual as usize].len() {
+        let val = match self.endianess {
+            Endianess::LittleEndian => val,
+            Endianess::BigEndian => val.swap_bytes(),
+        };
+        if usize::from(direccion) > self.segmento_memoria[self.banco_actual as usize].len() {
             println!("Intento de almacenar fuera del rango del segmento de memoria")
         } else {
             self.segmento_memoria[self.banco_actual as usize][direccion as usize] = val;
@@ -71,11 +101,15 @@ impl BancosMemoria {
     }
 
     pub fn leer_memoria(&self, direccion: u16) -> u8 {
-        if /*direccion < 0 ||*/usize::from(direccion) > self.segmento_memoria[self.banco_actual as usize].len() {
+        let val = if usize::from(direccion) > self.segmento_memoria[self.banco_actual as usize].len() {
             println!("Intento de leer fuera del rango del segmento de memoria");
             return 0;
         } else {
             self.segmento_memoria[self.banco_actual as usize][direccion as usize]
+        };
+        match self.endianess {
+            Endianess::LittleEndian => val,
+            Endianess::BigEndian => val.swap_bytes(),
         }
     }
 
@@ -114,74 +148,7 @@ mod tests {
     }
 }
 
-//***************************************************************************** 
-/* Modificaciones para añadir LittleEndian y BigEndian                              
-
-pub enum Endianess {
-    LittleEndian,
-    BigEndian,
-}
-
-pub struct BancosMemoria {
-    pub segmento_memoria: Vec<Vec<u8>>,
-    pub banco_actual: u8,
-    pub endianess: Endianess,
-}
-
-impl BancosMemoria {
-    pub fn new(endianess: Endianess) -> BancosMemoria {
-        BancosMemoria {
-            segmento_memoria: vec![vec![0; 16384]; 1],
-            banco_actual: 0,
-            endianess: endianess,
-        }
-    }
-
-    // El resto de los métodos se mantienen igual...
-
-    pub fn escribir_memoria(&mut self, direccion: u16, val: u8) {
-        let val = match self.endianess {
-            Endianess::LittleEndian => val,
-            Endianess::BigEndian => val.swap_bytes(),
-        };
-        if /*direccion < 0 ||*/ usize::from(direccion) > self.segmento_memoria[self.banco_actual as usize].len() {
-            println!("Intento de almacenar fuera del rango del segmento de memoria");
-        } else {
-            self.segmento_memoria[self.banco_actual as usize][direccion as usize] = val;
-        }
-    }
-
-    pub fn leer_memoria(&self, direccion: u16) -> u8 {
-        let val = if /*direccion < 0 ||*/usize::from(direccion) > self.segmento_memoria[self.banco_actual as usize].len() {
-            println!("Intento de leer fuera del rango del segmento de memoria");
-            0
-        } else {
-            self.segmento_memoria[self.banco_actual as usize][direccion as usize]
-        };
-        match self.endianess {
-            Endianess::LittleEndian => val,
-            Endianess::BigEndian => val.swap_bytes(),
-        }
-    }
-}
-*/
-
 //************************************* 
-/* Implementación de unidades de memoria, sus métodos, LitteEndian y Bigendian      
-struct UnidadMemoria                        
-En esta estructura, los datos de la memoria estarían almacenados en un vector dinámico.
-Además, se han agregado los campos start_address y end_address para indicar las
-direcciones de inicio y final de la unidad de memoria.
-
-También se han agregado dos campos opcionales de tipo Fn, read_handler y write_handler,
-que son funciones que se llamarán cuando se intente leer o escribir en una dirección
-de memoria que pertenezca a esta unidad. Estas funciones permiten implementar de 
-forma flexible el comportamiento de la memoria, por ejemplo, simulando dispositivos
-de entrada/salida o áreas de memoria especiales.
-
-La estructura Z80CPU se modificaría para tener una lista de unidades de memoria:
-*/
-
 /*
 pub struct UnidadMemoria {
     data: Vec<u8>,                                  // Datos de la unidad de memoria

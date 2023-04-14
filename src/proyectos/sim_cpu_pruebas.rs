@@ -214,6 +214,7 @@ pub fn cpu_sim_0() {
     println!(" {:?}", resultado);
 
 //************************************* Prueba manejo bit de flags
+/*
     let titulo = String::from(" CPU - Simulación CPU - Prueba manejo bit de flags ");
     imprime_titulo(&titulo);
 
@@ -235,8 +236,10 @@ pub fn cpu_sim_0() {
 
     cpu_flags.set_flags(0b00000000);
     println!("Valor de los flags: 0b{:08b}", cpu_flags.get_flags_1());
+*/
 
 //************************************* Pruebas cálculos de flags individuales
+/*
     let titulo = String::from(" CPU - Simulación CPU - Prueba cálculos de flags individuales ");
     imprime_titulo(&titulo);
 
@@ -268,6 +271,7 @@ pub fn cpu_sim_0() {
     println!("    Signo     : {}, {}", cpu_flags.get_bit(7), cpu_flags.get_bit_1(7));
     cpu_reg.set_a(resultado);
     println!("");
+*/
 
 //************************************* Pruebas cálculos de flags - ALU
     let titulo = String::from(" CPU - Simulación CPU - Prueba cálculos de flags - ALU ");
@@ -289,7 +293,7 @@ pub fn cpu_sim_0() {
     //println!("Registro A       {:08b}", cpu_reg.get_a());
     //println!("Registro B       {:08b}", cpu_reg.get_b());
     let resultado_add = cpu_flags.add(cpu_reg.get_a(), cpu_reg.get_b(), contempla_cf, test);
-    cpu_reg.set_a(resultado);
+    cpu_reg.set_a(resultado_add);
     println!("Resultado ADD: 0x{:02x}, {:08b}", cpu_reg.get_a(), cpu_reg.get_a());
     println!("Banderas: S={} Z={} HC={} P={} C={}"
             , cpu_flags.get_bit(7)
@@ -309,7 +313,7 @@ pub fn cpu_sim_0() {
     , cpu_reg.get_b(), cpu_reg.get_b()
     , cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
     let resultado_adc = cpu_flags.adc(cpu_reg.get_a(), cpu_reg.get_b(), test);
-    cpu_reg.set_a(resultado);
+    cpu_reg.set_a(resultado_adc);
     println!("Resultado ADC: 0x{:02x}, {:08b}", cpu_reg.get_a(), cpu_reg.get_a());
     println!("Resultado ADC: 0x{:02x}, {:08b}", resultado_adc, resultado_adc);
     println!("Banderas: S={} Z={} HC={} P={} C={}"

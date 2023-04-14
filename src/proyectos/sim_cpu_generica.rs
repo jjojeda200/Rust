@@ -15,7 +15,8 @@
 #![allow(unused_assignments)]
 #![allow(unused_mut)]
 
-use super::{sim_cpu_memoria::BancosMemoria, /* */sim_cpu_registros::*};
+use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_memoria::Endianess};
+use super::{sim_cpu_registros::RegistrosCPU, sim_cpu_registros::Flags};
 use pancurses::*;
 
 use std::sync::Mutex;
@@ -55,23 +56,7 @@ Métodos parte de una implementación de una máquina virtual o un emulador de u
     de control match para manejar cada opcode en particular. El código unimplemented!() indica que
     el comportamiento para este opcode aún no se ha implementado.
 */
-/* Little-endian - Big-endian               
-u16::from_le_bytes y u16::from_be_bytes son dos métodos en el tipo u16 de Rust que te permiten
-convertir un arreglo de bytes en un valor u16. La diferencia entre ellos está en el orden de
-los bytes utilizado para interpretar el arreglo.
 
-u16::from_le_bytes interpreta el arreglo en orden de bytes little-endian, lo que significa que
-el byte menos significativo está primero en el arreglo y el byte más significativo está último.
-Este es el orden de bytes utilizado por la mayoría de las computadoras basadas en Intel.
-
-u16::from_be_bytes interpreta el arreglo en orden de bytes big-endian, lo que significa que el
-byte más significativo está primero en el arreglo y el byte menos significativo está último. Este
-es el orden de bytes utilizado por la mayoría de los protocolos de red y algunas otras arquitecturas
-de computadora.
-
-Por ejemplo, si tienes un arreglo de bytes [0x78, 0x56], u16::from_le_bytes lo interpretará como el
-valor u16 0x5678, mientras que u16::from_be_bytes lo interpretará como el valor u16 0x7856.
-*/
 /* Manejar los bit 3, 4 y 5 de un byte      
     fn main() {
         let byte: u8 = 0b11100101; // byte de ejemplo
@@ -118,6 +103,7 @@ impl CPU {
                 segmento_memoria: vec![vec![0; 1024]; 1],
                 //segmento_memoria: vec![vec![0; 16384]; 1],
                 banco_actual: 0,
+                endianess: Endianess::LittleEndian,
             },
             flags: Flags { carry: false, subtract: true, parity_overflow: false, half_carry: false, zero: false, sign: false, },
             reg_a: 0,
@@ -223,10 +209,21 @@ impl CPU {
             }
 
 // Pendiente implementar acceso a 16 bit ***
-            0x0A => { // LDAX A,(BC) cargar el valor contenido en la dirección BC bits en el acumulador (A)
+            0x0A => { // LDAX B cargar el valor contenido en la dirección BC bits en el acumulador (A)
                 self.reg_a = operands[0];
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("LDAX A,[BC]"))); }
+                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("LDAX B"))); }
             }
+
+            0x3A => { // LDA addr: carga el valor de la dirección de memoria apuntada po los dos siguientes bytes en el acumulador (A)
+                self.reg_a = self.memoria.leer_memoria(self.contador_de_programa + 1);
+                //let hl = self.registers.get_hl();
+                //let val = self.memory[hl];
+                //self.registers[0] = val;
+                //self.registers.set_hl(hl.wrapping_sub(1));
+
+                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("LDA addr"))); }
+                self.contador_de_programa += 1;
+            },        
 
             0x3C => { // INR A incrementa el contenido en el Registro (A)
                 self.reg_a = self.flags.add(self.reg_a, 0x01, false, false);
@@ -442,15 +439,8 @@ pub fn cpu_generica_0() {
     //let mut cpu8080 = RegistrosCPU::new();
     //let mut memoria = BancosMemoria::new();
     //**************************************
-
-
-
     let mut reg = RegistrosCPU::new;
     //let mut reg = sim_cpu_registros::RegistrosCPU::new;
-
-
-
-
     let mut cpu = CPU::new();
     let programa = vec![
         0x00,           // NOP
@@ -469,8 +459,9 @@ pub fn cpu_generica_0() {
         0xFF, 0xFF,     // Marca fin de programa
     ];
     cpu.cargar_programa(&programa);
-    //cpu.cargar_programa0(programa.clone());
+    //**************************************
     //cpu.info_pruebas(0000);
+    //**************************************
 
     cpu.run(&ventana_principal);
 

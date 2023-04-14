@@ -64,3 +64,49 @@ pub fn ejemplo_impresion_datos_hex() {
 
 
 //***************************************************************************** 
+// Manejo de bit en un byte con operaciones lógicas y desplazamientos
+/*
+pub fn get0(){
+    // La expresión (1<<0) es una operación de desplazamiento a la izquierda de un bit, que se utiliza para mover
+    // el valor binario 1 cero posiciones a la izquierda.
+    println!("Creación de un byte activando el bit 0: {:08b}",(1<<0));
+    println!("Creación de un byte activando el bit 1: {:08b}",(1<<1));
+    println!("Creación de un byte activando el bit 7: {:08b}",(1<<7));
+    println!("máscara de bits {:08b}",(0x00 & (1<<1)));
+    println!("máscara de bits {:08b}",(0xff & (1<<1)));
+    let mut num = 0x00;
+    println!("Esta activo el bit 1? con & (1<<1 : {}",(num & (1 << 1)) != 0);
+    num = 0xff;
+    println!("Esta activo el bit 1? con & (1<<1 : {}",(num & (1 << 1)) != 0);
+}
+
+pub fn get(n: u8, b: usize) -> bool {
+    (n & (1 << b)) != 0
+}
+pub fn set(n: u8, b: usize) -> u8 {
+    n | (1 << b)
+}
+pub fn reset(n: u8, b: usize) -> u8 {
+    n & !(1 << b)
+}
+
+pub fn pruebas_mascara_bits() {
+    get0();
+    
+    let mut n: u8 = 0b00001111;         // n = 15 en binario
+    println!("El bit en la posición 3 es {}", get(n, 3));   // imprime true
+    n = set(n, 5);                      // establece el bit en la posición 5 en 1
+    println!("n ahora es {:08b}", n);   // imprime "n ahora es 0b00101111"
+    n = reset(n, 0);                    // resetea el bit en la posición 0 a 0
+    println!("n ahora es {:08b}", n);   // imprime "n ahora es 0b00101110"  
+
+    let mut n = 0b1101;             // El número binario 1101 es el número decimal 13
+    assert_eq!(get(n, 0), true);        // El bit menos significativo es 1
+    assert_eq!(get(n, 1), false);       // El siguiente bit es 0
+    n = set(n, 1);
+    assert_eq!(get(n, 1), true);        // Ahora el segundo bit es 1
+    n = reset(n, 3);
+    assert_eq!(get(n, 3), false);       // Ahora el cuarto bit es 0
+    assert_eq!(n, 0b0111);              // El número binario 0101 es el número decimal 5
+}
+*/
