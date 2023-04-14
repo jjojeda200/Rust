@@ -5,7 +5,7 @@
     Descripción:    CPU con direccionamiento de 8 bit (por ahora) y opcode del Intel 8080
     Referencias:
     PanCurses       https://crates.io/crates/pancurses
-    
+
     Crate bitflags  https://crates.io/crates/bitflags
 
 ***************************************************************************************/
@@ -97,10 +97,7 @@ valor u16 0x5678, mientras que u16::from_be_bytes lo interpretará como el valor
 struct CPU {
     memoria: BancosMemoria,
     flags: Flags,
-    //memory: [u8; 256],
-    //program_counter: u8,
-    //registro: [u8; 8],
-    reg_a: u8,   // Registro A de 8 bits
+    reg_a: u8,   // Acumulador A de 8 bits
     reg_b: u8,   // Registro B de 8 bits
     reg_c: u8,   // Registro C de 8 bits
     reg_d: u8,   // Registro D de 8 bits
@@ -123,9 +120,6 @@ impl CPU {
                 banco_actual: 0,
             },
             flags: Flags { carry: false, subtract: true, parity_overflow: false, half_carry: false, zero: false, sign: false, },
-            //memory: [0; 256],
-            //program_counter: 0,
-            //registro: [0; 8],
             reg_a: 0,
             reg_b: 0,
             reg_c: 0,
@@ -308,11 +302,11 @@ impl CPU {
             0x80 => { // ADD A,B suma el contenido del Registro B al acumulador (A)
                 let resultado_add = self.flags.add(self.reg_a, self.reg_b, true, false);
                 self.reg_a = resultado_add;
-            //    let resultado = self.flags.flags_acarreo_add(self.reg_a, self.reg_b);
-            //    self.flags.flags_paridad(self.reg_a);
-            //    self.flags.flags_acarreo_auxiliar(self.reg_a, self.reg_b);
-            //    self.flags.flags_cero(self.reg_a);
-            //    self.flags.flags_signo(self.reg_a);
+                //    let resultado = self.flags.flags_acarreo_add(self.reg_a, self.reg_b);
+                //    self.flags.flags_paridad(self.reg_a);
+                //    self.flags.flags_acarreo_auxiliar(self.reg_a, self.reg_b);
+                //    self.flags.flags_cero(self.reg_a);
+                //    self.flags.flags_signo(self.reg_a);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("ADD A,B"))); }
                 self.contador_de_programa += 1;
             }
@@ -461,16 +455,15 @@ pub fn cpu_generica_0() {
     let programa = vec![
         0x00,           // NOP
         0x3E, 0x04,     // Almacenar el valor 0x04 en el Registro A
-        0x00,           // NOP
         0x06, 0x0a,     // Almacenar el valor 0x0a en el Registro B
         0x04,           // Incrementa Registro B
         0x80,           // Suma el contenido del Registro B al Registro A
         0x00,           // NOP
         0x3E, 0xf0,     // Almacenar el valor 0xff en el Registro A
         0x06, 0x0f,     // Almacenar el valor 0xe0 en el Registro B
-        0x00,           // NOP
         0x80,           // Suma el contenido del Registro B al Registro A
-        0x3E, 0xff,     // Almacenar el valor 0x04 en el Registro A
+        0x00,           // NOP
+        0x3E, 0xff,     // Almacenar el valor 0xff en el Registro A
         0x3C,           // Incrementa Registro A
         0xC3, 0x00,     // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
         0xFF, 0xFF,     // Marca fin de programa

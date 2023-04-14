@@ -41,6 +41,7 @@ impl BancosMemoria {
 
     pub fn crear_segmento(&mut self, longitud_del_segmento: usize) {
         self.segmento_memoria.push(vec![0; longitud_del_segmento]);
+
     }
 
     pub fn eliminar_segmento(&mut self, num_de_banco: usize) -> Result<(), String> {

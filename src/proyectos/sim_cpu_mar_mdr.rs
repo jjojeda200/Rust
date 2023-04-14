@@ -37,27 +37,27 @@ operaciones de lectura y escritura de datos. El MAR proporciona la dirección de
 de la ubicación en la que se realizará la operación, mientras que el MDR contiene los
 datos que se van a leer o escribir en esa ubicación de memoria.
 */
-struct MAR {
-    address: u16,       // dirección de memoria actual del MAR
+pub struct MAR {
+    pub direccion: u16,       // dirección de memoria actual del MAR
 }
-struct MDR {
-    data: u8,           // datos actuales almacenados en el MDR
+pub struct MDR {
+    pub dato: u8,           // datos actuales almacenados en el MDR
 }
 
 // Simulación del MAR y MDR
 fn read_data(mar: &MAR, mdr: &mut MDR) {
     // Leer los datos de la dirección de memoria actual del MAR y almacenarlos en el MDR
-    let data = read_memory(mar.address);
-    mdr.data = data;
+    let dato = read_memory(mar.direccion);
+    mdr.dato = dato;
 }
 
 fn write_data(mar: &MAR, mdr: &MDR) {
     // Escribir los datos en la dirección de memoria actual del MAR desde el MDR
-    write_memory(mar.address, mdr.data);
+    write_memory(mar.direccion, mdr.dato);
 }
 
 // Simulación de la lectura de memoria
-fn read_memory(address: u16) -> u8 {
+fn read_memory(direccion: u16) -> u8 {
     // Retorna el byte en la dirección de memoria especificada
     // Aquí se puede añadir cualquier lógica adicional de la simulación
     // En este caso, simplemente retornamos un byte aleatorio
@@ -65,23 +65,23 @@ fn read_memory(address: u16) -> u8 {
 }
 
 // Simulación de la escritura de memoria
-fn write_memory(address: u16, data: u8) {
+fn write_memory(direccion: u16, dato: u8) {
     // Escribe el byte especificado en la dirección de memoria especificada
     // Aquí se puede añadir cualquier lógica adicional de la simulación
     // En este caso, simplemente imprimimos un mensaje para indicar que se escribieron los datos
-    println!("Data written to memory: 0x{:X} at address 0x{:X}", data, address);
+    println!("Dato written to memory: 0x{:X} at direccion 0x{:X}", dato, direccion);
 }
 
 // Ejemplo de uso
 pub fn uso_mar_mdr() {
-    let mar = MAR { address: 0x1234 };
-    let mut mdr = MDR { data: 0x00 };
+    let mar = MAR { direccion: 0x1234 };
+    let mut mdr = MDR { dato: 0x00 };
 
     read_data(&mar, &mut mdr);
-    println!("Data read from memory: 0x{:X}", mdr.data);
+    println!("Dato read from memory: 0x{:X}", mdr.dato);
 
     write_data(&mar, &mdr);
-    println!("Data written to memory at address 0x{:X}", mar.address);
+    println!("Dato written to memory at direccion 0x{:X}", mar.direccion);
 }
 
 
@@ -128,15 +128,15 @@ fn machine_cycle(memory: &mut [u8], pc: &mut u16) -> u8 {
         // Caso 2: Instrucción de 2 bytes
         0xc0..=0xdf => {
             // Leer el byte de datos y ejecutar la instrucción
-            let data = memory[(*pc + 1) as usize];
+            let dato = memory[(*pc + 1) as usize];
             *pc += 2;
             11
         },
         // Caso 3: Instrucción de 3 bytes
         0xed => {
             // Leer los dos bytes de datos y ejecutar la instrucción
-            let data1 = memory[(*pc + 1) as usize];
-            let data2 = memory[(*pc + 2) as usize];
+            let dato1 = memory[(*pc + 1) as usize];
+            let dato2 = memory[(*pc + 2) as usize];
             *pc += 3;
             16
         },

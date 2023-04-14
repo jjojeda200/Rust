@@ -15,7 +15,6 @@
 //#![allow(unused_imports)]       // Por el "use super::*;" de los test
 //#![allow(unused_mut)]           // Por el uso de los test
 
-
 use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self}};
 
 fn imprime_titulo(titulo: &String) {
@@ -261,7 +260,7 @@ pub fn cpu_sim_0() {
     , cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
     cpu_flags.flags_paridad(resultado);
     println!("    Paridad   : {}, {}", cpu_flags.get_bit(2), cpu_flags.get_bit_1(2));
-    cpu_flags.flags_acarreo_auxiliar(cpu_reg.get_a(), cpu_reg.get_b());
+    cpu_flags.flags_acarreo_auxiliar_add(cpu_reg.get_a(), cpu_reg.get_b());
     println!("    Half-Carry: {}, {}", cpu_flags.get_bit(4), cpu_flags.get_bit_1(4));
     cpu_flags.flags_cero(resultado);
     println!("    Cero      : {}, {}", cpu_flags.get_bit(6), cpu_flags.get_bit_1(6));
@@ -274,7 +273,7 @@ pub fn cpu_sim_0() {
     let titulo = String::from(" CPU - Simulación CPU - Prueba cálculos de flags - ALU ");
     imprime_titulo(&titulo);
 
-    let test = false;
+    let test = true;
     let contempla_cf = true;
 
     cpu_reg.set_a(0xfe);
@@ -408,3 +407,4 @@ fn test_muestra_memm() {
     vec[32] = 0xFF;
     muestra_mem(&vec);
 }
+
