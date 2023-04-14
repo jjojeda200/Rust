@@ -51,7 +51,7 @@ mod proyectos;
 mod rust_standard_library;
 mod lib_flujos;
 mod cap13;
-mod minifb;
+//mod minifb;
 
 /* función imprime_titulo   
 La función imprime_titulo(titulo: &String) recibe como parámetro un puntero a
@@ -87,10 +87,10 @@ fn main() {
 
 
     proyectos::sim_cpu_pruebas::cpu_sim_0();
-//    proyectos::sim_cpu_generica::cpu_generica_0();
+    proyectos::sim_cpu_generica::cpu_generica_0();
 
 
-    // ANALIZAR EN DETALLE
+    // ANALIZAR EN DETALLE OPTIMIZACIONES
     //ejer_rust_en_sp::ejer_trait_rasgos6::manipulacion_byte_0();
 
     //ejer_rust_en_sp::ejer_memoria6::memoria_0();  // Manejo de instrucciones con bits - Ejemplo para mov

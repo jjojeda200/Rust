@@ -1,26 +1,9 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          11-04-2023
+    Fecha:          14-04-2023
     Titulo:         Simulación CPU
     Descripción:    
     Referencias:
-    Rust Programming Language
-                https://doc.rust-lang.org/stable/book/
-    Rust Reference
-                https://doc.rust-lang.org/reference/introduction.html
-    Rust by examples
-                https://doc.rust-lang.org/beta/rust-by-example/index.html
-    Recetas de Rust Cookbook
-                https://rust-lang-nursery.github.io/rust-cookbook/
-    El Lenguaje de Programación Rust
-                https://github.com/goyox86/elpr-sources
-    Rust en español fácil
-                https://www.jmgaguilera.com/rust_facil/actualizaciones.html
-    Tour de Rust
-                https://tourofrust.com/TOC_es.html
-    Crate std   https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/std/index.html
-                https://doc.rust-lang.org/std/index.html
-    Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
 ***************************************************************************************/
 /* Detalles                                 
@@ -32,7 +15,8 @@
 //#![allow(unused_imports)]       // Por el "use super::*;" de los test
 //#![allow(unused_mut)]           // Por el uso de los test
 
-use crate::proyectos::{sim_cpu_registros::{self}, sim_cpu_memoria::*};
+
+use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self}};
 
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo);
@@ -47,7 +31,7 @@ pub struct RegistrosZ80 {
     sp: u16,
     pc: u16,
     pub a: u8,
-    pub f: sim_cpu_registros::Flags,
+    //pub f: sim_cpu_registros::Flags,
 }
 
 impl Default for RegistrosZ80 {
@@ -59,7 +43,7 @@ impl Default for RegistrosZ80 {
             sp: 0,
             pc: 0,
             a: 0,
-            f: Default::default(),
+            //f: Default::default(),
         }
     }
 }
@@ -162,6 +146,7 @@ pub fn cpu_sim_0() {
 
     // Inicializar la estructura de registros y de flags
     let mut cpu_reg = sim_cpu_registros::RegistrosCPU::new();
+    //let mut cpu_reg = sim_cpu_registros::RegistrosCPU::new();
     let mut cpu_flags = sim_cpu_registros::Flags::new_flags();
    
     // Registro A al inicializar
@@ -290,6 +275,7 @@ pub fn cpu_sim_0() {
     imprime_titulo(&titulo);
 
     let test = false;
+    let contempla_cf = true;
 
     cpu_reg.set_a(0xfe);
     cpu_reg.set_b(0x02);
@@ -303,10 +289,9 @@ pub fn cpu_sim_0() {
     , cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
     //println!("Registro A       {:08b}", cpu_reg.get_a());
     //println!("Registro B       {:08b}", cpu_reg.get_b());
-    let resultado_add = cpu_flags.add(cpu_reg.get_a(), cpu_reg.get_b(), test);
+    let resultado_add = cpu_flags.add(cpu_reg.get_a(), cpu_reg.get_b(), contempla_cf, test);
     cpu_reg.set_a(resultado);
     println!("Resultado ADD: 0x{:02x}, {:08b}", cpu_reg.get_a(), cpu_reg.get_a());
-    
     println!("Banderas: S={} Z={} HC={} P={} C={}"
             , cpu_flags.get_bit(7)
             , cpu_flags.get_bit(6)
@@ -335,8 +320,12 @@ pub fn cpu_sim_0() {
             , cpu_flags.get_bit(2)
             , cpu_flags.get_bit(0),);
     println!();
-    println!();
+    
 
+    // Prueba de integración estructura de flags en estructura de registros
+    cpu_flags.set_bit(0,true );
+    println!("cpu_flags.get_bit(0): {}, cpu_reg.flags.get_bit(0): {}", cpu_flags.get_bit(0), cpu_reg.flags.get_bit(0));
+    println!();
 
 //************************************* Mostrar memoria
     let mut vec: [u8; 128] = [0;128];
