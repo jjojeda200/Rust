@@ -637,6 +637,13 @@ mod tests_flags_1 {
         assert_eq!(flags.get_bit_1(4), false);
         assert_eq!(flags.get_bit_1(6), false);
         assert_eq!(flags.get_bit_1(7), true);
+        
+        assert_eq!(flags.add(0x0F, 0x0B, CONT_CF, IMP_TEST), 0x1A);
+        assert_eq!(flags.get_bit_1(0), false);
+        assert_eq!(flags.get_bit_1(2), false);
+        assert_eq!(flags.get_bit_1(4), true);
+        assert_eq!(flags.get_bit_1(6), false);
+        assert_eq!(flags.get_bit_1(7), false);
     }
 
     //********************************* Test de ADC

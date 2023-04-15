@@ -355,7 +355,7 @@ pub fn cpu_generica_0() {
         0x80,               // Suma el contenido del Registro B al Registro A
         0x00,               // NOP
         0x3E, 0xf0,         // Almacenar el valor 0xf0 en el Registro A
-        0x06, 0x0f,         // Almacenar el valor 0xe0 en el Registro B
+        0x06, 0x0f,         // Almacenar el valor 0x0f en el Registro B
         0x80,               // Suma el contenido del Registro B al Registro A
         0x00,               // NOP
         0x3E, 0x3b,         // Almacenar el valor 0x3b en el Registro A
@@ -364,6 +364,8 @@ pub fn cpu_generica_0() {
         0x00, 0x00,         // <-- Se cambio el contenido y se convierte en 3C
         0x3A, 0x0b, 0x00,   // Mueve el contenido (0x0f) de la dirección indicada (0x0b) en los dos bytes siguientes a A 
         0x00, 0x00,
+        0x06, 0xff,         // Almacenar el valor 0xff en el Registro B
+        0x80,               // Suma el contenido del Registro B al Registro A
         0x00, 0x00,
         0xC3, 0x00, 0x00,   // Salta a la dirección 0x0000
         0xFF, 0xFF,         // Marca fin de programa
