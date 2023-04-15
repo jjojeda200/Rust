@@ -43,7 +43,26 @@ pub fn ejemplo_impresion_datos_hex() {
 }
 
 //***************************************************************************** 
+/* Manejar los bit 3, 4 y 5 de un byte                                      
+    fn main() {
+        let byte: u8 = 0b11100101; // byte de ejemplo
 
+        // Máscara con los bits 3, 4 y 5 establecidos en 1 y los demás en 0
+        let mask: u8 = 0b00111000;
+
+        // Comprobación de los bits 3, 4 y 5
+        if byte & mask == mask {
+            println!("Los bits 3, 4 y 5 están establecidos en 1");
+        } else {
+            println!("Los bits 3, 4 y 5 no están establecidos en 1");
+        }
+
+        // Manipulación de los bits 3, 4 y 5
+        let new_byte = (byte & !mask) | (0b010 << 3); // Establece los bits 3, 4 y 5 en 010
+        println!("Byte original: {:08b}", byte);
+        println!("Byte modificado: {:08b}", new_byte);
+    }
+*/
 
 //***************************************************************************** 
 /* Manejo de bit en un byte con operaciones lógicas y desplazamientos       
