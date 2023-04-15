@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          14-04-2023
+    Fecha:          15-04-2023
     Titulo:         Funciones de manejo de registros y flags - Simulación CPU
     Descripción:    
     Referencias:
@@ -336,7 +336,7 @@ impl RegistrosCPU {
 
     pub fn get_h(&self) -> u8 { self.reg_h }
     pub fn set_h(&mut self, valor: u8) { self.reg_h = valor; }
-    pub fn get_l(&self) -> u8 { self.reg_c }
+    pub fn get_l(&self) -> u8 { self.reg_l }
     pub fn set_l(&mut self, valor: u8) { self.reg_l = valor; }
     pub fn get_hl(&self) -> u16 { u16::from_be_bytes([self.reg_h, self.reg_l]) }
     pub fn set_hl(&mut self, valor: u16) {
@@ -417,9 +417,9 @@ impl Alu {
 
 
 
-//***************************************************************************** Test manejo de bit de flags y calculo individual
+//***************************************************************************** Test  flags - manejo de bit y calculo individual
 #[cfg(test)]
-mod tests_0 {
+mod tests_flags_0 {
     use super::*;
 
     #[test]
@@ -575,9 +575,9 @@ mod tests_0 {
     }
 }
 
-//***************************************************************************** Test manejo de flags - ALU
+//***************************************************************************** Test flags - ALU
 #[cfg(test)]
-mod tests_1 {
+mod tests_flags_1 {
     const IMP_TEST: bool = false;
     const CONT_CF: bool = true;
     use crate::proyectos::sim_cpu_registros::Flags;
@@ -723,6 +723,61 @@ mod tests_1 {
         assert_eq!(flags.get_bit_1(4), true);
         assert_eq!(flags.get_bit_1(6), true);
         assert_eq!(flags.get_bit_1(7), false);
+    }
+}
+
+//***************************************************************************** Test manejo de Registros
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_registros() {
+        let registros = RegistrosCPU::new();
+        assert_eq!(registros.memoria.segmento_memoria[0][0], 0);
+        assert_eq!(registros.flags.carry, false);
+        assert_eq!(registros.reg_a, 0);
+        assert_eq!(registros.reg_b, 0);
+        assert_eq!(registros.reg_c, 0);
+        assert_eq!(registros.reg_d, 0);
+        assert_eq!(registros.reg_e, 0);
+        assert_eq!(registros.reg_h, 0);
+        assert_eq!(registros.reg_l, 0);
+        assert_eq!(registros.reg_ix, 0);
+        assert_eq!(registros.reg_iy, 0);
+        assert_eq!(registros.sp, 0);
+        assert_eq!(registros.pc, 0);
+        assert_eq!(registros.contador_de_programa, 0);
+        assert_eq!(registros.puntero_de_pila, 0);
+        assert_eq!(registros.registro_instrucciones, 0);
+    }
+
+    #[test]
+    fn test_get_set_a() {
+        let mut registros = RegistrosCPU::new();
+        registros.set_a(0x55);
+        assert_eq!(registros.get_a(), 0x55);
+    }
+
+    #[test]
+    fn test_get_set_bc() {
+        let mut registros = RegistrosCPU::new();
+        registros.set_bc(0x1234);
+        assert_eq!(registros.get_bc(), 0x1234);
+    }
+
+    #[test]
+    fn test_get_set_de() {
+        let mut registros = RegistrosCPU::new();
+        registros.set_de(0xABCD);
+        assert_eq!(registros.get_de(), 0xABCD);
+    }
+
+    #[test]
+    fn test_get_set_hl() {
+        let mut registros = RegistrosCPU::new();
+        registros.set_hl(0x5678);
+        assert_eq!(registros.get_hl(), 0x5678);
     }
 }
 

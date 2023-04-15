@@ -152,7 +152,7 @@ impl CPU {
         (opcode, operandos)
     }
     
-    fn ejecuta_instruccion(&mut self, opcode: u8, operands: [u8; 2]) {
+    fn ejecuta_instruccion(&mut self, opcode: u8, operandos: [u8; 2]) {
         match opcode {
             0x00 => { // NOP: No hace nada
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("NOP"))); }
@@ -160,11 +160,12 @@ impl CPU {
             }
 
             0x04 => { // INR B incrementa el contenido en el Registro (B)
-                self.reg_b += 1;
+                self.reg_b = self.flags.add(self.reg_b, 0x01, false, false);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("INR B"))); }
                 self.contador_de_programa += 1;
             }
 
+// Corregir
             0x05 => { // DCR B decrementa el contenido en el Registro (B)
                 self.reg_b -= 1;
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("DCR B"))); }
@@ -203,40 +204,34 @@ impl CPU {
             }
 
             0x06 => { // MVI B,d8 cargar un valor de 8 bits en el Registro (B)
-                self.reg_b = self.memoria.leer_memoria(self.contador_de_programa + 1);
+                self.reg_b = operandos[0];  // self.reg_b = self.memoria.leer_memoria(self.contador_de_programa + 1);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI B,d8"))); }
                 self.contador_de_programa += 2;
             }
 
-// Pendiente implementar acceso a 16 bit ***
+// Verificar
             0x0A => { // LDAX B cargar el valor contenido en la dirección BC bits en el acumulador (A)
-                self.reg_a = operands[0];
+                let direccion = u16::from_le_bytes([self.reg_b, self.reg_c]);
+                self.reg_a = self.memoria.leer_memoria(direccion);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("LDAX B"))); }
+                self.contador_de_programa += 1;
             }
 
             0x32 => { // STA addr: carga el registro A en la dirección apuntada por HL
-                self.reg_h = self.memoria.leer_memoria(self.contador_de_programa + 1);
-                self.reg_l = self.memoria.leer_memoria(self.contador_de_programa + 2);
-                let bytes: [u8; 2] = [self.reg_h, self.reg_l];
-                let addr = u16::from_le_bytes([self.reg_h, self.reg_l]);
-                self.memoria.escribir_memoria(addr, self.reg_a);
-                //self.memory[addr] = self.registers[0];
-                //self.registers.set_hl(addr.wrapping_sub(1));
-
+                //self.reg_h = operandos[0];  // self.reg_h = self.memoria.leer_memoria(self.contador_de_programa + 1);
+                //self.reg_l = operandos[1];  // self.reg_l = self.memoria.leer_memoria(self.contador_de_programa + 2);
+                let direccion = u16::from_le_bytes([operandos[0], operandos[1]]);
+                // let direccion = u16::from_be_bytes([self.reg_h, self.reg_l]);
+                self.memoria.escribir_memoria(direccion, self.reg_a);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("STA addr"))); }
                 self.contador_de_programa += 3;
             },
         
-            
-            0x3A => { // LDA addr: carga el valor de la dirección de memoria apuntada po los dos siguientes bytes en el acumulador (A)
-                self.reg_a = self.memoria.leer_memoria(self.contador_de_programa + 1);
-                //let hl = self.registers.get_hl();
-                //let val = self.memory[hl];
-                //self.registers[0] = val;
-                //self.registers.set_hl(hl.wrapping_sub(1));
-
+            0x3A => { // LDA addr: carga el valor de la dirección apuntada por los dos siguientes bytes en el acumulador (A)
+                let direccion = u16::from_le_bytes([operandos[0], operandos[1]]);
+                self.reg_a = self.memoria.leer_memoria(direccion);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("LDA addr"))); }
-                self.contador_de_programa += 1;
+                self.contador_de_programa += 3;
             },        
 
             0x3C => { // INR A incrementa el contenido en el Registro (A)
@@ -245,6 +240,7 @@ impl CPU {
                 self.contador_de_programa += 1;
             }
 
+// Corregir
             0x3D => { // DCR A decrementa el contenido en el Registro (A)
                 self.reg_a -= 1;
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("DCR A"))); }
@@ -256,9 +252,7 @@ impl CPU {
             }
 
             0x3E => { // MVI A,n cargar un valor de 8 bits en el acumulador (A)
-                self.reg_a = self.memoria.leer_memoria(self.contador_de_programa + 1);
-                // La siguiente linea para pruebas (borrar) -> 
-                // self.flags.flags_paridad(self.reg_a);
+                self.reg_a = operandos[0];  // self.reg_a = self.memoria.leer_memoria(self.contador_de_programa + 1);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI A,d8"))); }
                 self.contador_de_programa += 2;
             }
@@ -266,11 +260,6 @@ impl CPU {
             0x80 => { // ADD A,B suma el contenido del Registro B al acumulador (A)
                 let resultado_add = self.flags.add(self.reg_a, self.reg_b, true, false);
                 self.reg_a = resultado_add;
-                //    let resultado = self.flags.flags_acarreo_add(self.reg_a, self.reg_b);
-                //    self.flags.flags_paridad(self.reg_a);
-                //    self.flags.flags_acarreo_auxiliar(self.reg_a, self.reg_b);
-                //    self.flags.flags_cero(self.reg_a);
-                //    self.flags.flags_signo(self.reg_a);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("ADD A,B"))); }
                 self.contador_de_programa += 1;
             }
@@ -282,56 +271,26 @@ impl CPU {
                 self.contador_de_programa += 1;
             }
 
-// Revisar implementar manejo de direccionamiento de 16 bit *****
             0xC3 => { // JMP nn marca PC con la dirección indicada por los dos siguientes bytes
-                self.contador_de_programa = self.memoria.leer_memoria(self.contador_de_programa + 1) as u16;
+                self.contador_de_programa = u16::from_le_bytes([operandos[0], operandos[1]]);
                 unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("JMP nn"))); }
-                /* Instrucción 0xC3 manejando direcciones de 16 bits
-                fn 0x3C (address: u16) {
-                    // La dirección a la que saltaremos es una palabra de 16 bits, por lo que
-                    // debemos leer dos bytes de memoria consecutivos.
-                    let high_byte = memory[address as usize];
-                    let low_byte  = memory[(address + 1) as usize];
-                    // Combinamos los dos bytes leídos en una sola dirección de memoria de 16 bits.
-                    /* ((high_byte as u16) << 8) | (low_byte as u16)
-                    Convertimos el byte más significativo (high_byte) en un valor u16 utilizando la sintaxis as u16.
-                    Luego, utilizamos el operador de desplazamiento a la izquierda << para mover este byte 8 bits
-                    hacia la izquierda, lo que coloca los bits del byte en las posiciones más altas del valor de 16
-                    bits. A continuación, convertimos el byte menos significativo (low_byte) en un valor u16 de la
-                    misma manera. Finalmente, combinamos los dos valores u16 utilizando el operador OR |, lo que
-                    establece los bits del byte menos significativo en las posiciones más bajas del valor de 16 bits.
-                    Ejemplo:
-                        let inst0: u8 = 0b11011010;         // variable con valor binario 11011010
-                        let inst1: u8 = inst0 & 0x0F;       // operación AND con 0x0F (00001111)
-                        println!("Inst0: {:08b}", inst0);   // imprime Inst0: 11011010
-                        println!("Inst1: {:08b}", inst1);   // imprime Inst1: 00001010
-                        let inst2 = ((inst1 as u16) << 8) | (inst0 as u16);
-                        println!("Inst2: {:016b}", inst2);  // imprime Inst2: Inst2: 0000101011011010
-                    */
-                    let jump_address = ((high_byte as u16) << 8) | (low_byte as u16);
-                    // Saltamos a la dirección de memoria especificada.
-                    pc = jump_address;
-                }
-                */
             }
 
 // Revisar *********************************
-            _ => {
-                print!("");
-            }
+            _ => { print!("exit"); }
         }
     }
 
     fn step(&mut self) {
         let instruccion = self.busca_instruccion();
-        let (opcode, operands) = self.decodifica_instruccion(instruccion);
-        self.ejecuta_instruccion(opcode, operands);
+        let (opcode, operandos) = self.decodifica_instruccion(instruccion);
+        self.ejecuta_instruccion(opcode, operandos);
 
         /* (&self).info_registros()
         El paréntesis es necesario para asegurar que se tome la referencia de self antes de llamar al método
         info_registros(). Esto se debe a que el operador . tiene una mayor precedencia que el operador &
         */
-        (&self).info_opcode(opcode, operands);
+        (&self).info_opcode(opcode, operandos);
         (&self).info_registros();
         (&self).info_pruebas();
 
@@ -410,25 +369,25 @@ pub fn cpu_generica_0() {
     //let mut reg = sim_cpu_registros::RegistrosCPU::new;
     let mut cpu = CPU::new();
     let programa = vec![
-        0x00,           // NOP
-        0x3E, 0x04,     // Almacenar el valor 0x04 en el Registro A
-        0x06, 0x0a,     // Almacenar el valor 0x0a en el Registro B
-        0x04,           // Incrementa Registro B
-        0x80,           // Suma el contenido del Registro B al Registro A
-        0x00,           // NOP
-        0x3E, 0xf0,     // Almacenar el valor 0xff en el Registro A
-        0x06, 0x0f,     // Almacenar el valor 0xe0 en el Registro B
-        0x80,           // Suma el contenido del Registro B al Registro A
-        0x00,           // NOP
-        0x3E, 0xff,     // Almacenar el valor 0xff en el Registro A
-        0x3C,           // Incrementa Registro A
-        0x32, 0x00, 0x00,
+        0x00,               // NOP
+        0x3E, 0x04,         // Almacenar el valor 0x04 en el Registro A
+        0x06, 0x0a,         // Almacenar el valor 0x0a en el Registro B
+        0x04,               // Incrementa Registro B
+        0x80,               // Suma el contenido del Registro B al Registro A
+        0x00,               // NOP
+        0x3E, 0xf0,         // Almacenar el valor 0xf0 en el Registro A
+        0x06, 0x0f,         // Almacenar el valor 0xe0 en el Registro B
+        0x80,               // Suma el contenido del Registro B al Registro A
+        0x00,               // NOP
+        0x3E, 0x3b,         // Almacenar el valor 0x3b en el Registro A
+        0x3C,               // Incrementa Registro A
+        0x32, 0x15, 0x00,   // Mueve el contenido de A a la dirección indicada por los dos bytes siguientes 
+        0x00, 0x00,         // <-- Se cambio el contenido y se convierte en 3C
+        0x3A, 0x0b, 0x00,   // Mueve el contenido (0x0f) de la dirección indicada (0x0b) en los dos bytes siguientes a A 
         0x00, 0x00,
         0x00, 0x00,
-        0x00, 0x00,
-        0x00, 0x00,
-        0xC3, 0x00,     // Salta a la dirección 00 (modificar para direccionamiento de 2 bytes)
-        0xFF, 0xFF,     // Marca fin de programa
+        0xC3, 0x00, 0x00,   // Salta a la dirección 0x0000
+        0xFF, 0xFF,         // Marca fin de programa
     ];
     cpu.cargar_programa(&programa);
     //**************************************
@@ -572,12 +531,7 @@ impl CPU {                                   // Funciones de manejo de ventanas
 }
 
 //***************************************************************************** Muestra memoria en formato tabla
-fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec: &[u8], /* , size: usize, ancho: usize */) {
-
-    // let mut lineas = vec.len() / 16;
-    // if (vec.len() & 0xf) != 0 {
-    //     lineas += 1;
-    // }
+fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec: &[u8]) {
 
     comentarios_window.mv(pos_y, pos_x);
     comentarios_window.mvprintw( pos_y, pos_x,format!(" Dir. Memoria  || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F"));
@@ -601,62 +555,6 @@ fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec:
 12- Se actualiza la posición vertical de la ventana, se incrementa el valor de "dir" en 0x10 y se actualiza el valor de "lineas".
 13- Si "lineas" es igual a 8, se establece el valor de "doble_ff" a true y se sale del bucle. De lo contrario, se incrementa el valor de "lineas".
 14- Se repite el bucle for desde el punto 3 hasta que se hayan recorrido todos los grupos del vector "vec" o hasta que se establezca el valor de "doble_ff" a true.
-*/
-/* Diagrama de flujo                        
-Inicio
-|
-|__ Inicializar variables mutables
-|__ Iniciar bucle for para recorrer grupos del vector vec
-   |
-   |__ Evaluar si se ha encontrado doble_ff
-   |   |
-   |   |__ Si es verdadero, salir del bucle
-   |   |
-   |   |__ Si es falso, continuar con el flujo
-   |
-   |__ Limpiar el buffer
-   |
-   |__ Iniciar bucle for para recorrer elementos del grupo actual
-      |
-      |__ Guardar el valor actual de byte
-      |
-      |__ Evaluar si i es igual a 0 y byte es igual a 0xff y ultimo_byte es igual a 0xff
-      |   |
-      |   |__ Si es verdadero, establecer doble_ff a true y salir del bucle
-      |   |
-      |   |__ Si es falso, continuar con el flujo
-      |
-      |__ Evaluar si i es igual al tamaño del grupo menos 1 y byte es igual a 0xff
-      |   |
-      |   |__ Si es verdadero, guardar byte en ultimo_byte
-      |   |
-      |   |__ Si es falso, continuar con el flujo
-      |
-      |__ Evaluar si byte es igual a 0xff y i es menor que el tamaño del grupo menos 1 y el siguiente elemento del grupo es igual a 0xff
-      |   |
-      |   |__ Si es verdadero, establecer doble_ff a true y salir del bucle
-      |   |
-      |   |__ Si es falso, continuar con el flujo
-      |
-      |__ Agregar la representación en hexadecimal de byte al buffer
-      |
-      |__ Mostrar los elementos del buffer en la ventana
-      |
-      |__ Actualizar la posición vertical de la ventana, dir y lineas
-      |
-      |__ Evaluar si lineas es igual a 8
-      |   |
-      |   |__ Si es verdadero, establecer doble_ff a true y salir del bucle
-      |   |
-      |   |__ Si es falso, incrementar lineas
-      |
-   |
-Fin del bucle for de elementos del grupo actual
-|
-|__ Repetir el bucle for de grupos del vector vec si doble_ff es falso
-|
-Fin del bucle for de grupos del vector vec o si doble_ff es verdadero
-
 */
 
     let mut doble_ff = false;

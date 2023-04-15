@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          14-04-2023
+    Fecha:          15-04-2023
     Titulo:         Simulación CPU
     Descripción:    
     Referencias:
@@ -200,8 +200,8 @@ pub fn cpu_sim_0() {
     // escribe un byte en la dirección 0x2000 del primer banco
     memoria.escribir_memoria(0x2000, 0x55);
     // lee el byte en la dirección 0x2000 del primer banco
-    let byte1 = memoria.leer_memoria(10);
-    println!("Byte leído en la dirección 0x2000 del primer banco: 0x{:02x}", byte1);
+    let byte_1 = memoria.leer_memoria(10);
+    println!("Byte leído en la dirección 0x2000 del primer banco: 0x{:02x}", byte_1);
 
     println!(" {:?} ", memoria.segmento_memoria.len());
     let mut resultado = memoria.eliminar_segmento(1);
@@ -290,8 +290,6 @@ pub fn cpu_sim_0() {
     , cpu_reg.get_a(), cpu_reg.get_a()
     , cpu_reg.get_b(), cpu_reg.get_b()
     , cpu_flags.get_bit(0), cpu_flags.get_bit_1(0));
-    //println!("Registro A       {:08b}", cpu_reg.get_a());
-    //println!("Registro B       {:08b}", cpu_reg.get_b());
     let resultado_add = cpu_flags.add(cpu_reg.get_a(), cpu_reg.get_b(), contempla_cf, test);
     cpu_reg.set_a(resultado_add);
     println!("Resultado ADD: 0x{:02x}, {:08b}", cpu_reg.get_a(), cpu_reg.get_a());
@@ -323,25 +321,40 @@ pub fn cpu_sim_0() {
             , cpu_flags.get_bit(2)
             , cpu_flags.get_bit(0),);
     println!();
-    
 
-    // Prueba de integración estructura de flags en estructura de registros
+//************************************* Prueba de integración estructura de flags en estructura de registros
     cpu_flags.set_bit(0,true );
     println!("cpu_flags.get_bit(0): {}, cpu_reg.flags.get_bit(0): {}", cpu_flags.get_bit(0), cpu_reg.flags.get_bit(0));
     println!();
 
-//************************************* Mostrar memoria
-    let mut vec: [u8; 128] = [0;128];
-    for i in 0..vec.len() { vec[i] = (i+0) as u8; }
+//************************************* Mostrar memoria y lectura/escritura con LittleEndian y BigEndian
+    let titulo = String::from(" Mostrar memoria y lectura/escritura con LittleEndian y BigEndian ");
+    imprime_titulo(&titulo);
 
-    vec[30] = 0xAA;
-    vec[31] = 0xFF;
-    vec[32] = 0xFF;
+    cpu_reg.set_b(0xff);
+    cpu_reg.set_d(0x00);
+    let bytes: [u8; 2] = [cpu_reg.get_b(), cpu_reg.get_d()];
+    let bytes_le = u16::from_le_bytes([cpu_reg.get_b(), cpu_reg.get_d()]);
+    println!("Byte: {:02x}{:02x}, Byte Little: {:04x}", bytes[0], bytes[1], bytes_le);
+    println!();
+
+    let mut vec: [u8; 512] = [0;512];
+    for i in 0..vec.len() { vec[i] = (i+0) as u8; }
+    for i in 16..32 { vec[i] = 00 as u8; }
+
+    println!("Byte: {:02x}{:02x}, Byte Little: {:04x}", bytes[0], bytes[1], bytes_le);
+    vec[20] = bytes[0];
+    vec[21] = bytes[1];
+    vec[22] = ((bytes_le >> 8) & 0xFF) as u8;   // 8 bits + significativos en la posición 22 del vector
+    vec[23] = (bytes_le & 0xFF) as u8;          // 8 bits - significativos en la posición 23 del vector
+    vec[41] = 0xFF;
+    vec[42] = 0xFF;
 
     muestra_mem(&vec);
     
 }
 
+//***************************************************************************** 
 fn muestra_mem(vec: &[u8]) {
 
     //    let lineas = vec.len() / 16 + if vec.len() % 16 != 0 { 1 } else { 0 };

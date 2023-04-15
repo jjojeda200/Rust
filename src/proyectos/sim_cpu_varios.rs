@@ -1,27 +1,9 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          26-03-2023
+    Fecha:          15-04-2023
     Titulo:         Simulación CPU
     Descripción:    Rutinas variadas
-    Referencias:
-    Rust Programming Language
-                https://doc.rust-lang.org/stable/book/
-    Rust Reference
-                https://doc.rust-lang.org/reference/introduction.html
-    Rust by examples
-                https://doc.rust-lang.org/beta/rust-by-example/index.html
-    Recetas de Rust Cookbook
-                https://rust-lang-nursery.github.io/rust-cookbook/
-    El Lenguaje de Programación Rust
-                https://github.com/goyox86/elpr-sources
-    Rust en español fácil
-                https://www.jmgaguilera.com/rust_facil/actualizaciones.html
-    Tour de Rust
-                https://tourofrust.com/TOC_es.html
-    Crate std   https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/std/index.html
-                https://doc.rust-lang.org/std/index.html
-    Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
-
+    
 ***************************************************************************************/
 /* Detalles
 */
@@ -64,8 +46,7 @@ pub fn ejemplo_impresion_datos_hex() {
 
 
 //***************************************************************************** 
-// Manejo de bit en un byte con operaciones lógicas y desplazamientos
-/*
+/* Manejo de bit en un byte con operaciones lógicas y desplazamientos       
 pub fn get0(){
     // La expresión (1<<0) es una operación de desplazamiento a la izquierda de un bit, que se utiliza para mover
     // el valor binario 1 cero posiciones a la izquierda.
@@ -108,5 +89,34 @@ pub fn pruebas_mascara_bits() {
     n = reset(n, 3);
     assert_eq!(get(n, 3), false);       // Ahora el cuarto bit es 0
     assert_eq!(n, 0b0111);              // El número binario 0101 es el número decimal 5
+}
+*/
+
+//***************************************************************************** 
+/* Instrucción 0xC3 manejando direcciones de 16 bits                        
+fn 0x3C (address: u16) {
+    // La dirección a la que saltaremos es una palabra de 16 bits, por lo que
+    // debemos leer dos bytes de memoria consecutivos.
+    let high_byte = memory[address as usize];
+    let low_byte  = memory[(address + 1) as usize];
+    // Combinamos los dos bytes leídos en una sola dirección de memoria de 16 bits.
+    /* ((high_byte as u16) << 8) | (low_byte as u16)
+    Convertimos el byte más significativo (high_byte) en un valor u16 utilizando la sintaxis as u16.
+    Luego, utilizamos el operador de desplazamiento a la izquierda << para mover este byte 8 bits
+    hacia la izquierda, lo que coloca los bits del byte en las posiciones más altas del valor de 16
+    bits. A continuación, convertimos el byte menos significativo (low_byte) en un valor u16 de la
+    misma manera. Finalmente, combinamos los dos valores u16 utilizando el operador OR |, lo que
+    establece los bits del byte menos significativo en las posiciones más bajas del valor de 16 bits.
+    Ejemplo:
+        let inst0: u8 = 0b11011010;         // variable con valor binario 11011010
+        let inst1: u8 = inst0 & 0x0F;       // operación AND con 0x0F (00001111)
+        println!("Inst0: {:08b}", inst0);   // imprime Inst0: 11011010
+        println!("Inst1: {:08b}", inst1);   // imprime Inst1: 00001010
+        let inst2 = ((inst1 as u16) << 8) | (inst0 as u16);
+        println!("Inst2: {:016b}", inst2);  // imprime Inst2: Inst2: 0000101011011010
+    */
+    let jump_address = ((high_byte as u16) << 8) | (low_byte as u16);
+    // Saltamos a la dirección de memoria especificada.
+    pc = jump_address;
 }
 */

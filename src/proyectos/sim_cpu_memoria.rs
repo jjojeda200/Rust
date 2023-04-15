@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          14-03-2023
+    Fecha:          15-03-2023
     Titulo:         Funciones de manejo de registros y flags - Simulación CPU
     Descripción:    
     Referencias:
@@ -149,7 +149,7 @@ mod tests {
 }
 
 //************************************* 
-/*
+/* UnidadMemoria                            
 pub struct UnidadMemoria {
     data: Vec<u8>,                                  // Datos de la unidad de memoria
     start_address: u16,                             // Dirección de inicio de la unidad de memoria
