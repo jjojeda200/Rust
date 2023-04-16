@@ -23,6 +23,9 @@
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
 ***************************************************************************************/
+
+use colored::*;
+
 /* Notas:                   
 Expresiones son instrucciones que devuelven algún valor como resultado.
 Declaraciones y Sentencias son instrucciones que no dan lugar a ningún resultado.
@@ -59,7 +62,7 @@ una cadena de texto String y utiliza la macro println!() para imprimir el valor
 de la cadena de texto centrado en 80 caracteres y rodeado por asteriscos.
 */
 fn imprime_titulo(titulo: &String) {
-    println!("\n{:*^80}", titulo);
+    println!("\n{:*^80}", titulo.yellow());
 }
 
 fn main() {
