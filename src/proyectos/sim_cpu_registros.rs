@@ -238,7 +238,6 @@ Las operaciones que utiliza la ALU en el procesador Intel 8080 incluyen:
         return resultado;
     }
 
-
 }
 
 //***************************************************************************** Estructura e implementación Registros
