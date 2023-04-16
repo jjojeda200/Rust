@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          15-04-2023
+    Fecha:          16-04-2023
     Titulo:         Funciones de manejo de registros y flags - Simulación CPU
     Descripción:    
     Referencias:
@@ -255,6 +255,23 @@ pub struct RegistrosCPU {
     reg_iy: u16,        // Registro IY de 16 bits
     sp: u16,            // Registro SP de 16 bits
     pc: u16,            // Registro PC de 16 bits
+    contador_de_programa: u16,
+    puntero_de_pila: u16,
+    registro_instrucciones: u8,
+}
+
+struct CPU {
+    memoria: BancosMemoria,
+    flags: Flags,
+    reg_a: u8,   // Acumulador A de 8 bits
+    reg_b: u8,   // Registro B de 8 bits
+    reg_c: u8,   // Registro C de 8 bits
+    reg_d: u8,   // Registro D de 8 bits
+    reg_e: u8,   // Registro E de 8 bits
+    reg_h: u8,   // Registro H de 8 bits
+    reg_l: u8,   // Registro L de 8 bits
+    reg_ix: u16, // Registro IX de 16 bits
+    reg_iy: u16, // Registro IY de 16 bits
     contador_de_programa: u16,
     puntero_de_pila: u16,
     registro_instrucciones: u8,

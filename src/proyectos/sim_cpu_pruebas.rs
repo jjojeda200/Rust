@@ -1,19 +1,15 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          15-04-2023
+    Fecha:          16-04-2023
     Titulo:         Simulación CPU
     Descripción:    
     Referencias:
 
 ***************************************************************************************/
-/* Detalles                                 
-
-*/
 #![allow(dead_code)]
 #![allow(unused_variables)]
 #![allow(unused_assignments)]
-//#![allow(unused_imports)]       // Por el "use super::*;" de los test
-//#![allow(unused_mut)]           // Por el uso de los test
+#![allow(unused_mut)]
 
 use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self}};
 //use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::*};
@@ -115,7 +111,7 @@ pub fn actualizar_registros_z80(registros: &mut RegistrosZ80, ciclos_restantes: 
 }
 
 fn ejecutar_programa() -> u8 {
-    // Inicializar la estructura de registros Z80 y la memoria del sistema
+    // Inicializar la estructura de registros y la memoria del sistema
     let mut registros = RegistrosZ80::default();
     registros.pc = 0x100;
     let mut memoria = Memoria { datos: [0; 65536] };
@@ -135,9 +131,8 @@ fn ejecutar_programa() -> u8 {
  */
 
 pub fn cpu_sim_0() {
-    let titulo = String::from(" CPU - Simulación CPU - Aproximación de pruebas 1 ");
+    let titulo = String::from(" Simulación CPU - Pruebas de Funciones, Métodos ");
     imprime_titulo(&titulo);
-
 
 /* 
     let resultado = ejecutar_programa();
@@ -152,13 +147,22 @@ pub fn cpu_sim_0() {
     let mut memoria = BancosMemoria::new();
 
 
+    //pru_registros(&mut cpu_reg);                    // Prueba manejo registros
+    //pru_flags(&mut cpu_reg, &mut cpu_flags);        // Prueba manejo bit de flags
+    //pru_flags_cal(&mut cpu_reg, &mut cpu_flags);    // Pruebas cálculos de flags individuales
+    //pru_flags_alu_0(&mut cpu_reg, &mut cpu_flags);  // Pruebas cálculos de flags - ALU
+    //pru_mem_0(&mut cpu_reg, &mut memoria);          // Manejo bancos de memoria
+    //pru_varias_0(&mut cpu_reg);                     // "fn muestra_mem" y manejo de LittleEndian y BigEndian
+
+}
+
+//***************************************************************************** 
 
 
-//************************************* Prueba manejo registros
+//*************************************  Prueba manejo registros
+fn pru_registros(cpu_reg: &mut sim_cpu_registros::RegistrosCPU){
     let titulo = String::from(" CPU - Simulación CPU - Prueba manejo registros ");
     imprime_titulo(&titulo);
-
-
    
     // Registro A al inicializar
     println!("Registro A: 0x{:02x}", cpu_reg.get_a());
@@ -175,10 +179,11 @@ pub fn cpu_sim_0() {
     // Registro BC modificados como uno solo
     cpu_reg.set_reg_bc(0b0000111111110000);
     println!("Registro BC: 0x{:04x}", cpu_reg.get_reg_bc());
+}
 
 //************************************* Prueba manejo bit de flags
-/*
-    let titulo = String::from(" CPU - Simulación CPU - Prueba manejo bit de flags ");
+fn pru_flags(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, cpu_flags: &mut sim_cpu_registros::Flags){
+    let titulo = String::from(" Simulación CPU - Prueba manejo bit de flags ");
     imprime_titulo(&titulo);
 
     cpu_flags.set_flags(0b10110101);
@@ -199,11 +204,16 @@ pub fn cpu_sim_0() {
 
     cpu_flags.set_flags(0b00000000);
     println!("Valor de los flags: 0b{:08b}", cpu_flags.get_flags_1());
-*/
+
+    //************************************* Integración estructura "flags" y estructura "reg/flags"
+    cpu_flags.set_bit(0,true );
+    println!("cpu_flags.get_bit(0): {}, cpu_reg.flags.get_bit(0): {}", cpu_flags.get_bit(0), cpu_reg.flags.get_bit(0));
+    println!();
+}
 
 //************************************* Pruebas cálculos de flags individuales
-/*
-    let titulo = String::from(" CPU - Simulación CPU - Prueba cálculos de flags individuales ");
+fn pru_flags_cal(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, cpu_flags: &mut sim_cpu_registros::Flags) {
+    let titulo = String::from(" Simulación CPU - Prueba cálculos de flags individuales ");
     imprime_titulo(&titulo);
 
     cpu_reg.set_a(0xfe);
@@ -233,36 +243,12 @@ pub fn cpu_sim_0() {
     cpu_flags.flags_signo(resultado);
     println!("    Signo     : {}, {}", cpu_flags.get_bit(7), cpu_flags.get_bit_1(7));
     cpu_reg.set_a(resultado);
-    println!("");
-*/
-
-//************************************* Pruebas cálculos de flags - ALU
-
-
-    pru_flags_alu_0(&mut cpu_reg, &mut cpu_flags);
-
-//************************************* Prueba de integración estructura de flags en estructura de registros
-    cpu_flags.set_bit(0,true );
-    println!("cpu_flags.get_bit(0): {}, cpu_reg.flags.get_bit(0): {}", cpu_flags.get_bit(0), cpu_reg.flags.get_bit(0));
-    println!();
-
-//************************************* Manejo bancos de memoria
-    pru_mem_0(&mut cpu_reg, &mut memoria);
-
-//************************************* Mostrar memoria y lectura/escritura con LittleEndian y BigEndian
-    pru_varias_0(&mut cpu_reg);
 
 }
 
-//***************************************************************************** 
-
-
-//************************************* 
-
-
 //************************************* Pruebas cálculos de flags - ALU
 fn pru_flags_alu_0(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, cpu_flags: &mut sim_cpu_registros::Flags){
-    let titulo = String::from(" CPU - Simulación CPU - Cálculos de flags - ALU ");
+    let titulo = String::from(" Simulación CPU - Cálculos de flags - ALU (ADD, ADC) ");
     imprime_titulo(&titulo);
 
     let test = true;
@@ -308,12 +294,11 @@ fn pru_flags_alu_0(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, cpu_flags: &mu
             , cpu_flags.get_bit(4)
             , cpu_flags.get_bit(2)
             , cpu_flags.get_bit(0),);
-    println!();
 }
 
 //************************************* Manejo bancos de memoria
 fn pru_mem_0(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, memoria: &mut BancosMemoria) {
-    let titulo = String::from(" Simulación CPU - Prueba manejo memoria ");
+    let titulo = String::from(" Simulación CPU - Pruebas manejo bancos de memoria ");
     imprime_titulo(&titulo);
     
     // Confirma el banco activo (Banco índice 0)
@@ -362,6 +347,29 @@ fn pru_mem_0(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, memoria: &mut Bancos
 }
 
 //************************************* Pruebas de "fn muestra_mem" y manejo de LittleEndian y BigEndian
+/* Little-endian - Big-endian               
+u16::from_le_bytes y u16::from_be_bytes son dos métodos en el tipo u16 de Rust que te permiten
+convertir un arreglo de bytes en un valor u16. La diferencia entre ellos está en el orden de
+los bytes utilizado para interpretar el arreglo.
+
+u16::from_le_bytes interpreta el arreglo en orden de bytes little-endian, lo que significa que
+el byte menos significativo está primero en el arreglo y el byte más significativo está último.
+Este es el orden de bytes utilizado por la mayoría de las computadoras basadas en Intel.
+
+u16::from_be_bytes interpreta el arreglo en orden de bytes big-endian, lo que significa que el
+byte más significativo está primero en el arreglo y el byte menos significativo está último. Este
+es el orden de bytes utilizado por la mayoría de los protocolos de red y algunas otras arquitecturas
+de computadora.
+
+Por ejemplo, si tienes un arreglo de bytes [0x78, 0x56], u16::from_le_bytes lo interpretará como el
+valor u16 0x5678, mientras que u16::from_be_bytes lo interpretará como el valor u16 0x7856.
+
+little endian 0xABCD =
+Dirección de memoria:  | 0x0000 | 0x0001 |
+                       +--------+--------+
+     Contenido (hex):  |  0xCD  |  0xAB  |
+                       +--------+--------+
+*/
 fn pru_varias_0(cpu_reg: &mut sim_cpu_registros::RegistrosCPU) {
     let titulo = String::from(" Pruebas de \"fn muestra_mem\" y manejo de LittleEndian y BigEndian ");
     imprime_titulo(&titulo);

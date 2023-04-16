@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          15-03-2023
+    Fecha:          16-03-2023
     Titulo:         Funciones de manejo de registros y flags - Simulación CPU
     Descripción:    
     Referencias:
