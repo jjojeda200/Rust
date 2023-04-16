@@ -193,7 +193,7 @@ Las operaciones que utiliza la ALU en el procesador Intel 8080 incluyen:
         if (resultado & 0x80) == 0x80 {self.set_bit(7, true)} else {self.set_bit(7, false)}
     }
 
-//*****************************************************************************
+//***************************************************************************** 
     pub fn add(&mut self, val_reg_a: u8, val_reg_x: u8, cf: bool, test: bool) -> u8 {
         let val_acarreo:u8 = self.get_bit(0);
         let (resultado, acarreo) = val_reg_a.overflowing_add(val_reg_x);
@@ -236,125 +236,6 @@ Las operaciones que utiliza la ALU en el procesador Intel 8080 incluyen:
             , self.get_bit_1(0));
         };
         return resultado;
-    }
-
-}
-
-//***************************************************************************** Estructura e implementación Registros
-pub struct RegistrosCPU {
-    pub memoria: BancosMemoria,
-    pub reg_a: u8,          // Acumulador A de 8 bits
-    pub flags: Flags,   // Manejamos el registro de flags F de manera independiente
-    pub reg_b: u8,          // Registro B de 8 bits
-    pub reg_c: u8,          // Registro C de 8 bits
-    pub reg_d: u8,          // Registro D de 8 bits
-    pub reg_e: u8,          // Registro E de 8 bits
-    pub reg_h: u8,          // Registro H de 8 bits
-    pub reg_l: u8,          // Registro L de 8 bits
-    pub reg_ix: u16,        // Registro IX de 16 bits
-    pub reg_iy: u16,        // Registro IY de 16 bits
-    pub contador_de_programa: u16,
-    pub puntero_de_pila: u16,
-    pub registro_instrucciones: u8,
-}
-
-pub struct CPU {
-    pub memoria: BancosMemoria,
-    pub flags: Flags,
-    pub reg_a: u8,   // Acumulador A de 8 bits
-    pub reg_b: u8,   // Registro B de 8 bits
-    pub reg_c: u8,   // Registro C de 8 bits
-    pub reg_d: u8,   // Registro D de 8 bits
-    pub reg_e: u8,   // Registro E de 8 bits
-    pub reg_h: u8,   // Registro H de 8 bits
-    pub reg_l: u8,   // Registro L de 8 bits
-    pub reg_ix: u16, // Registro IX de 16 bits
-    pub reg_iy: u16, // Registro IY de 16 bits
-    pub contador_de_programa: u16,
-    pub puntero_de_pila: u16,
-    pub registro_instrucciones: u8,
-}
-
-impl RegistrosCPU {
-    pub fn new() -> RegistrosCPU {
-        RegistrosCPU {
-            memoria: BancosMemoria {
-                segmento_memoria: vec![vec![0; 1024]; 1],
-                //segmento_memoria: vec![vec![0; 16384]; 1],
-                banco_actual: 0,
-                endianess: Endianess::LittleEndian,
-            },
-            flags: Flags { 
-                carry: false,
-                subtract: true,
-                parity_overflow: false,
-                half_carry: false,
-                zero: false,
-                sign: false, },
-            reg_a: 0,
-            reg_b: 0,
-            reg_c: 0,
-            reg_d: 0,
-            reg_e: 0,
-            reg_h: 0,
-            reg_l: 0,
-            reg_ix: 0,
-            reg_iy: 0,
-            contador_de_programa: 0,
-            puntero_de_pila: 0,
-            registro_instrucciones: 0,
-        }
-    }
-
-//************************************* Manejo de Registro
-    pub fn get_a(&self) -> u8 { self.reg_a }
-    pub fn set_a(&mut self, valor: u8) { self.reg_a = valor; }
-
-    pub fn get_b(&self) -> u8 { self.reg_b }
-    pub fn set_b(&mut self, valor: u8) { self.reg_b = valor; }
-    pub fn get_c(&self) -> u8 { self.reg_c }
-    pub fn set_c(&mut self, valor: u8) { self.reg_c = valor; }
-    pub fn get_bc(&self) -> u16 { u16::from_be_bytes([self.reg_b, self.reg_c]) }
-    pub fn set_bc(&mut self, valor: u16) {
-        let bytes = valor.to_be_bytes();
-        self.reg_b = bytes[0];
-        self.reg_c = bytes[1];
-        /*
-        Este método permite acceder al registro BC como un valor de 16 bits, pero solo permite
-        la escritura de los 4 bits más significativos del registro:
-        self.reg_c = bytes[1] & 0xF0;
-        */
-    }
-    //********************************* Otra forma de manejar BC
-    pub fn get_reg_bc(&self) -> u16 {
-        u16::from_be_bytes([self.get_b(), self.get_c()])
-    }
-    pub fn set_reg_bc(&mut self, valor: u16) {
-        let [reg_b, reg_c] = valor.to_be_bytes();
-        self.set_b(reg_b);
-        self.set_c(reg_c);
-    }
-
-    pub fn get_d(&self) -> u8 { self.reg_d }
-    pub fn set_d(&mut self, valor: u8) { self.reg_d = valor; }
-    pub fn get_e(&self) -> u8 { self.reg_e }
-    pub fn set_e(&mut self, valor: u8) { self.reg_e = valor; }
-    pub fn get_de(&self) -> u16 { u16::from_be_bytes([self.reg_d, self.reg_e]) }
-    pub fn set_de(&mut self, valor: u16) {
-        let bytes = valor.to_be_bytes();
-        self.reg_d = bytes[0];
-        self.reg_e = bytes[1];
-    }
-
-    pub fn get_h(&self) -> u8 { self.reg_h }
-    pub fn set_h(&mut self, valor: u8) { self.reg_h = valor; }
-    pub fn get_l(&self) -> u8 { self.reg_l }
-    pub fn set_l(&mut self, valor: u8) { self.reg_l = valor; }
-    pub fn get_hl(&self) -> u16 { u16::from_be_bytes([self.reg_h, self.reg_l]) }
-    pub fn set_hl(&mut self, valor: u16) {
-        let bytes = valor.to_be_bytes();
-        self.reg_h = bytes[0];
-        self.reg_l = bytes[1];
     }
 
 }
@@ -424,10 +305,109 @@ impl Alu {
     }
 */
 
-//*****************************************************************************
+//***************************************************************************** Estructura e implementación Registros
+pub struct CPU {
+    pub memoria: BancosMemoria,
+    pub flags: Flags,
+    pub reg_a: u8,   // Acumulador A de 8 bits
+    pub reg_b: u8,   // Registro B de 8 bits
+    pub reg_c: u8,   // Registro C de 8 bits
+    pub reg_d: u8,   // Registro D de 8 bits
+    pub reg_e: u8,   // Registro E de 8 bits
+    pub reg_h: u8,   // Registro H de 8 bits
+    pub reg_l: u8,   // Registro L de 8 bits
+    pub reg_ix: u16, // Registro IX de 16 bits
+    pub reg_iy: u16, // Registro IY de 16 bits
+    pub contador_de_programa: u16,
+    pub puntero_de_pila: u16,
+    pub registro_instrucciones: u8,
+    pub mnemonic: String,
+}
 
+impl CPU {
+    pub fn new() -> CPU {
+        CPU {
+            memoria: BancosMemoria {
+                segmento_memoria: vec![vec![0; 1024]; 1],
+                //segmento_memoria: vec![vec![0; 16384]; 1],
+                banco_actual: 0,
+                endianess: Endianess::LittleEndian,
+            },
+            flags: Flags { 
+                carry: false,
+                subtract: true,
+                parity_overflow: false,
+                half_carry: false,
+                zero: false,
+                sign: false, },
+            reg_a: 0,
+            reg_b: 0,
+            reg_c: 0,
+            reg_d: 0,
+            reg_e: 0,
+            reg_h: 0,
+            reg_l: 0,
+            reg_ix: 0,
+            reg_iy: 0,
+            contador_de_programa: 0,
+            puntero_de_pila: 0,
+            registro_instrucciones: 0,
+            mnemonic: String::new(),
+        }
+    }
 
+//************************************* Manejo de Registro
+    pub fn get_a(&self) -> u8 { self.reg_a }
+    pub fn set_a(&mut self, valor: u8) { self.reg_a = valor; }
 
+    pub fn get_b(&self) -> u8 { self.reg_b }
+    pub fn set_b(&mut self, valor: u8) { self.reg_b = valor; }
+    pub fn get_c(&self) -> u8 { self.reg_c }
+    pub fn set_c(&mut self, valor: u8) { self.reg_c = valor; }
+    pub fn get_bc(&self) -> u16 { u16::from_be_bytes([self.reg_b, self.reg_c]) }
+    pub fn set_bc(&mut self, valor: u16) {
+        let bytes = valor.to_be_bytes();
+        self.reg_b = bytes[0];
+        self.reg_c = bytes[1];
+        /*
+        Este método permite acceder al registro BC como un valor de 16 bits, pero solo permite
+        la escritura de los 4 bits más significativos del registro:
+        self.reg_c = bytes[1] & 0xF0;
+        */
+    }
+    //********************************* Otra forma de manejar BC
+    pub fn get_reg_bc(&self) -> u16 {
+        u16::from_be_bytes([self.get_b(), self.get_c()])
+    }
+    pub fn set_reg_bc(&mut self, valor: u16) {
+        let [reg_b, reg_c] = valor.to_be_bytes();
+        self.set_b(reg_b);
+        self.set_c(reg_c);
+    }
+
+    pub fn get_d(&self) -> u8 { self.reg_d }
+    pub fn set_d(&mut self, valor: u8) { self.reg_d = valor; }
+    pub fn get_e(&self) -> u8 { self.reg_e }
+    pub fn set_e(&mut self, valor: u8) { self.reg_e = valor; }
+    pub fn get_de(&self) -> u16 { u16::from_be_bytes([self.reg_d, self.reg_e]) }
+    pub fn set_de(&mut self, valor: u16) {
+        let bytes = valor.to_be_bytes();
+        self.reg_d = bytes[0];
+        self.reg_e = bytes[1];
+    }
+
+    pub fn get_h(&self) -> u8 { self.reg_h }
+    pub fn set_h(&mut self, valor: u8) { self.reg_h = valor; }
+    pub fn get_l(&self) -> u8 { self.reg_l }
+    pub fn set_l(&mut self, valor: u8) { self.reg_l = valor; }
+    pub fn get_hl(&self) -> u16 { u16::from_be_bytes([self.reg_h, self.reg_l]) }
+    pub fn set_hl(&mut self, valor: u16) {
+        let bytes = valor.to_be_bytes();
+        self.reg_h = bytes[0];
+        self.reg_l = bytes[1];
+    }
+
+}
 
 //***************************************************************************** Test  flags - manejo de bit y calculo individual
 #[cfg(test)]
@@ -752,7 +732,7 @@ mod tests {
 
     #[test]
     fn test_registros() {
-        let registros = RegistrosCPU::new();
+        let registros = CPU::new();
         assert_eq!(registros.memoria.segmento_memoria[0][0], 0);
         assert_eq!(registros.flags.carry, false);
         assert_eq!(registros.reg_a, 0);
@@ -771,28 +751,28 @@ mod tests {
 
     #[test]
     fn test_get_set_a() {
-        let mut registros = RegistrosCPU::new();
+        let mut registros = CPU::new();
         registros.set_a(0x55);
         assert_eq!(registros.get_a(), 0x55);
     }
 
     #[test]
     fn test_get_set_bc() {
-        let mut registros = RegistrosCPU::new();
+        let mut registros = CPU::new();
         registros.set_bc(0x1234);
         assert_eq!(registros.get_bc(), 0x1234);
     }
 
     #[test]
     fn test_get_set_de() {
-        let mut registros = RegistrosCPU::new();
+        let mut registros = CPU::new();
         registros.set_de(0xABCD);
         assert_eq!(registros.get_de(), 0xABCD);
     }
 
     #[test]
     fn test_get_set_hl() {
-        let mut registros = RegistrosCPU::new();
+        let mut registros = CPU::new();
         registros.set_hl(0x5678);
         assert_eq!(registros.get_hl(), 0x5678);
     }

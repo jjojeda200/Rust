@@ -89,8 +89,8 @@ fn main() {
 
 
 
-    proyectos::sim_cpu_pruebas::cpu_sim_0();
     proyectos::sim_cpu_generica::cpu_generica_0();
+    proyectos::sim_cpu_pruebas::cpu_sim_0();
 
 
     // ANALIZAR EN DETALLE OPTIMIZACIONES

@@ -15,12 +15,9 @@
 #![allow(unused_assignments)]
 #![allow(unused_mut)]
 
-use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_memoria::Endianess};
-use super::{sim_cpu_registros::CPU, sim_cpu_registros::Flags};
+// use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_memoria::Endianess};
+use super::{sim_cpu_registros::CPU, /*sim_cpu_registros::Flags */};
 use pancurses::*;
-
-use std::sync::Mutex;
-static mut MNEMONICO_OPCODE: Option<Mutex<String>> = None;
 
 fn imprime_titulo(ventana: &Window, titulo: &str) {
     let max_x = ventana.get_max_x();
@@ -76,30 +73,7 @@ Métodos parte de una implementación de una máquina virtual o un emulador de u
 } */
 
 impl CPU {
-    fn new() -> CPU {
-        CPU {
-            memoria: BancosMemoria {
-                segmento_memoria: vec![vec![0; 1024]; 1],
-                //segmento_memoria: vec![vec![0; 16384]; 1],
-                banco_actual: 0,
-                endianess: Endianess::LittleEndian,
-            },
-            flags: Flags { carry: false, subtract: true, parity_overflow: false, half_carry: false, zero: false, sign: false, },
-            reg_a: 0,
-            reg_b: 0,
-            reg_c: 0,
-            reg_d: 0,
-            reg_e: 0,
-            reg_h: 0,
-            reg_l: 0,
-            reg_ix: 0,
-            reg_iy: 0,
-            contador_de_programa: 0,
-            puntero_de_pila: 0,
-            registro_instrucciones: 0,
-        }
-    }
-
+/*
     fn cargar_programa(&mut self, programa: &Vec<u8>) {
         // Iterar a través de cada instrucción del programa proporcionado.
         for (i, &instruccion) in programa.iter().enumerate() {
@@ -109,7 +83,6 @@ impl CPU {
             self.memoria.escribir_memoria(i as u16, instruccion);
         }
     }
-
     fn busca_instruccion(&mut self) -> u8 { 
         // Obtener la instrucción de la memoria en la dirección del contador de programa (1 byte)
         let instruccion = self.memoria.leer_memoria(self.contador_de_programa); 
@@ -130,24 +103,24 @@ impl CPU {
         // Devuelve la tupla 'opcode' y 'operandos'.
         (opcode, operandos)
     }
-    
-    fn ejecuta_instruccion(&mut self, opcode: u8, operandos: [u8; 2]) {
+
+    pub fn ejecuta_instruccion(&mut self, opcode: u8, operandos: [u8; 2]) {
         match opcode {
             0x00 => { // NOP: No hace nada
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("NOP"))); }
+                self.mnemonic = "NOP".to_string();
                 self.contador_de_programa += 1;
             }
 
             0x04 => { // INR B incrementa el contenido en el Registro (B)
                 self.reg_b = self.flags.add(self.reg_b, 0x01, false, false);
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("INR B"))); }
+                self.mnemonic = "INR B".to_string();
                 self.contador_de_programa += 1;
             }
 
 // Corregir
             0x05 => { // DCR B decrementa el contenido en el Registro (B)
                 self.reg_b -= 1;
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("DCR B"))); }
+                self.mnemonic = "DCR B".to_string();
                 self.contador_de_programa += 1;
                 /* 0x054 sin control de desbordamiento
                     let b = get_register_value(Register::B);
@@ -184,15 +157,18 @@ impl CPU {
 
             0x06 => { // MVI B,d8 cargar un valor de 8 bits en el Registro (B)
                 self.reg_b = operandos[0];  // self.reg_b = self.memoria.leer_memoria(self.contador_de_programa + 1);
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI B,d8"))); }
+                self.mnemonic = "MVI B,d8".to_string();
                 self.contador_de_programa += 2;
             }
 
 // Verificar
             0x0A => { // LDAX B cargar el valor contenido en la dirección BC bits en el acumulador (A)
                 let direccion = u16::from_le_bytes([self.reg_b, self.reg_c]);
+
+                let dire = self.get_bc().swap_bytes();
+                
                 self.reg_a = self.memoria.leer_memoria(direccion);
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("LDAX B"))); }
+                self.mnemonic = "LDAX B".to_string();
                 self.contador_de_programa += 1;
             }
 
@@ -202,27 +178,27 @@ impl CPU {
                 let direccion = u16::from_le_bytes([operandos[0], operandos[1]]);
                 // let direccion = u16::from_be_bytes([self.reg_h, self.reg_l]);
                 self.memoria.escribir_memoria(direccion, self.reg_a);
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("STA addr"))); }
+                self.mnemonic = "STA addr".to_string();
                 self.contador_de_programa += 3;
             },
         
             0x3A => { // LDA addr: carga el valor de la dirección apuntada por los dos siguientes bytes en el acumulador (A)
                 let direccion = u16::from_le_bytes([operandos[0], operandos[1]]);
                 self.reg_a = self.memoria.leer_memoria(direccion);
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("LDA addr"))); }
+                self.mnemonic = "LDA addr".to_string();
                 self.contador_de_programa += 3;
             },        
 
             0x3C => { // INR A incrementa el contenido en el Registro (A)
                 self.reg_a = self.flags.add(self.reg_a, 0x01, false, false);
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("INR A"))); }
+                self.mnemonic = "INR A".to_string();
                 self.contador_de_programa += 1;
             }
 
 // Corregir
             0x3D => { // DCR A decrementa el contenido en el Registro (A)
                 self.reg_a -= 1;
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("DCR A"))); }
+                self.mnemonic = "DCR A".to_string();
                 self.contador_de_programa += 1;
                 /*
                 Si se decrementa el acumulador en 8080 hasta que llega a 0, esto provocará un desbordamiento (overflow) en el registro, es decir, que el valor almacenado en el acumulador pasará de 0xFF (255 en decimal) a 0x00 (0 en decimal).
@@ -232,27 +208,27 @@ impl CPU {
 
             0x3E => { // MVI A,n cargar un valor de 8 bits en el acumulador (A)
                 self.reg_a = operandos[0];  // self.reg_a = self.memoria.leer_memoria(self.contador_de_programa + 1);
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("MVI A,d8"))); }
+                self.mnemonic = "MVI A,d8".to_string();
                 self.contador_de_programa += 2;
             }
 
             0x80 => { // ADD A,B suma el contenido del Registro B al acumulador (A)
                 let resultado_add = self.flags.add(self.reg_a, self.reg_b, true, false);
                 self.reg_a = resultado_add;
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("ADD A,B"))); }
+                self.mnemonic = "ADD A,B".to_string();
                 self.contador_de_programa += 1;
             }
 
             0x88 => { // ADC A,B suma el contenido del Registro B + Acarreo operación anterior al acumulador (A)
                 let resultado_adc = self.flags.adc(self.reg_a, self.reg_b, false);
                 self.reg_a = resultado_adc;
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("ADC A,B"))); }
+                self.mnemonic = "ADC A,B".to_string();
                 self.contador_de_programa += 1;
             }
 
             0xC3 => { // JMP nn marca PC con la dirección indicada por los dos siguientes bytes
                 self.contador_de_programa = u16::from_le_bytes([operandos[0], operandos[1]]);
-                unsafe { MNEMONICO_OPCODE = Some(Mutex::new(String::from("JMP nn"))); }
+                self.mnemonic = "JMP nn".to_string();
             }
 
 // Revisar *********************************
@@ -260,6 +236,8 @@ impl CPU {
         }
     }
 
+ */
+    
     fn step(&mut self) {
         let instruccion = self.busca_instruccion();
         let (opcode, operandos) = self.decodifica_instruccion(instruccion);
@@ -498,8 +476,7 @@ impl CPU {                                   // Funciones de manejo de ventanas
         imprime_titulo(&opcode_window, &titulo_ventana_opcode);
         let pos_y = opcode_window.get_cur_y();
 
-        let mnemonico_opcode = unsafe { MNEMONICO_OPCODE.as_ref().unwrap().lock().unwrap() };
-        opcode_window.mvprintw(2, 2, format!("{}", mnemonico_opcode));
+        opcode_window.mvprintw(2, 2, format!("{}", self.mnemonic));
         opcode_window.mvprintw(3, 2, format!("Hex: 0x{:02X}", opcode));
         opcode_window.mvprintw(5, 2, format!("PC : {:04x}", self.contador_de_programa));
         opcode_window.mvprintw(6, 2, format!("Contenido en"));

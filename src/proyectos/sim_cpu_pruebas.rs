@@ -11,141 +11,98 @@
 #![allow(unused_assignments)]
 #![allow(unused_mut)]
 
-use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self}};
+use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self, CPU}};
 //use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::*};
 use colored::*;
+use std::io::{stdin, Read};
 
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo.red());
 }
 
 //***************************************************************************** 
+impl CPU{
+    fn step_no_win(&mut self) {
+        let instruccion = self.busca_instruccion();
+        let (opcode, operandos) = self.decodifica_instruccion(instruccion);
+        self.ejecuta_instruccion(opcode, operandos);
 
+        /* (&self).info_registros()
+        El paréntesis es necesario para asegurar que se tome la referencia de self antes de llamar al método
+        info_registros(). Esto se debe a que el operador . tiene una mayor precedencia que el operador &
+        */
+//        (&self).info_opcode(opcode, operandos);
+//        (&self).info_registros();
+//        (&self).info_pruebas();
+
+        //info_pruebas();
+    }
+
+    fn run_no_win(&mut self) {
+        // ************************************** Ventana principal
+        loop {
+            println!("Contador: 0x{:04X}, Instruccion: {:02x}, Mnemonic: {},\tReg A: {:02x}, Reg B: {:02x}"
+                , self.contador_de_programa
+                , self.memoria.leer_memoria(self.contador_de_programa)
+                , self.mnemonic
+                , self.reg_a
+                , self.reg_b );
+            self.step_no_win();
+
+            if self.memoria.leer_memoria(self.contador_de_programa) == 0xFF { break; }
 /* 
-// Struct para representar los registros Z80
-pub struct RegistrosZ80 {
-    bc: u16,
-    de: u16,
-    hl: u16,
-    sp: u16,
-    pc: u16,
-    pub a: u8,
-    //pub f: sim_cpu_registros::Flags,
-}
+            let mut entrada = String::new();
+            io::stdin().read_line(&mut entrada).expect("No se pudo leer la entrada");
+            let tecla = entrada.chars().next().unwrap();
 
-impl Default for RegistrosZ80 {
-    fn default() -> Self {
-        RegistrosZ80 {
-            bc: 0,
-            de: 0,
-            hl: 0,
-            sp: 0,
-            pc: 0,
-            a: 0,
-            //f: Default::default(),
+            if tecla == 'q' || tecla == 'Q' {
+                quit = Some(tecla);
+                break;
+            } */
         }
     }
 }
-
-// Struct para representar la memoria del sistema
-pub struct Memoria {
-    datos: [u8; 65536],
-}
-
-// Función para leer un byte de la memoria
-pub fn leer_memoria(memoria: &Memoria, direccion: u16) -> u8 {
-    memoria.datos[direccion as usize]
-}
-
-// Función para escribir un byte en la memoria
-pub fn escribir_memoria(memoria: &mut Memoria, direccion: u16, dato: u8) {
-    memoria.datos[direccion as usize] = dato;
-}
-
-// Función para ejecutar una instrucción del procesador
-pub fn ejecutar_instruccion(registros: &mut RegistrosZ80, opcode: u8, memoria: &mut Memoria) -> u32 {
-    // Implementar la lógica para decodificar y ejecutar cada instrucción
-    // Utilizar la función leer_memoria para leer operandos de la memoria
-    // Utilizar la función escribir_memoria para escribir resultados en la memoria
-    // Actualizar los registros según sea necesario
-    // Devolver el número de ciclos que consume la instrucción
-
-    match opcode {
-        0x00 => {
-            registros.pc += 1;
-            4
-        }
-        // LD A, n
-        0x3E => {
-            let n = leer_memoria(memoria, registros.pc + 1);
-            registros.a = n;
-            registros.pc += 2;
-            8
-        }
-        // HALT
-        0x76 => {
-            registros.pc += 1;
-            4
-        }
-        _ => unimplemented!("opcode {:02X} not implemented", opcode),
-        //_ =>  0,
-    }
-}
-
-// Función para actualizar los registros Z80 después de ejecutar una instrucción
-pub fn actualizar_registros(registros: &mut RegistrosZ80) {
-    // Implementar la lógica para actualizar los registros según sea necesario
-    
-}
-
-// Función para actualizar los registros Z80 a lo largo de varios ciclos de reloj
-pub fn actualizar_registros_z80(registros: &mut RegistrosZ80, ciclos_restantes: &mut u32, memoria: &mut Memoria) {
-    while *ciclos_restantes > 0 {
-        // Ejecutar la siguiente instrucción y restablecer el contador
-        let opcode = leer_memoria(memoria, registros.pc);
-        *ciclos_restantes -= ejecutar_instruccion(registros, opcode, memoria);
-
-        // Actualizar los registros de acuerdo a los efectos de la instrucción
-        actualizar_registros(registros);
-    }
-}
-
-fn ejecutar_programa() -> u8 {
-    // Inicializar la estructura de registros y la memoria del sistema
-    let mut registros = RegistrosZ80::default();
-    registros.pc = 0x100;
-    let mut memoria = Memoria { datos: [0; 65536] };
-
-    // Escribir un programa en la memoria
-    escribir_memoria(&mut memoria, 0x100, 0x3E); // LD A, 0x42
-    escribir_memoria(&mut memoria, 0x101, 0x42);
-    escribir_memoria(&mut memoria, 0x102, 0x76); // HALT
-
-    // Ejecutar el programa a una velocidad de 4 MHz
-    let mut ciclos_restantes = 4 * 60000;
-    actualizar_registros_z80(&mut registros, &mut ciclos_restantes, &mut memoria);
-
-    // Devolver el valor del registro A después de ejecutar el programa
-    registros.a
-}
- */
 
 pub fn cpu_sim_0() {
     let titulo = String::from(" Simulación CPU - Pruebas de Funciones, Métodos ");
     imprime_titulo(&titulo);
 
-/* 
-    let resultado = ejecutar_programa();
-    println!("Valor de registro A después de ejecutar el programa: {:02x}", resultado);
-*/
-
     // Inicializar la estructura de registros, flags y memoria
-    let mut cpu_reg = sim_cpu_registros::RegistrosCPU::new();
-    //let mut cpu_reg = sim_cpu_registros::RegistrosCPU::new();
+    let mut cpu_reg = sim_cpu_registros::CPU::new();
+    //let mut cpu_reg = sim_cpu_registros::CPU::new();
     let mut cpu_flags = sim_cpu_registros::Flags::new_flags();
+
     // Crea un banco de memoria por defecto de 16384 bytes (16Kb)
     let mut memoria = BancosMemoria::new();
 
+    //**************************************
+    let programa = vec![
+    0x00,               // NOP
+    0x3E, 0x04,         // Almacenar el valor 0x04 en el Registro A
+    0x06, 0x0a,         // Almacenar el valor 0x0a en el Registro B
+    0x04,               // Incrementa Registro B
+    0x80,               // Suma el contenido del Registro B al Registro A
+    0x00,               // NOP
+    0x3E, 0xf0,         // Almacenar el valor 0xf0 en el Registro A
+    0x06, 0x0f,         // Almacenar el valor 0x0f en el Registro B
+    0x80,               // Suma el contenido del Registro B al Registro A
+    0x00,               // NOP
+    0x3E, 0x3b,         // Almacenar el valor 0x3b en el Registro A
+    0x3C,               // Incrementa Registro A
+    0x32, 0x15, 0x00,   // Mueve el contenido de A a la dirección indicada por los dos bytes siguientes 
+    0x00, 0x00,         // <-- Se cambio el contenido y se convierte en 3C
+    0x3A, 0x0b, 0x00,   // Mueve el contenido (0x0f) de la dirección indicada (0x0b) en los dos bytes siguientes a A 
+    0x00, 0x00,
+    0x06, 0xff,         // Almacenar el valor 0xff en el Registro B
+    0x80,               // Suma el contenido del Registro B al Registro A
+    0x00, 0x00,
+    0xFF,
+    0xC3, 0x00, 0x00,   // Salta a la dirección 0x0000
+    0xFF, 0xFF,         // Marca fin de programa
+    ];
+    cpu_reg.cargar_programa(&programa);
+
+    cpu_reg.run_no_win();
 
     //pru_registros(&mut cpu_reg);                    // Prueba manejo registros
     //pru_flags(&mut cpu_reg, &mut cpu_flags);        // Prueba manejo bit de flags
@@ -160,7 +117,7 @@ pub fn cpu_sim_0() {
 
 
 //*************************************  Prueba manejo registros
-fn pru_registros(cpu_reg: &mut sim_cpu_registros::RegistrosCPU){
+fn pru_registros(cpu_reg: &mut sim_cpu_registros::CPU){
     let titulo = String::from(" CPU - Simulación CPU - Prueba manejo registros ");
     imprime_titulo(&titulo);
    
@@ -182,7 +139,7 @@ fn pru_registros(cpu_reg: &mut sim_cpu_registros::RegistrosCPU){
 }
 
 //************************************* Prueba manejo bit de flags
-fn pru_flags(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, cpu_flags: &mut sim_cpu_registros::Flags){
+fn pru_flags(cpu_reg: &mut sim_cpu_registros::CPU, cpu_flags: &mut sim_cpu_registros::Flags){
     let titulo = String::from(" Simulación CPU - Prueba manejo bit de flags ");
     imprime_titulo(&titulo);
 
@@ -212,7 +169,7 @@ fn pru_flags(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, cpu_flags: &mut sim_
 }
 
 //************************************* Pruebas cálculos de flags individuales
-fn pru_flags_cal(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, cpu_flags: &mut sim_cpu_registros::Flags) {
+fn pru_flags_cal(cpu_reg: &mut sim_cpu_registros::CPU, cpu_flags: &mut sim_cpu_registros::Flags) {
     let titulo = String::from(" Simulación CPU - Prueba cálculos de flags individuales ");
     imprime_titulo(&titulo);
 
@@ -247,7 +204,7 @@ fn pru_flags_cal(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, cpu_flags: &mut 
 }
 
 //************************************* Pruebas cálculos de flags - ALU
-fn pru_flags_alu_0(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, cpu_flags: &mut sim_cpu_registros::Flags){
+fn pru_flags_alu_0(cpu_reg: &mut sim_cpu_registros::CPU, cpu_flags: &mut sim_cpu_registros::Flags){
     let titulo = String::from(" Simulación CPU - Cálculos de flags - ALU (ADD, ADC) ");
     imprime_titulo(&titulo);
 
@@ -296,54 +253,56 @@ fn pru_flags_alu_0(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, cpu_flags: &mu
             , cpu_flags.get_bit(0),);
 }
 
-//************************************* Manejo bancos de memoria
-fn pru_mem_0(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, memoria: &mut BancosMemoria) {
+//************************************* Manejo estructura registro.bancos de memoria
+fn pru_mem_0(cpu_reg: &mut sim_cpu_registros::CPU, memoria: &mut BancosMemoria) {
     let titulo = String::from(" Simulación CPU - Pruebas manejo bancos de memoria ");
     imprime_titulo(&titulo);
     
     // Confirma el banco activo (Banco índice 0)
-    let mut num_banco_actual = memoria.get_banco_activo() as usize;
+    let mut num_banco_actual = cpu_reg.memoria.get_banco_activo() as usize;
     // Impresión de verificación
 
     println!("Banco de memoria Nº: {}, Tamaño del banco: {}, Capacidad del banco de memoria: {} ",
-        memoria.banco_actual,
-        memoria.segmento_memoria[num_banco_actual].len(),
-        memoria.segmento_memoria[num_banco_actual].capacity());
+        cpu_reg.memoria.banco_actual,
+        cpu_reg.memoria.segmento_memoria[num_banco_actual].len(),
+        cpu_reg.memoria.segmento_memoria[num_banco_actual].capacity());
 
     // Crea un banco de memoria adicional de 32768 bytes (32Kb)
-    memoria.crear_segmento(32768);
+    cpu_reg.memoria.crear_segmento(32768);
 
     // Selecciona el nuevo banco (Banco índice 1)
-    memoria.set_banco_activo(1);
-    num_banco_actual = memoria.get_banco_activo() as usize;
+    cpu_reg.memoria.set_banco_activo(1);
+    num_banco_actual = cpu_reg.memoria.get_banco_activo() as usize;
 
     // Impresión de verificación
     println!("Banco de memoria Nº: {}, Tamaño del banco: {}, Dirección de memoria (ptr): {:p} ",
-        memoria.banco_actual,
-        memoria.segmento_memoria[num_banco_actual].len(),
-        memoria.segmento_memoria[num_banco_actual].as_ptr());
+        cpu_reg.memoria.banco_actual,
+        cpu_reg.memoria.segmento_memoria[num_banco_actual].len(),
+        cpu_reg.memoria.segmento_memoria[num_banco_actual].as_ptr());
 
     // selecciona el primer banco (Banco índice 0)
-    memoria.set_banco_activo(0);
-    num_banco_actual = memoria.get_banco_activo() as usize;
+    cpu_reg.memoria.set_banco_activo(0);
+    num_banco_actual = cpu_reg.memoria.get_banco_activo() as usize;
 
     // escribe un byte en la dirección 0x2000 del primer banco
     cpu_reg.set_b(0xff);
     cpu_reg.set_c(0x00);
-    memoria.escribir_memoria(0x2000, cpu_reg.get_b());
+    cpu_reg.memoria.escribir_memoria(0x2000, cpu_reg.get_b());
     // lee el byte en la dirección 0x2000 del primer banco
-    let byte_1 = memoria.leer_memoria(0x2000);
+    let byte_1 = cpu_reg.memoria.leer_memoria(0x2000);
     println!("Byte leído en la dirección 8192 (0x2000) del primer banco: 0x{:02x}", byte_1);
 
-    println!(" {:?} ", memoria.segmento_memoria.len());
-    let mut resultado = memoria.eliminar_segmento(1);
+    println!(" {:?} ", cpu_reg.memoria.segmento_memoria.len());
+    let mut resultado = cpu_reg.memoria.eliminar_segmento(1);
     println!(" {:?}", resultado);
-    println!(" {:?} ", memoria.segmento_memoria.len());
-    resultado = memoria.eliminar_segmento(1);
+    println!(" {:?} ", cpu_reg.memoria.segmento_memoria.len());
+    resultado = cpu_reg.memoria.eliminar_segmento(1);
     println!(" {:?}", resultado);
 
-    resultado = memoria.eliminar_segmento(0);
+    resultado = cpu_reg.memoria.eliminar_segmento(0);
     println!(" {:?}", resultado);
+
+    muestra_mem(&cpu_reg.memoria.segmento_memoria[0][0..64]);
 }
 
 //************************************* Pruebas de "fn muestra_mem" y manejo de LittleEndian y BigEndian
@@ -370,7 +329,7 @@ Dirección de memoria:  | 0x0000 | 0x0001 |
      Contenido (hex):  |  0xCD  |  0xAB  |
                        +--------+--------+
 */
-fn pru_varias_0(cpu_reg: &mut sim_cpu_registros::RegistrosCPU) {
+fn pru_varias_0(cpu_reg: &mut sim_cpu_registros::CPU) {
     let titulo = String::from(" Pruebas de \"fn muestra_mem\" y manejo de LittleEndian y BigEndian ");
     imprime_titulo(&titulo);
 
