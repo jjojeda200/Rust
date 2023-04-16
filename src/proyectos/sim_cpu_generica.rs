@@ -541,7 +541,7 @@ fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec:
     let mut doble_ff = false;
     let mut ultimo_byte: u8 = 0;
     let mut lineas: u8 = 0;
-    let mut dir: u16 = 0;
+    let mut direccion: u16 = 0;
     let mut buffer = String::new();
     for group in vec.chunks(16) {
         if doble_ff == true { break; }
@@ -565,10 +565,10 @@ fn muestra_mem(comentarios_window: &Window, mut pos_y: i32, mut pos_x: i32, vec:
 
             buffer.push_str(&format!("{:02X} ", byte));
         }
-        comentarios_window.mvprintw(pos_y as i32, 2, format!("       {:04x}    || ", dir));
+        comentarios_window.mvprintw(pos_y as i32, 2, format!("       {:04x}    || ", direccion));
         comentarios_window.mvprintw(pos_y as i32, pos_x, &buffer);
         pos_y += 1;
-        dir += 0x10;
+        direccion += 0x10;
         if lineas == 8 { doble_ff = true; } else { lineas += 1}
     }
     comentarios_window.refresh();

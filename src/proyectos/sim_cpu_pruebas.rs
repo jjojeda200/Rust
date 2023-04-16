@@ -16,12 +16,16 @@
 //#![allow(unused_mut)]           // Por el uso de los test
 
 use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self}};
+//use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::*};
+use colored::*;
 
 fn imprime_titulo(titulo: &String) {
-    println!("\n{:*^80}", titulo);
+    println!("\n{:*^80}", titulo.red());
 }
 
 //***************************************************************************** 
+
+/* 
 // Struct para representar los registros Z80
 pub struct RegistrosZ80 {
     bc: u16,
@@ -128,14 +132,25 @@ fn ejecutar_programa() -> u8 {
     // Devolver el valor del registro A después de ejecutar el programa
     registros.a
 }
-
+ */
 
 pub fn cpu_sim_0() {
     let titulo = String::from(" CPU - Simulación CPU - Aproximación de pruebas 1 ");
     imprime_titulo(&titulo);
 
+
+/* 
     let resultado = ejecutar_programa();
     println!("Valor de registro A después de ejecutar el programa: {:02x}", resultado);
+*/
+
+    // Inicializar la estructura de registros, flags y memoria
+    let mut cpu_reg = sim_cpu_registros::RegistrosCPU::new();
+    //let mut cpu_reg = sim_cpu_registros::RegistrosCPU::new();
+    let mut cpu_flags = sim_cpu_registros::Flags::new_flags();
+    // Crea un banco de memoria por defecto de 16384 bytes (16Kb)
+    let mut memoria = BancosMemoria::new();
+
 
 
 
@@ -143,10 +158,7 @@ pub fn cpu_sim_0() {
     let titulo = String::from(" CPU - Simulación CPU - Prueba manejo registros ");
     imprime_titulo(&titulo);
 
-    // Inicializar la estructura de registros y de flags
-    let mut cpu_reg = sim_cpu_registros::RegistrosCPU::new();
-    //let mut cpu_reg = sim_cpu_registros::RegistrosCPU::new();
-    let mut cpu_flags = sim_cpu_registros::Flags::new_flags();
+
    
     // Registro A al inicializar
     println!("Registro A: 0x{:02x}", cpu_reg.get_a());
@@ -163,55 +175,6 @@ pub fn cpu_sim_0() {
     // Registro BC modificados como uno solo
     cpu_reg.set_reg_bc(0b0000111111110000);
     println!("Registro BC: 0x{:04x}", cpu_reg.get_reg_bc());
-
-//************************************* Prueba manejo memoria
-    let titulo = String::from(" CPU - Simulación CPU - Prueba manejo memoria ");
-    imprime_titulo(&titulo);
-
-    // Crea un banco de memoria por defecto de 16384 bytes (16Kb)
-    let mut memoria = BancosMemoria::new();
-    
-    // Confirma el banco activo (Banco índice 0)
-    let mut num_banco_actual = memoria.get_banco_activo() as usize;
-    // Impresión de verificación
-
-    println!("Banco de memoria Nº: {}, Tamaño del banco: {}, Capacidad del banco de memoria: {} ",
-        memoria.banco_actual,
-        memoria.segmento_memoria[num_banco_actual].len(),
-        memoria.segmento_memoria[num_banco_actual].capacity());
-
-    // Crea un banco de memoria adicional de 32768 bytes (32Kb)
-    memoria.crear_segmento(32768);
-
-    // Selecciona el nuevo banco (Banco índice 1)
-    memoria.set_banco_activo(1);
-    num_banco_actual = memoria.get_banco_activo() as usize;
-
-    // Impresión de verificación
-    println!("Banco de memoria Nº: {}, Tamaño del banco: {}, Dirección de memoria (ptr): {:p} ",
-        memoria.banco_actual,
-        memoria.segmento_memoria[num_banco_actual].len(),
-        memoria.segmento_memoria[num_banco_actual].as_ptr());
-
-    // selecciona el primer banco (Banco índice 0)
-    memoria.set_banco_activo(0);
-    num_banco_actual = memoria.get_banco_activo() as usize;
-
-    // escribe un byte en la dirección 0x2000 del primer banco
-    memoria.escribir_memoria(0x2000, 0x55);
-    // lee el byte en la dirección 0x2000 del primer banco
-    let byte_1 = memoria.leer_memoria(10);
-    println!("Byte leído en la dirección 0x2000 del primer banco: 0x{:02x}", byte_1);
-
-    println!(" {:?} ", memoria.segmento_memoria.len());
-    let mut resultado = memoria.eliminar_segmento(1);
-    println!(" {:?}", resultado);
-    println!(" {:?} ", memoria.segmento_memoria.len());
-    resultado = memoria.eliminar_segmento(1);
-    println!(" {:?}", resultado);
-
-    resultado = memoria.eliminar_segmento(0);
-    println!(" {:?}", resultado);
 
 //************************************* Prueba manejo bit de flags
 /*
@@ -274,7 +237,32 @@ pub fn cpu_sim_0() {
 */
 
 //************************************* Pruebas cálculos de flags - ALU
-    let titulo = String::from(" CPU - Simulación CPU - Prueba cálculos de flags - ALU ");
+
+
+    pru_flags_alu_0(&mut cpu_reg, &mut cpu_flags);
+
+//************************************* Prueba de integración estructura de flags en estructura de registros
+    cpu_flags.set_bit(0,true );
+    println!("cpu_flags.get_bit(0): {}, cpu_reg.flags.get_bit(0): {}", cpu_flags.get_bit(0), cpu_reg.flags.get_bit(0));
+    println!();
+
+//************************************* Manejo bancos de memoria
+    pru_mem_0(&mut cpu_reg, &mut memoria);
+
+//************************************* Mostrar memoria y lectura/escritura con LittleEndian y BigEndian
+    pru_varias_0(&mut cpu_reg);
+
+}
+
+//***************************************************************************** 
+
+
+//************************************* 
+
+
+//************************************* Pruebas cálculos de flags - ALU
+fn pru_flags_alu_0(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, cpu_flags: &mut sim_cpu_registros::Flags){
+    let titulo = String::from(" CPU - Simulación CPU - Cálculos de flags - ALU ");
     imprime_titulo(&titulo);
 
     let test = true;
@@ -321,48 +309,101 @@ pub fn cpu_sim_0() {
             , cpu_flags.get_bit(2)
             , cpu_flags.get_bit(0),);
     println!();
+}
 
-//************************************* Prueba de integración estructura de flags en estructura de registros
-    cpu_flags.set_bit(0,true );
-    println!("cpu_flags.get_bit(0): {}, cpu_reg.flags.get_bit(0): {}", cpu_flags.get_bit(0), cpu_reg.flags.get_bit(0));
-    println!();
+//************************************* Manejo bancos de memoria
+fn pru_mem_0(cpu_reg: &mut sim_cpu_registros::RegistrosCPU, memoria: &mut BancosMemoria) {
+    let titulo = String::from(" Simulación CPU - Prueba manejo memoria ");
+    imprime_titulo(&titulo);
+    
+    // Confirma el banco activo (Banco índice 0)
+    let mut num_banco_actual = memoria.get_banco_activo() as usize;
+    // Impresión de verificación
 
-//************************************* Mostrar memoria y lectura/escritura con LittleEndian y BigEndian
-    let titulo = String::from(" Mostrar memoria y lectura/escritura con LittleEndian y BigEndian ");
+    println!("Banco de memoria Nº: {}, Tamaño del banco: {}, Capacidad del banco de memoria: {} ",
+        memoria.banco_actual,
+        memoria.segmento_memoria[num_banco_actual].len(),
+        memoria.segmento_memoria[num_banco_actual].capacity());
+
+    // Crea un banco de memoria adicional de 32768 bytes (32Kb)
+    memoria.crear_segmento(32768);
+
+    // Selecciona el nuevo banco (Banco índice 1)
+    memoria.set_banco_activo(1);
+    num_banco_actual = memoria.get_banco_activo() as usize;
+
+    // Impresión de verificación
+    println!("Banco de memoria Nº: {}, Tamaño del banco: {}, Dirección de memoria (ptr): {:p} ",
+        memoria.banco_actual,
+        memoria.segmento_memoria[num_banco_actual].len(),
+        memoria.segmento_memoria[num_banco_actual].as_ptr());
+
+    // selecciona el primer banco (Banco índice 0)
+    memoria.set_banco_activo(0);
+    num_banco_actual = memoria.get_banco_activo() as usize;
+
+    // escribe un byte en la dirección 0x2000 del primer banco
+    cpu_reg.set_b(0xff);
+    cpu_reg.set_c(0x00);
+    memoria.escribir_memoria(0x2000, cpu_reg.get_b());
+    // lee el byte en la dirección 0x2000 del primer banco
+    let byte_1 = memoria.leer_memoria(0x2000);
+    println!("Byte leído en la dirección 8192 (0x2000) del primer banco: 0x{:02x}", byte_1);
+
+    println!(" {:?} ", memoria.segmento_memoria.len());
+    let mut resultado = memoria.eliminar_segmento(1);
+    println!(" {:?}", resultado);
+    println!(" {:?} ", memoria.segmento_memoria.len());
+    resultado = memoria.eliminar_segmento(1);
+    println!(" {:?}", resultado);
+
+    resultado = memoria.eliminar_segmento(0);
+    println!(" {:?}", resultado);
+}
+
+//************************************* Pruebas de "fn muestra_mem" y manejo de LittleEndian y BigEndian
+fn pru_varias_0(cpu_reg: &mut sim_cpu_registros::RegistrosCPU) {
+    let titulo = String::from(" Pruebas de \"fn muestra_mem\" y manejo de LittleEndian y BigEndian ");
     imprime_titulo(&titulo);
 
     cpu_reg.set_b(0xff);
-    cpu_reg.set_d(0x00);
-    let bytes: [u8; 2] = [cpu_reg.get_b(), cpu_reg.get_d()];
-    let bytes_le = u16::from_le_bytes([cpu_reg.get_b(), cpu_reg.get_d()]);
+    cpu_reg.set_c(0x00);
+    let bytes: [u8; 2] = [cpu_reg.get_b(), cpu_reg.get_c()];
+    let bytes_le = u16::from_le_bytes([cpu_reg.get_b(), cpu_reg.get_c()]);
     println!("Byte: {:02x}{:02x}, Byte Little: {:04x}", bytes[0], bytes[1], bytes_le);
     println!();
 
     let mut vec: [u8; 512] = [0;512];
     for i in 0..vec.len() { vec[i] = (i+0) as u8; }
-    for i in 16..32 { vec[i] = 00 as u8; }
+    for i in 16..49 { vec[i] = 00 as u8; }
 
     println!("Byte: {:02x}{:02x}, Byte Little: {:04x}", bytes[0], bytes[1], bytes_le);
     vec[20] = bytes[0];
     vec[21] = bytes[1];
     vec[22] = ((bytes_le >> 8) & 0xFF) as u8;   // 8 bits + significativos en la posición 22 del vector
     vec[23] = (bytes_le & 0xFF) as u8;          // 8 bits - significativos en la posición 23 del vector
-    vec[41] = 0xFF;
-    vec[42] = 0xFF;
+    vec[51] = 0xFF;
+    vec[52] = 0xFF;
 
     muestra_mem(&vec);
-    
+
+    //********************************* Más LittleEndian con "swap_bytes()"
+    // https://doc.rust-lang.org/std/primitive.u16.html#method.swap_bytes
+    println!();
+    let direccion = u16::from_be_bytes([cpu_reg.get_b(), cpu_reg.get_c()]);
+    let direccion_le = direccion.swap_bytes();
+    println!("Dirección: {:04x}, Dirección_le: {:04x}", direccion, direccion_le);
+
 }
 
-//***************************************************************************** 
+//***************************************************************************** fn nuestra_mem
 fn muestra_mem(vec: &[u8]) {
-
-    //    let lineas = vec.len() / 16 + if vec.len() % 16 != 0 { 1 } else { 0 };
+    // let lineas = vec.len() / 16 + if vec.len() % 16 != 0 { 1 } else { 0 };
     println!(" Dir. Memoria  || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
     println!("-------------- || ------------------------------------------------");
     
     let mut found_pair = false;
-    //let mut dir: u16 = 0;
+    //let mut direccion: u16 = 0;
     let mut ultimo_byte: u8 = 0;
     let mut buffer = String::with_capacity(16);
     //let mut buffer = String::new();
@@ -370,7 +411,7 @@ fn muestra_mem(vec: &[u8]) {
         if found_pair { break; }
         
         buffer.clear();
-        
+ 
 /*
         for i in 0..group.len() {
             let byte = group[i];
@@ -389,7 +430,7 @@ fn muestra_mem(vec: &[u8]) {
             buffer.push_str(&format!("{:02X} ", byte));
         }
         //println!("       {:04x}    || {}", dir, &buffer.trim_end());
-        //dir += 0x10;
+        //direccion += 0x10;
 */
 
         for (i, byte) in group.iter().enumerate() {
@@ -415,13 +456,4 @@ fn muestra_mem(vec: &[u8]) {
     }
 }
 
-#[test]
-fn test_muestra_memm() {
-    // Test para comprobar si la función se detiene correctamente cuando se encuentra el valor hexadecimal "0xFFFF".
-    let mut vec: [u8; 40] = [0;40];
-    vec[30] = 0xAA;
-    vec[31] = 0xFF;
-    vec[32] = 0xFF;
-    muestra_mem(&vec);
-}
-
+//***************************************************************************** 
