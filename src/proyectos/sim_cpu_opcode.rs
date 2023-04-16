@@ -1,278 +1,45 @@
 /***************************************************************************************
     José Juan Ojeda Granados
     Fecha:          16-04-2023
-    Titulo:         Funciones de manejo de registros y flags - Simulación CPU
+    Titulo:         Metodos asociados a los opcode - Simulación CPU
     Descripción:    
     Referencias:
 
 ***************************************************************************************/
 #![allow(dead_code)]
 #![allow(unused_variables)]
+#![allow(unused_assignments)]
+#![allow(unused_mut)]
 
 use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_memoria::Endianess};
+use super::{sim_cpu_registros::RegistrosCPU, sim_cpu_registros::Flags};
+use colored::*;
 
-/* Registro Flags (banderas)                
-                                                    Bits    7	6	5	4	3	2	1	0
-                                                    Flags   S	Z	0	H	0	P	1	C
-Estas son las banderas que se utilizan en el Z80:
--   Bit 0 (C o CF) Carry Flag (bandera de acarreo): Indica si se produjo un acarreo en la
-    operación aritmética (no se usa en las operaciones lógicas). Se establece en 1 cuando se
-    produce un acarreo en la operación, de lo contrario, se establece en 0.
--   Bit 1: siempre está en 1.
-    Nota para el Z80:
-    Bit 1 (N): Add/Subtract flag (bandera de suma/resta): Esta bandera se establece en 1 si la
-    última operación realizada fue una resta. De lo contrario, se establece en 0.
--   Bit 2 (P o PF) Parity Flag (bandera de paridad/sobreflujo): Indica si el resultado de la
-    operación tiene un número par o impar de bits. Se establece en 1 cuando si el resultado
-    contiene un número par de unos, de lo contrario, se establece en 0.
-    Nota para el Z80 (PV):
-    Parity/Overflow flag Esta bandera también se utiliza para indicar si se ha producido un
-    error en una operación que involucra números con signo.
--   Bit 3: siempre está en 0.
--   Bit 4 (H o AC) Half Carry Flag o Auxiliary Carry Flag (bandera de medio acarreo): Indica
-    si se produjo un acarreo en el bit 3 de la operación aritmética (no se usa en las operaciones
-    lógicas). El AC se establece en 1 cuando se produce un acarreo en el bit 3 de la operación,
-    de lo contrario, se establece en 0.
--   Bit 5: siempre está en 0.
-
--   Bit 6 (Z o ZF) Zero Flag (bandera de cero): Indica si el resultado de la operación es cero.
-    Esta bandera se establece en 1 si el resultado de una operación es cero, de lo contrario, se
-    establece en 0.
--   El bit 7 (S o SF) Sign Flag (bandera de signo): Indica si el resultado de la operación es
-    negativo. Esta bandera se establece en 1 si el resultado de una operación es negativo (el bit
-    más significativo es 1), de lo contrario, se establece en 0.
-*/
-
-//***************************************************************************** Estructura e implementación Flags
-//#[derive(Default)]
-pub struct Flags {
-    pub carry: bool,                    // Bit 0 (C):  Carry flag
-    pub subtract: bool,                 // Bit 1 (N):  Add/subtract flag (En el Intel 8080 no se usa, siempre a uno)
-    pub parity_overflow: bool,          // Bit 2 (PV): Parity/overflow flag
-                                        // Bit 3 (3):  Unused (Siempre a cero)
-    pub half_carry: bool,               // Bit 4 (H):  Half-carry flag
-                                        // Bit 5 (3):  Unused (Siempre a cero)
-    pub zero: bool,                     // Bit 6 (Z):  Zero flag
-    pub sign: bool,                     // Bit 7 (S):  Sign flag
+fn imprime_titulo(titulo: &String) {
+    println!("\n{:*^80}", titulo.blue());
 }
 
-impl Flags {
-    pub fn new_flags() -> Flags {
-        Flags {
-            carry: false,
-            subtract: true,
-            parity_overflow: false,
-            half_carry: false,
-            zero: false,
-            sign: false,
-        }
-    }
+use std::sync::Mutex;
+static mut MNEMONICO_OPCODE: Option<Mutex<String>> = None;
 
-    // Método que devuelva un valor de 8 bits que represente los Flags (bitwise con Hex):
-    pub fn get_flags(&self) -> u8 {
-        let mut resultado = 0u8;
-        if self.carry { resultado |= 0x01 };
-        if self.subtract { resultado |= 0x02 };
-        if self.parity_overflow { resultado |= 0x04 };
-        if self.half_carry { resultado |= 0x10 };
-        if self.zero { resultado |= 0x40 };
-        if self.sign { resultado |= 0x80 };
-        resultado
-    }
-
-    // Método que devuelva un valor de 8 bits que represente los Flags (bitwise con bin):
-    pub fn get_flags_1(&self) -> u8 {
-        let mut resultado = 0u8;
-        if self.carry { resultado |= 0b00000001 };
-        if self.subtract { resultado |= 0b00000010 };
-        if self.parity_overflow { resultado |= 0b00000100 };
-        if self.half_carry { resultado |= 0b00010000 };
-        if self.zero { resultado |= 0b01000000 };
-        if self.sign { resultado |= 0b10000000 };
-        resultado
-    }
-
-    // Método que toma un valor de 8 bits y actualiza los bits de los Flags (bitwise con Hex):
-    pub fn set_flags(&mut self, valor: u8) {
-        self.carry = valor & 0x01 != 0;             // Bit 0
-        self.subtract = valor & 0x02 != 0;          // Bit 1
-        self.parity_overflow = valor & 0x04 != 0;   // Bit 2
-        self.half_carry = valor & 0x10 != 0;        // Bit 4
-        self.zero = valor & 0x40 != 0;              // Bit 6
-        /* Operación bitwise                
-        "Valor" es un valor de 8 bits (u8) y 0x80 es un valor hexadecimal que representa el
-        número 128 en decimal y su representación binaria es 10000000.
-        La operación AND se realiza bit a bit, lo que significa que cada bit del valor "valor" se
-        compara con el correspondiente bit de 0x80 y se devuelve un resultado que tiene un bit 1
-        solo si ambos bits son 1. En caso contrario, el resultado tendrá un bit 0.
-        */
-        self.sign = valor & 0x80 != 0;              // Bit 7
-    }
-
-    pub fn get_bit(&self, index: u8) -> u8 {
-        match index {
-            0 => {self.carry as u8},
-            1 => {self.subtract as u8},
-            2 => {self.parity_overflow as u8},
-            4 => {self.half_carry as u8},
-            6 => {self.zero as u8},
-            7 => {self.sign as u8},
-            _ => panic!("Índice de bit no válido: {}", index),
-        }
-    }
-
-    pub fn get_bit_1(&self, bit: u8) -> bool {
-        (self.get_flags() & (1 << bit)) != 0
-    }
-
-    pub fn set_bit(&mut self, index: u8, valor: bool) {
-        match index {
-            0 => self.carry = valor,
-            1 => self.subtract = valor,
-            2 => self.parity_overflow = valor,
-            4 => self.half_carry = valor,
-            6 => self.zero = valor,
-            7 => self.sign = valor,
-            _ => panic!("Índice de bit no válido: {}", index),
-        }
-    }
-
-/* Implementación ALU                       
-Las operaciones que utiliza la ALU en el procesador Intel 8080 incluyen:
-
-    ADD: Suma el valor especificado con el valor actual en el registro A.
-    ADC: Suma el valor especificado y la bandera de acarreo con el valor actual en el registro A.
-    SUB: Resta el valor especificado del valor actual en el registro A.
-    SBB: Resta el valor especificado y la bandera de acarreo del valor actual en el registro A.
-    AND: Realiza una operación lógica AND entre el valor especificado y el valor actual en el registro A.
-    OR: Realiza una operación lógica OR entre el valor especificado y el valor actual en el registro A.
-    XOR: Realiza una operación lógica XOR entre el valor especificado y el valor actual en el registro A.
-    CMP: Compara el valor especificado con el valor actual en el registro A, actualizando las banderas según corresponda.
-*/
-
-//***************************************************************************** cálculos de flags individuales
-    pub fn flags_acarreo_add(&mut self, val_reg_a: u8, val_reg_x: u8) -> u8 {
-        // suma sin propagación de acarreo
-        let (resultado, acarreo) = val_reg_a.overflowing_add(val_reg_x);
-        if acarreo == true {self.set_bit(0, true)} else {self.set_bit(0, false)}
-        resultado
-    }
-
-    pub fn flags_paridad(&mut self, resultado: u8) {
-        if resultado.count_ones() % 2 == 0 {self.set_bit(2, true)} else {self.set_bit(2, false)}
-    }
-
-    /* (result & 0x0F) + (carry as u8) > 0x0F;
-    La instrucción se divide en dos partes:
-        (result & 0x0F) + (carry as u8)
-        > 0x0F
-    La primera parte de la instrucción está sumando dos valores:
-    ->  (result & 0x0F): Este es el resultado de aplicar una operación AND entre el valor result y la máscara
-        de bits 0x0F. La máscara de bits se utiliza para eliminar todos los bits que no estén en las posiciones
-        0 a 3. Esto significa que solo se sumarán los 4 bits menos significativos del valor de result.
-    ->  (carry as u8): Este valor representa el valor del acarreo (carry) de una operación anterior. En este
-        caso, la instrucción está tratando de determinar si hubo un acarreo de la suma anterior, lo que podría
-        indicar que hay un bit de overflow en la operación actual.
-    La segunda parte de la instrucción está realizando una comparación:
-    ->  > 0x0F: Esta parte de la instrucción está comparando la suma anterior con el valor 0x0F. 0x0F representa
-        el valor decimal 15 en hexadecimal. Si la suma anterior es mayor que 0x0F, entonces la instrucción devuelve
-        el valor booleano true, lo que indica que hubo un acarreo.
-    En resumen, esta instrucción está tratando de determinar si hubo un acarreo en la operación anterior de suma,
-    al evaluar los 4 bits menos significativos del valor resultante de la suma y el valor del acarreo. Si la suma
-    de ambos valores supera el valor de 15, entonces se devuelve true, lo que indica que hubo un acarreo.
-    */
-    pub fn flags_acarreo_auxiliar_add(&mut self, val_reg_a: u8, val_reg_x: u8) {
-        if (val_reg_a & 0x0F) + (val_reg_x & 0x0F) > 0x0F { self.set_bit(4,true)} else {self.set_bit(4, false)}
-    }
-
-    pub fn flags_cero(&mut self, resultado: u8) {
-        if resultado == 0 {self.set_bit(6, true)} else {self.set_bit(6, false)}
-    }
-
-    pub fn flags_signo(&mut self, resultado: u8) {
-        if (resultado & 0x80) == 0x80 {self.set_bit(7, true)} else {self.set_bit(7, false)}
-    }
-
-//*****************************************************************************
-    pub fn add(&mut self, val_reg_a: u8, val_reg_x: u8, cf: bool, test: bool) -> u8 {
-        let val_acarreo:u8 = self.get_bit(0);
-        let (resultado, acarreo) = val_reg_a.overflowing_add(val_reg_x);
-        if acarreo == true && cf == true {self.set_bit(0, true)}
-        self.flags_paridad(resultado);
-        if (val_reg_a & 0x0F) + (val_reg_x & 0x0F) > 0x0F { self.set_bit(4,true)} else {self.set_bit(4, false)}
-        self.flags_cero(resultado);
-        self.flags_signo(resultado);
-        if test {
-            println!("Reg A: {:08b}, Reg X: {:08b}, Resultado-> Reg A: {:08b}, Flags    : {:08b}, Acarreo: {}\n"
-            , val_reg_a
-            , val_reg_x
-            , resultado
-            , self.get_flags_1()
-            , self.get_bit_1(0));
-        };
-        return resultado;
-    }
-
-    pub fn adc(&mut self, val_reg_a: u8, val_reg_x: u8, test: bool ) -> u8 {
-        let val_acarreo:u8 = self.get_bit(0);
-        let (resultado_intermedio, acarreo_intermedio) = val_reg_a.overflowing_add(val_reg_x);
-        let (resultado, acarreo) = resultado_intermedio.overflowing_add(val_acarreo);
-        if acarreo == true || acarreo_intermedio {self.set_bit(0, true)} else {self.set_bit(0, false)}
-        self.flags_paridad(resultado);
-        if ((val_reg_a & 0x0F) + (val_reg_x & 0x0F)) > 0x0f || ((resultado_intermedio & 0x0F) + (val_acarreo & 0x0F)) > 0x0F {
-             self.set_bit(4,true)} else {self.set_bit(4, false)
-        }
-        self.flags_cero(resultado);
-        self.flags_signo(resultado);
-        if test {
-            println!("Acarreo OP anterior   : {}", val_acarreo);
-            println!("ADC Reg a + Reg B     : {:08b}, Flags HC de Reg A + Reg X             : {}",resultado_intermedio, acarreo_intermedio);
-            println!("ADC Reg a + Reg B + C : {:08b}, Flags HC de Resultado + CF OP anterior: {}",resultado, acarreo);
-            println!("Reg A: {:08b}, Reg X: {:08b}, Resultado-> Reg A: {:08b}, Flags    : {:08b}, Acarreo: {}\n"
-            , val_reg_a
-            , val_reg_x
-            , resultado
-            , self.get_flags_1()
-            , self.get_bit_1(0));
-        };
-        return resultado;
-    }
-
-}
+//***************************************************************************** 
 
 //***************************************************************************** Estructura e implementación Registros
 pub struct RegistrosCPU {
-    pub memoria: BancosMemoria,
-    pub reg_a: u8,          // Acumulador A de 8 bits
+    memoria: BancosMemoria,
+    reg_a: u8,          // Acumulador A de 8 bits
     pub flags: Flags,   // Manejamos el registro de flags F de manera independiente
-    pub reg_b: u8,          // Registro B de 8 bits
-    pub reg_c: u8,          // Registro C de 8 bits
-    pub reg_d: u8,          // Registro D de 8 bits
-    pub reg_e: u8,          // Registro E de 8 bits
-    pub reg_h: u8,          // Registro H de 8 bits
-    pub reg_l: u8,          // Registro L de 8 bits
-    pub reg_ix: u16,        // Registro IX de 16 bits
-    pub reg_iy: u16,        // Registro IY de 16 bits
-    pub contador_de_programa: u16,
-    pub puntero_de_pila: u16,
-    pub registro_instrucciones: u8,
-}
-
-pub struct CPU {
-    pub memoria: BancosMemoria,
-    pub flags: Flags,
-    pub reg_a: u8,   // Acumulador A de 8 bits
-    pub reg_b: u8,   // Registro B de 8 bits
-    pub reg_c: u8,   // Registro C de 8 bits
-    pub reg_d: u8,   // Registro D de 8 bits
-    pub reg_e: u8,   // Registro E de 8 bits
-    pub reg_h: u8,   // Registro H de 8 bits
-    pub reg_l: u8,   // Registro L de 8 bits
-    pub reg_ix: u16, // Registro IX de 16 bits
-    pub reg_iy: u16, // Registro IY de 16 bits
-    pub contador_de_programa: u16,
-    pub puntero_de_pila: u16,
-    pub registro_instrucciones: u8,
+    reg_b: u8,          // Registro B de 8 bits
+    reg_c: u8,          // Registro C de 8 bits
+    reg_d: u8,          // Registro D de 8 bits
+    reg_e: u8,          // Registro E de 8 bits
+    reg_h: u8,          // Registro H de 8 bits
+    reg_l: u8,          // Registro L de 8 bits
+    reg_ix: u16,        // Registro IX de 16 bits
+    reg_iy: u16,        // Registro IY de 16 bits
+    contador_de_programa: u16,
+    puntero_de_pila: u16,
+    registro_instrucciones: u8,
 }
 
 impl RegistrosCPU {
@@ -284,27 +51,28 @@ impl RegistrosCPU {
                 banco_actual: 0,
                 endianess: Endianess::LittleEndian,
             },
-            flags: Flags { 
-                carry: false,
-                subtract: true,
-                parity_overflow: false,
-                half_carry: false,
-                zero: false,
-                sign: false, },
-            reg_a: 0,
-            reg_b: 0,
-            reg_c: 0,
-            reg_d: 0,
-            reg_e: 0,
-            reg_h: 0,
-            reg_l: 0,
-            reg_ix: 0,
-            reg_iy: 0,
+            flags: Flags { carry: false, subtract: false, parity_overflow: false, half_carry: false, zero: false, sign: false, },
+            reg_a: 0, 
+            reg_b: 0, 
+            reg_c: 0, 
+            reg_d: 0, 
+            reg_e: 0, 
+            reg_h: 0, 
+            reg_l: 0, 
+            reg_ix: 0, 
+            reg_iy: 0, 
             contador_de_programa: 0,
             puntero_de_pila: 0,
             registro_instrucciones: 0,
         }
     }
+
+
+
+
+
+
+
 
 //************************************* Manejo de Registro
     pub fn get_a(&self) -> u8 { self.reg_a }
@@ -764,6 +532,8 @@ mod tests {
         assert_eq!(registros.reg_l, 0);
         assert_eq!(registros.reg_ix, 0);
         assert_eq!(registros.reg_iy, 0);
+        assert_eq!(registros.sp, 0);
+        assert_eq!(registros.pc, 0);
         assert_eq!(registros.contador_de_programa, 0);
         assert_eq!(registros.puntero_de_pila, 0);
         assert_eq!(registros.registro_instrucciones, 0);

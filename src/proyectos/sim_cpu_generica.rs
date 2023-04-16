@@ -16,7 +16,7 @@
 #![allow(unused_mut)]
 
 use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_memoria::Endianess};
-use super::{sim_cpu_registros::RegistrosCPU, sim_cpu_registros::Flags};
+use super::{sim_cpu_registros::CPU, sim_cpu_registros::Flags};
 use pancurses::*;
 
 use std::sync::Mutex;
@@ -58,7 +58,7 @@ Métodos parte de una implementación de una máquina virtual o un emulador de u
 */
 
 //*****************************************************************************
-struct CPU {
+/* struct CPU {
     memoria: BancosMemoria,
     flags: Flags,
     reg_a: u8,   // Acumulador A de 8 bits
@@ -73,7 +73,7 @@ struct CPU {
     contador_de_programa: u16,
     puntero_de_pila: u16,
     registro_instrucciones: u8,
-}
+} */
 
 impl CPU {
     fn new() -> CPU {
@@ -344,8 +344,6 @@ pub fn cpu_generica_0() {
     //let mut cpu8080 = RegistrosCPU::new();
     //let mut memoria = BancosMemoria::new();
     //**************************************
-    let mut reg = RegistrosCPU::new;
-    //let mut reg = sim_cpu_registros::RegistrosCPU::new;
     let mut cpu = CPU::new();
     let programa = vec![
         0x00,               // NOP
