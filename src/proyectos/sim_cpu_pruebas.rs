@@ -14,7 +14,7 @@
 use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self, CPU}};
 //use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::*};
 use colored::*;
-use std::io::{stdin, Read};
+use std::io::{stdin, stdout, Write, Read};
 
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo.red());
@@ -39,8 +39,16 @@ impl CPU{
     }
 
     fn run_no_win(&mut self) {
-        // ************************************** Ventana principal
-        loop {
+        
+            println!("Contador: 0x{:04X}, Instruccion: {:02x}, Mnemonic: {},\tReg A: {:02x}, Reg B: {:02x}"
+                , self.contador_de_programa
+                , self.memoria.leer_memoria(self.contador_de_programa)
+                , self.mnemonic
+                , self.reg_a
+                , self.reg_b );
+            self.step_no_win();
+
+         loop {
             println!("Contador: 0x{:04X}, Instruccion: {:02x}, Mnemonic: {},\tReg A: {:02x}, Reg B: {:02x}"
                 , self.contador_de_programa
                 , self.memoria.leer_memoria(self.contador_de_programa)
@@ -50,16 +58,36 @@ impl CPU{
             self.step_no_win();
 
             if self.memoria.leer_memoria(self.contador_de_programa) == 0xFF { break; }
-/* 
-            let mut entrada = String::new();
-            io::stdin().read_line(&mut entrada).expect("No se pudo leer la entrada");
-            let tecla = entrada.chars().next().unwrap();
+        } 
 
-            if tecla == 'q' || tecla == 'Q' {
-                quit = Some(tecla);
-                break;
-            } */
+/*
+// ***************
+        let mut running = true;
+        let mut parameter = 0;
+            print!("\nEnter 'c' to change parameter, or 'q' to quit: ");
+        while running {
+            stdout().flush().unwrap();
+    
+            let mut input = String::new();
+            stdin().read_line(&mut input).unwrap();
+    
+            match input.trim() {
+                "q" | "Q" => running = false,
+                "c" => {
+                    println!("Contador: 0x{:04X}, Instruccion: {:02x}, Mnemonic: {},\tReg A: {:02x}, Reg B: {:02x}"
+                    , self.contador_de_programa
+                    , self.memoria.leer_memoria(self.contador_de_programa)
+                    , self.mnemonic
+                    , self.reg_a
+                    , self.reg_b );
+                    self.step_no_win(); 
+                },
+                _ => println!("Invalid input"),
+            }
+            if !running { break; }
         }
+*/
+    //***************
     }
 }
 
