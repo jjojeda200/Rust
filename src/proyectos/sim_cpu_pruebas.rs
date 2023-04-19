@@ -14,16 +14,24 @@
 use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self, CPU}};
 //use super::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::*};
 use colored::*;
-use std::io::{stdin, stdout, Write, Read};
+//use std::io::{stdin, stdout, Write, Read};
 
 fn imprime_titulo(titulo: &String) {
     println!("\n{:*^80}", titulo.red());
 }
 
 //***************************************************************************** 
+pub struct Aux {
+    imp_contador_programa: u16,
+    imp_instruccion: u8,
+    imp_mnemonico: String,
+}
+
 impl CPU{
-    fn step_no_win(&mut self) {
+    fn step_no_win(&mut self, aux: &mut Aux) {
+        aux.imp_contador_programa = self.contador_de_programa;
         let instruccion = self.busca_instruccion();
+        aux.imp_instruccion = instruccion;
         let (opcode, operandos) = self.decodifica_instruccion(instruccion);
         self.ejecuta_instruccion(opcode, operandos);
 
@@ -38,24 +46,17 @@ impl CPU{
         //info_pruebas();
     }
 
-    fn run_no_win(&mut self) {
-        
-            println!("Contador: 0x{:04X}, Instruccion: {:02x}, Mnemonic: {},\tReg A: {:02x}, Reg B: {:02x}"
-                , self.contador_de_programa
-                , self.memoria.leer_memoria(self.contador_de_programa)
-                , self.mnemonic
-                , self.reg_a
-                , self.reg_b );
-            self.step_no_win();
-
+    fn run_no_win(&mut self, aux: &mut Aux) {
          loop {
-            println!("Contador: 0x{:04X}, Instruccion: {:02x}, Mnemonic: {},\tReg A: {:02x}, Reg B: {:02x}"
-                , self.contador_de_programa
-                , self.memoria.leer_memoria(self.contador_de_programa)
-                , self.mnemonic
-                , self.reg_a
-                , self.reg_b );
-            self.step_no_win();
+            self.step_no_win(aux);
+            println!("Contador: 0x{:04X}, Instruccion: {:02x}, Mnemonic: {},\tReg A: {:02x}, Reg B: {:02x}",
+                aux.imp_contador_programa,
+                //, self.contador_de_programa -1
+                //, self.memoria.leer_memoria(self.contador_de_programa -1)
+                aux.imp_instruccion,
+                self.mnemonic,
+                self.reg_a,
+                self.reg_b );
 
             if self.memoria.leer_memoria(self.contador_de_programa) == 0xFF { break; }
         } 
@@ -87,7 +88,6 @@ impl CPU{
             if !running { break; }
         }
 */
-    //***************
     }
 }
 
@@ -95,13 +95,10 @@ pub fn cpu_sim_0() {
     let titulo = String::from(" Simulación CPU - Pruebas de Funciones, Métodos ");
     imprime_titulo(&titulo);
 
-    // Inicializar la estructura de registros, flags y memoria
+    // Inicializa la estructura de registros, flags y memoria
     let mut cpu_reg = sim_cpu_registros::CPU::new();
-    //let mut cpu_reg = sim_cpu_registros::CPU::new();
-    let mut cpu_flags = sim_cpu_registros::Flags::new_flags();
-
-    // Crea un banco de memoria por defecto de 16384 bytes (16Kb)
-    let mut memoria = BancosMemoria::new();
+    // Inicializa estructura auxiliar
+    let mut aux = Aux {imp_contador_programa: 0x0, imp_instruccion: 0x0, imp_mnemonico: String::new()};
 
     //**************************************
     let programa = vec![
@@ -130,7 +127,15 @@ pub fn cpu_sim_0() {
     ];
     cpu_reg.cargar_programa(&programa);
 
-    cpu_reg.run_no_win();
+    cpu_reg.run_no_win(&mut aux);
+
+
+
+    //*********************************
+    // Para pruebas
+    //let mut cpu_reg = sim_cpu_registros::CPU::new();
+    //let mut cpu_flags = sim_cpu_registros::Flags::new_flags();
+    //let mut memoria = BancosMemoria::new();     // Crea un banco de memoria por defecto de 16384 bytes (16Kb)
 
     //pru_registros(&mut cpu_reg);                    // Prueba manejo registros
     //pru_flags(&mut cpu_reg, &mut cpu_flags);        // Prueba manejo bit de flags
@@ -138,13 +143,12 @@ pub fn cpu_sim_0() {
     //pru_flags_alu_0(&mut cpu_reg, &mut cpu_flags);  // Pruebas cálculos de flags - ALU
     //pru_mem_0(&mut cpu_reg, &mut memoria);          // Manejo bancos de memoria
     //pru_varias_0(&mut cpu_reg);                     // "fn muestra_mem" y manejo de LittleEndian y BigEndian
-
 }
 
 //***************************************************************************** 
 
 
-//*************************************  Prueba manejo registros
+//************************************* Prueba manejo registros
 fn pru_registros(cpu_reg: &mut sim_cpu_registros::CPU){
     let titulo = String::from(" CPU - Simulación CPU - Prueba manejo registros ");
     imprime_titulo(&titulo);

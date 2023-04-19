@@ -7,11 +7,12 @@ edition = "2021"
 
 [dependencies]
 colored = "2.0.0"
-termion = "2.0.1"
 
 #---------------------------------------------------
-# Requerido pruebas minifb
-#minifb = "0.24.0"
+# Requerido pruebas GUI
+# minifb = "0.24.0"
+# termion = "2.0.1"
+# piston_window = "0.128.0"
 
 #---------------------------------------------------
 # Requerido pruebas plotters
