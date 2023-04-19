@@ -261,5 +261,5 @@ fn main() {
     minifb::pruebas_01::gate_bool();
 
     gui::piston_window_00::piston_win_00();
-
+    gui::piston_window_00::piston_win_01();
 */
