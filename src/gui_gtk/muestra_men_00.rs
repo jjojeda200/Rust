@@ -20,9 +20,10 @@
 //#![allow(unused_imports)]
 
 use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow,TextView, TextBuffer, TextTagTable};
-//use gtk::{Button, Box, Label, Entry};
+use gtk::{Application, ApplicationWindow, Button, Box, Label, TextView, TextBuffer, TextTagTable};
+//use gtk::{Entry};
 //use gtk::pango::{FontDescription, Style};
+use crate::proyectos::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self, CPU}};
 
 const COL_POR_DEFECTO: usize = 16;
 
@@ -39,7 +40,7 @@ fn muestra_linea_mem(mem: &[u8], ancho: usize) -> String {
     for i in 0..ancho {
         linea.push_str(&format!(" {:02x}", mem[i]));
     }
-    linea.push_str("\n");
+    linea.push_str(" \n");
     linea
 }
 
@@ -72,24 +73,56 @@ fn build_ui(application: &gtk::Application) {
     let window = ApplicationWindow::new(application);
     window.set_title("Muestra Memoria - GTK Rust");
     window.set_position(gtk::WindowPosition::Center);
-    window.set_default_size(420, 400);
-    window.set_default_width(500);
+    //window.set_default_size(420, 400);
+    window.set_default_width(400);
+    window.set_default_height(500);
+    window.set_border_width(10);
+    window.set_resizable(false);
 
-    // Creamos el estilo de texto con la familia "monospace"
-    //let mut font_desc = FontDescription::new();
-    //font_desc.set_family("monospace");
-    //font_desc.set_size(20);
-    //font_desc.set_style(Style::Normal);
+
+    let caja0 = Box::new(gtk::Orientation::Vertical, 8);
+    caja0.set_margin(8);
+    let caja1 = Box::new(gtk::Orientation::Horizontal, 8);
+    caja1.set_margin(4);
+
+    let etiqueta = Label::new(None);
+    let boton0 = Button::with_label("Reserva Memoria");
+    let boton1 = Button::with_label("libera Memoria");
 
     let text_view = TextView::new();
     text_view.set_monospace(true);
+    text_view.set_editable(false);
+    text_view.set_cursor_visible(false);
 
     // Creamos el buffer de texto y establecemos el estilo de fuente en el
     let buffer = TextBuffer::new(Some(&TextTagTable::new()));
-    buffer.set_text(&muestra_mem_obj([1, 2, 4, 8, 16, 32, 64, 128]));
+
+    let mut memoria = BancosMemoria::new();
+    memoria.escribir_memoria(0x0000, 0xff);
+    memoria.escribir_memoria(0x0001, 0xaa);
+    println!("{:02x}",memoria.leer_memoria(0x0000));
+    println!("{:02x}",memoria.leer_memoria(0x0001));
+    buffer.set_text(&muestra_mem_obj(&memoria.segmento_memoria[0][0..64]));
+    
+    //let mut vec: [u8; 64] = [0;64];
+    //for i in 0..vec.len() { vec[i] = (i+0) as u8; }
+    //buffer.set_text(&muestra_mem_obj(vec));
+    //buffer.set_text(&muestra_mem_obj([1, 2, 4, 8, 16, 32, 64, 128]));
 
     text_view.set_buffer(Some(&buffer));
-    window.add(&text_view);
+
+    window.add(&caja0);
+    caja0.pack_start(&text_view, true, true, 8);
+    caja0.pack_start(&caja1, true, false, 4);
+    caja1.pack_start(&boton0, false, false, 4);
+    caja1.pack_start(&boton1, false, false, 4);
+    caja0.pack_end(&etiqueta, true, true, 8);
+        
+    boton0.connect_clicked(move |_| {
+        let vec = vec![0; 1048576];
+        let used_memory = (vec.len() * std::mem::size_of::<i32>()) / (1024 * 1024);
+        etiqueta.set_text(&format!("Allocated {} MB of memory", used_memory));
+    });
 
     window.show_all();
 }
@@ -106,7 +139,6 @@ pub fn pru_muestra_men() {
 
     application.run();
 }
-
 
 //***************************************************************************** 
 

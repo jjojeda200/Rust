@@ -88,9 +88,13 @@ fn main() {
 */
 
 
+    gui_gtk::muestra_men_00::pru_muestra_men();
+//    gui_gtk::main_copy::maincopy();
+//    gui_gtk::main_heap0::xx();
 
+    
 //    proyectos::sim_cpu_generica::cpu_generica_0();
-    proyectos::sim_cpu_pruebas::cpu_sim_0();
+//    proyectos::sim_cpu_pruebas::cpu_sim_0();
 
 
     // ANALIZAR EN DETALLE OPTIMIZACIONES
@@ -264,7 +268,10 @@ fn main() {
     gui::piston_window_00::piston_win_01();
 */
 /* pruebas gui GTK              
+    gui_gtk::muestra_men_00::pru_muestra_men();
+
     gui_gtk::celcius_fahrenheit::c_f();
+    gui_gtk::dialogo::pru_dialogo();
 */
 
 //*****************************************************************************

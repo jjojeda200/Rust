@@ -9,3 +9,5 @@ pub mod celcius_fahrenheit;
 pub mod muestra_men_00;
 pub mod dialogo;
 
+pub mod main_copy;
+pub mod main_heap0;
