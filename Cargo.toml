@@ -10,6 +10,7 @@ colored = "2.0.0"
 
 #---------------------------------------------------
 # Requerido pruebas GUI
+gtk = "0.17.1"
 #minifb = "0.24.0"
 #termion = "2.0.1"
 #piston_window = "0.128.0"

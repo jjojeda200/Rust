@@ -23,7 +23,6 @@
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
 ***************************************************************************************/
-
 use colored::*;
 
 /* Notas:                   
@@ -55,6 +54,7 @@ mod rust_standard_library;
 mod lib_flujos;
 mod cap13;
 //mod gui;
+mod gui_gtk;
 
 /* función imprime_titulo   
 La función imprime_titulo(titulo: &String) recibe como parámetro un puntero a
@@ -100,7 +100,6 @@ fn main() {
     //ejer_rust_en_sp::ejer_memoria6::memoria_1();  // Pruebas extracción de slice de un vector
 
     //ejer_rust_en_sp::ejer_memoriax::memoria_1();    // Rutinas de salida por pantalla - Formato memoria Hex 1
-
 
 //*****************************************************************************
 /* Características básicas                      
@@ -158,6 +157,7 @@ fn main() {
 /* Genéricos/Option/Result                      
     ejer_rust_en_sp::ejer_genericos_option_result::genericos_0();
     ejer_rust_en_sp::ejer_genericos_option_result::genericos_1();
+    ejer_rust_en_sp::ejer_genericos_option_result::genericos_option();
     ejer_rust_en_sp::ejer_genericos_option_result::option_intro_0();
     ejer_rust_en_sp::ejer_genericos_option_result::option_intro_1();
     ejer_rust_en_sp::ejer_genericos_option_result::option_intro_2();
@@ -255,7 +255,7 @@ fn main() {
 
     proyectos::pruebas_plotters::pru_ploter2();
 */
-/* pruebas gui               
+/* pruebas gui                  
     minifb::pruebas_00::inicio();
     minifb::pruebas_00::flags();
     minifb::pruebas_01::gate_bool();
@@ -263,3 +263,8 @@ fn main() {
     gui::piston_window_00::piston_win_00();
     gui::piston_window_00::piston_win_01();
 */
+/* pruebas gui GTK              
+    gui_gtk::celcius_fahrenheit::c_f();
+*/
+
+//*****************************************************************************

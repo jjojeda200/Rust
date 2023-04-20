@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          20-02-2023
+    Fecha:          20-04-2023
     Titulo:         introducción a RUST
     Descripción:    Tipos Genéricos
     Referencias:
@@ -23,9 +23,15 @@
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
 ***************************************************************************************/
+#![allow(dead_code)]
+#![allow(unused_variables)]
+//#![allow(unused_assignments)]
+//#![allow(unused_mut)]
+
+use colored::*;
 
 fn imprime_titulo(titulo: &String) {
-    println!("\n{:*^80}", titulo);
+    println!("\n{:*^80}", titulo.red());
 }
 
 //***************************************************************************** Genéricos T - Intro 0
@@ -40,7 +46,6 @@ encierran el nombre que representa al parámetro de tipo.
 */
 use std::cmp::PartialOrd;   // Ahora es posible usar solo PartialOrd.
 
-#[allow(dead_code)]
 fn max<T: PartialOrd>(a: T, b: T) -> T {
     if a > b {
         a
@@ -49,7 +54,6 @@ fn max<T: PartialOrd>(a: T, b: T) -> T {
     }
 }
 
-#[allow(dead_code)]
 pub fn genericos_0(){
     let titulo = String::from(" Genéricos T - Intro 0 ");
     imprime_titulo(&titulo);
@@ -128,6 +132,89 @@ pub fn genericos_1() {
     compara_e_imprime_1("¡¡compara_e_imprime_1!!", 9, 8);
 }
 
+
+//***************************************************************************** Genéricos T - Option - Intro 
+use std::any::type_name;
+struct Vector<T> {
+    elements: Vec<T>,
+}
+
+impl<T> Vector<T> {
+    fn new() -> Vector<T> {
+        Vector { elements: Vec::new() }
+    }
+    
+    fn push(&mut self, element: T) {
+        self.elements.push(element);
+    }
+    
+    fn pop(&mut self) -> Option<T> {
+        self.elements.pop()
+    }
+    
+    fn get(&self, index: usize) -> Option<&T> {
+        self.elements.get(index)
+    }
+    
+    fn len(&self) -> usize {
+        self.elements.len()
+    }
+
+    fn print_type(&self) {
+        println!("Type of T: {}", type_name::<T>());
+    }
+}
+
+pub fn genericos_option() {
+    let titulo = String::from(" Genéricos T - Option - Intro");
+    imprime_titulo(&titulo);
+
+    let mut my_vector = Vector::new();
+    let mut vec = Vector::<u8>::new();
+
+    vec.push(0xff);
+
+    my_vector.push(1);
+    my_vector.push(2);
+    my_vector.push(3);
+    
+    println!("Vector length: {}", my_vector.len());
+    
+    match my_vector.pop() {
+        Some(element) => println!("Popped element: {}", element),
+        None => println!("Vector is empty"),
+    }
+    
+    match my_vector.get(1) {
+        Some(element) => println!("Element at index 1: {}", element),
+        None => println!("Index out of bounds"),
+    }
+    
+    
+    // Crear un nuevo Vector<T> con tipo &str
+    let mut my_string_vector = Vector::<&str>::new();
+    
+    my_string_vector.push("hello");
+    my_string_vector.push("world");
+    
+    println!("Vector length: {}", my_string_vector.len());
+    
+    match my_string_vector.pop() {
+        Some(element) => println!("Popped element: {}", element),
+        None => println!("Vector is empty"),
+    }
+    
+    match my_string_vector.get(1) {
+        Some(element) => println!("Element at index 1: {}", element),
+        None => println!("Index out of bounds"),
+    }
+    
+    
+    my_vector.print_type();
+    vec.print_type();
+    my_string_vector.print_type();
+}
+
 //***************************************************************************** Option - Intro
 /* Notas:       
 Option trata sobre Some o None. La existencia o no de un valor. Cuando el valor
@@ -147,7 +234,6 @@ fn identificador(id: u8) -> Option<String> {
 }
 
 //************************************* option_intro_0
-#[allow(dead_code)]
 pub fn option_intro_0() {
     let titulo = String::from(" Option - Intro 0 ");
     imprime_titulo(&titulo);
@@ -162,7 +248,6 @@ pub fn option_intro_0() {
     println!("Identidad: {}", identidad);
 }
 //************************************* option_intro_1
-#[allow(dead_code)]
 pub fn option_intro_1() -> Option<()> {
     let titulo = String::from(" Option - Intro 1 ");
     imprime_titulo(&titulo);
@@ -188,7 +273,6 @@ fn identificador_enum_opciones(id: u8) -> Opciones<std::string::String> {
     return Opciones::None;
 }
 
-#[allow(dead_code)]
 pub fn option_intro_2() {
     let titulo = String::from(" Option - Intro 2 ");
     imprime_titulo(&titulo);
@@ -222,7 +306,6 @@ fn toma_valor(valor: &Vec<i32>, var_posicion:usize) -> Option<i32> {
 }
 
 //************************************* option_0
-#[allow(dead_code)]
 pub fn option_0() {
     let titulo = String::from(" Option - Detalles 0 ");
     imprime_titulo(&titulo);
@@ -244,7 +327,6 @@ La función unwrap() recupera el valor contenido en el Some, pero entra en páni
 }
 
 //************************************* option_1
-#[allow(dead_code)]
 pub fn option_1() {
     let titulo = String::from(" Option - Detalles 1 ");
     imprime_titulo(&titulo);
@@ -280,7 +362,6 @@ En el código siguiente, se usa el método .is_some() para preguntar si el tipo 
 también hay otro método complementario denominado .is_none().
 */
 
-#[allow(dead_code)]
 pub fn option_2() {
     let titulo = String::from(" Option - Detalles 2 ");
     imprime_titulo(&titulo);
@@ -332,7 +413,6 @@ fn comprueba_valor(numero: i32) -> Result<i32, String> {
     }
 }
 
-#[allow(dead_code)]
 pub fn result_0() {
     let titulo = String::from(" Result - Intro 0 ");
     imprime_titulo(&titulo);
@@ -364,7 +444,6 @@ pub fn result_0() {
 }
 
 //***************************************************************************** Result - Intro 1
-#[allow(dead_code)]
 pub fn result_1() {
     let titulo = String::from(" Result - Intro 1 ");
     imprime_titulo(&titulo);
@@ -411,8 +490,6 @@ pub fn result_1() {
 }
 
 //***************************************************************************** Result - Intro 2
-#[allow(dead_code)]
-#[allow(unused_variables)]
 pub fn result_2() {
     let titulo = String::from(" Result - Intro 2 ");
     imprime_titulo(&titulo);
