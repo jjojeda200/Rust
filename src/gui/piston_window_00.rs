@@ -75,7 +75,6 @@ impl InnerApp {
     }
 }
 
-
 //*****************************************************************************
 fn create_window(number: usize) -> PistonWindow {
     WindowSettings::new(format!("window {}", number + 1), [256, 256])
