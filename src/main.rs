@@ -89,6 +89,7 @@ fn main() {
 
 
     gui_gtk::muestra_men_00::pru_muestra_men();
+
 //    gui_gtk::main_copy::maincopy();
 //    gui_gtk::main_heap0::xx();
 
@@ -269,9 +270,13 @@ fn main() {
 */
 /* pruebas gui GTK              
     gui_gtk::muestra_men_00::pru_muestra_men();
-
+    gui_gtk::draw_00::draw_00();
+    
     gui_gtk::celcius_fahrenheit::c_f();
     gui_gtk::dialogo::pru_dialogo();
+
+    gui_gtk::main_heap0::xx();
+    gui_gtk::main_copy::maincopy();
 */
 
 //*****************************************************************************
