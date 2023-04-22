@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          20-04-2023
+    Fecha:          22-04-2023
     Titulo:         introducción a RUST y GTK3
     Descripción:    
                     
@@ -17,7 +17,7 @@
 
 ***************************************************************************************/
 #![allow(dead_code)]
-//#![allow(unused_imports)]
+#![allow(unused_imports)]
 
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, Button, Box, Label, TextView, TextBuffer, TextTagTable};
@@ -58,9 +58,11 @@ fn muestra_mem(mem: &[u8], size: usize, ancho: usize) -> String {
     salida
 }
 
-fn muestra_mem_obj<T>(var_a: T) -> String {
+fn muestra_mem_obj<T: std::fmt::Debug>(var_a: T) -> String {
     let var_ptr = &var_a as *const T as *const u8;
+    println!("{:p}, {:?}", &var_a, var_ptr);
     let mut salida = format!("--> Tamaño ocupado en bytes ({})\n", std::mem::size_of::<T>());
+    println!("{}", salida);
     salida.push_str(&muestra_mem(
         unsafe { std::slice::from_raw_parts(var_ptr, std::mem::size_of::<T>()) },
         std::mem::size_of::<T>(),
@@ -100,13 +102,11 @@ fn build_ui(application: &gtk::Application) {
     let mut memoria = BancosMemoria::new();
     memoria.escribir_memoria(0x0000, 0xff);
     memoria.escribir_memoria(0x0001, 0xaa);
-    println!("{:02x}",memoria.leer_memoria(0x0000));
-    println!("{:02x}",memoria.leer_memoria(0x0001));
-    buffer.set_text(&muestra_mem_obj(&memoria.segmento_memoria[0][0..64]));
-    
-    //let mut vec: [u8; 64] = [0;64];
-    //for i in 0..vec.len() { vec[i] = (i+0) as u8; }
-    //buffer.set_text(&muestra_mem_obj(vec));
+    buffer.set_text(&muestra_mem_obj(&memoria.segmento_memoria[0][0..16]));
+
+//    let mut vec: [u8; 64] = [0;64];
+//    for i in 0..vec.len() { vec[i] = (i+0) as u8; }
+//    buffer.set_text(&muestra_mem_obj(vec));
     //buffer.set_text(&muestra_mem_obj([1, 2, 4, 8, 16, 32, 64, 128]));
 
     text_view.set_buffer(Some(&buffer));
@@ -121,7 +121,7 @@ fn build_ui(application: &gtk::Application) {
     boton0.connect_clicked(move |_| {
         let vec = vec![0; 1048576];
         let used_memory = (vec.len() * std::mem::size_of::<i32>()) / (1024 * 1024);
-        etiqueta.set_text(&format!("Allocated {} MB of memory", used_memory));
+        etiqueta.set_text(&format!("Ubicado {} MB de memoria", used_memory));
     });
 
     window.show_all();

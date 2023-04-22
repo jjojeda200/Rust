@@ -32,7 +32,7 @@ impl From<Celsius> for Fahrenheit {
 
 pub fn c_f() {
     let app = Application::new(
-        Some("com.convertido-temperaturas"),
+        Some("com.convertidor-temperaturas"),
         Default::default(),
     );
 

@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          20-04-2023
+    Fecha:          22-04-2023
     Titulo:         introducción a RUST y GTK3
     Descripción:    
                     

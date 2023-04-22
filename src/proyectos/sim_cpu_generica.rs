@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          14-04-2023
+    Fecha:          22-04-2023
     Titulo:         Simulación CPU Genérica
     Descripción:    CPU con direccionamiento de 8 bit (por ahora) y opcode del Intel 8080
     Referencias:
@@ -313,10 +313,10 @@ impl CPU {                                   // Funciones de manejo de ventanas
 
         opcode_window.mvprintw(2, 2, format!("{}", self.mnemonic));
         opcode_window.mvprintw(3, 2, format!("Hex: 0x{:02X}", opcode));
-        opcode_window.mvprintw(5, 2, format!("PC : {:04x}", self.contador_de_programa));
-        opcode_window.mvprintw(6, 2, format!("Contenido en"));
-        opcode_window.mvprintw(7, 2, format!("PC +1: 0x{:02X}", operandos[0]));
-        opcode_window.mvprintw(8, 2, format!("PC +2: 0x{:02X}", operandos[1]));
+        opcode_window.mvprintw(5, 2, format!(" PC : {:04x}", self.contador_de_programa));
+        opcode_window.mvprintw(6, 2, format!(" Operandos"));
+        opcode_window.mvprintw(7, 2, format!(" Cero: 0x{:02X}", operandos[0]));
+        opcode_window.mvprintw(8, 2, format!(" Uno : 0x{:02X}", operandos[1]));
         opcode_window.refresh();
     }
 }

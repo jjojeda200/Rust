@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          16-04-2023
+    Fecha:          22-04-2023
     Titulo:         Metodos asociados a los opcode - Simulación CPU
     Descripción:    
     Referencias:
