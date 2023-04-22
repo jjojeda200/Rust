@@ -21,9 +21,8 @@
 
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, Button, Box, Label, TextView, TextBuffer, TextTagTable};
-//use gtk::{Entry};
-//use gtk::pango::{FontDescription, Style};
 use crate::proyectos::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self, CPU}};
+use std::any::type_name;
 
 const COL_POR_DEFECTO: usize = 16;
 
@@ -51,6 +50,7 @@ fn muestra_mem(mem: &[u8], size: usize, ancho: usize) -> String {
     let lineas = calcula_lineas(size, ancho);
     let mut offset = 0;
     for _ in 0..lineas {
+        println!("mem {:?} {:p}", &mem, mem);
         salida.push_str(&muestra_linea_mem(&mem[offset..], ancho));
         offset += ancho;
     }
@@ -60,10 +60,20 @@ fn muestra_mem(mem: &[u8], size: usize, ancho: usize) -> String {
 
 fn muestra_mem_obj<T: std::fmt::Debug>(var_a: T) -> String {
     let var_ptr = &var_a as *const T as *const u8;
-    println!("{:p}, {:?}", &var_a, var_ptr);
     let mut salida = format!("--> Tamaño ocupado en bytes ({})\n", std::mem::size_of::<T>());
-    println!("{}", salida);
+    println!("Type of T: {}", type_name::<T>());
+    //println!("{:p}, {:?}", &var_a, var_ptr);
+    //println!("{}", salida);
     salida.push_str(&muestra_mem(
+        /*
+        La función std::slice::from_raw_parts crea un slice a partir de un puntero a un bloque de memoria.
+        El primer argumento es el puntero a la memoria que se utilizará para crear el slice.
+        El segundo argumento es el tamaño en bytes del tipo de datos que se almacenará en el slice.
+        El puntero a la memoria se proporciona como var_ptr, que se supone que es un puntero a un bloque
+        de memoria que contiene datos de tipo T. El segundo argumento, std::mem::size_of::<T>(), es una
+        llamada a la función size_of del módulo mem de Rust.
+        Esta función devuelve el tamaño en bytes del tipo de datos T.
+        */
         unsafe { std::slice::from_raw_parts(var_ptr, std::mem::size_of::<T>()) },
         std::mem::size_of::<T>(),
         COL_POR_DEFECTO,
@@ -81,48 +91,67 @@ fn build_ui(application: &gtk::Application) {
     window.set_border_width(10);
     window.set_resizable(false);
 
-
+    // Crea cajas
     let caja0 = Box::new(gtk::Orientation::Vertical, 8);
     caja0.set_margin(8);
     let caja1 = Box::new(gtk::Orientation::Horizontal, 8);
     caja1.set_margin(4);
 
+    // Crea botones y etiquetas
     let etiqueta = Label::new(None);
-    let boton0 = Button::with_label("Reserva Memoria");
-    let boton1 = Button::with_label("libera Memoria");
+    let boton00 = Button::with_label("Botón 0");
+    let boton01 = Button::with_label("Botón 1");
+    let boton10 = Button::with_label("Reserva Memoria");
+    let boton11 = Button::with_label("libera Memoria");
 
+    // Crea vistas de texto
+    let cont_bufer = TextView::new();
+    cont_bufer.set_editable(false);
+    cont_bufer.set_cursor_visible(false);
     let text_view = TextView::new();
     text_view.set_monospace(true);
     text_view.set_editable(false);
     text_view.set_cursor_visible(false);
 
-    // Creamos el buffer de texto y establecemos el estilo de fuente en el
-    let buffer = TextBuffer::new(Some(&TextTagTable::new()));
+    // Creamos el bufer's de texto
+    let bufer0 = TextBuffer::new(Some(&TextTagTable::new()));    
+    let bufer1 = TextBuffer::new(Some(&TextTagTable::new()));
+    //let bufer1 = contenido_bufer.buffer().expect("Error al obtener el búfer1");
 
     let mut memoria = BancosMemoria::new();
     memoria.escribir_memoria(0x0000, 0xff);
-    memoria.escribir_memoria(0x0001, 0xaa);
-    buffer.set_text(&muestra_mem_obj(&memoria.segmento_memoria[0][0..16]));
+    memoria.escribir_memoria(0x0016, 0xaa);
+    bufer0.set_text(&muestra_mem(&memoria.segmento_memoria[0][0..32], 32, 16));
+    //bufer0.set_text(&muestra_mem_obj::<&[u8]>(&memoria.segmento_memoria[0][0..32]));
 
 //    let mut vec: [u8; 64] = [0;64];
 //    for i in 0..vec.len() { vec[i] = (i+0) as u8; }
-//    buffer.set_text(&muestra_mem_obj(vec));
-    //buffer.set_text(&muestra_mem_obj([1, 2, 4, 8, 16, 32, 64, 128]));
+//    bufer0.set_text(&muestra_mem_obj(vec));
+    //bufer0.set_text(&muestra_mem_obj([1, 2, 4, 8, 16, 32, 64, 128]));
 
-    text_view.set_buffer(Some(&buffer));
+    text_view.set_buffer(Some(&bufer0));
 
     window.add(&caja0);
     caja0.pack_start(&text_view, true, true, 8);
     caja0.pack_start(&caja1, true, false, 4);
-    caja1.pack_start(&boton0, false, false, 4);
-    caja1.pack_start(&boton1, false, false, 4);
+    caja1.pack_start(&boton10, false, false, 4);
+    caja1.pack_start(&boton11, false, false, 4);
+    caja0.pack_start(&cont_bufer, false, true, 2);
+    caja0.pack_end(&boton01, false, true, 0);
+    caja0.pack_end(&boton00, false, true, 0);
     caja0.pack_end(&etiqueta, true, true, 8);
-        
-    boton0.connect_clicked(move |_| {
+
+    boton00.connect_clicked(move |_| {
+        bufer1.set_text(&format!("Contenido en memoria {:02x}", memoria.leer_memoria(0x0000)));
+        cont_bufer.set_buffer(Some(&bufer1));
+    });
+
+    boton10.connect_clicked(move |_| {
         let vec = vec![0; 1048576];
         let used_memory = (vec.len() * std::mem::size_of::<i32>()) / (1024 * 1024);
         etiqueta.set_text(&format!("Ubicado {} MB de memoria", used_memory));
     });
+
 
     window.show_all();
 }
@@ -139,8 +168,6 @@ pub fn pru_muestra_men() {
 
     application.run();
 }
-
-//***************************************************************************** 
 
 
 //***************************************************************************** 

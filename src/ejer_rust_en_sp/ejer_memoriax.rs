@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          29-03-2023
+    Fecha:          22-04-2023
     Titulo:         introducción a RUST
     Descripción:    Jugando con la memoria, punteros, referencias, etc.
     Referencias:
@@ -28,13 +28,15 @@
 #![allow(unused_mut)]
 //#![allow(unused_assignments)]
 
+use colored::*;
+
 /* función imprime_titulo   
 La función imprime_titulo(titulo: &String) recibe como parámetro un puntero a
 una cadena de texto String y utiliza la macro println!() para imprimir el valor
 de la cadena de texto centrado en 80 caracteres y rodeado por asteriscos.
 */
 fn imprime_titulo(titulo: &String) {
-    println!("\n{:*^80}", titulo);
+    println!("\n{:*^80}", titulo.blue());
 }
 
 //***************************************************************************** 
@@ -241,6 +243,15 @@ evitar errores y vulnerabilidades en el código.
 fn muestra_mem_obj<T>(var_a: &T) {
     let var_ptr = var_a as *const T as *const u8;
     println!("--> Tamaño ocupado en bytes ({})", mem::size_of::<T>());
+    /*
+    La función std::slice::from_raw_parts crea un slice a partir de un puntero a un bloque de memoria.
+    El primer argumento es el puntero a la memoria que se utilizará para crear el slice.
+    El segundo argumento es el tamaño en bytes del tipo de datos que se almacenará en el slice.
+    El puntero a la memoria se proporciona como var_ptr, que se supone que es un puntero a un bloque
+    de memoria que contiene datos de tipo T. El segundo argumento, std::mem::size_of::<T>(), es una
+    llamada a la función size_of del módulo mem de Rust.
+    Esta función devuelve el tamaño en bytes del tipo de datos T.
+    */
     muestra_mem(unsafe { std::slice::from_raw_parts(var_ptr, mem::size_of::<T>()) }, mem::size_of::<T>(), COL_POR_DEFECTO);
 }
 

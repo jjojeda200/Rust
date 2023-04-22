@@ -11,4 +11,3 @@ pub mod dialogo;
 pub mod draw_00;
 
 pub mod main_copy;
-pub mod main_heap0;

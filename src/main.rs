@@ -89,9 +89,7 @@ fn main() {
 
 
     gui_gtk::muestra_men_00::pru_muestra_men();
-
 //    gui_gtk::main_copy::maincopy();
-//    gui_gtk::main_heap0::xx();
 
     
 //    proyectos::sim_cpu_generica::cpu_generica_0();
@@ -275,7 +273,6 @@ fn main() {
     gui_gtk::celcius_fahrenheit::c_f();
     gui_gtk::dialogo::pru_dialogo();
 
-    gui_gtk::main_heap0::xx();
     gui_gtk::main_copy::maincopy();
 */
 
