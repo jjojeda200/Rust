@@ -50,7 +50,7 @@ fn muestra_mem(mem: &[u8], size: usize, ancho: usize) -> String {
     let lineas = calcula_lineas(size, ancho);
     let mut offset = 0;
     for _ in 0..lineas {
-        println!("mem {:?} {:p}", &mem, mem);
+        //println!("mem {:?} {:p}", &mem, mem);
         salida.push_str(&muestra_linea_mem(&mem[offset..], ancho));
         offset += ancho;
     }
@@ -91,9 +91,9 @@ fn build_ui(application: &gtk::Application) {
     text_view.set_cursor_visible(false);
 
     // Creamos el bufer's de texto
-    let bufer0 = TextBuffer::new(Some(&TextTagTable::new()));    
+    let bufer0 = TextBuffer::new(Some(&TextTagTable::new()));
     let bufer1 = TextBuffer::new(Some(&TextTagTable::new()));
-    //let bufer1 = contenido_bufer.buffer().expect("Error al obtener el búfer1");
+    let bufer2 = TextBuffer::new(Some(&TextTagTable::new()));
 
     let mut memoria = BancosMemoria::new();
     memoria.escribir_memoria(0x0000, 0xff);

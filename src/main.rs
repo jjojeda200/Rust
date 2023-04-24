@@ -88,6 +88,7 @@ fn main() {
 */
 
 
+
     gui_gtk::muestra_men_00::pru_muestra_men();
 //    gui_gtk::main_copy::maincopy();
 
@@ -113,6 +114,7 @@ fn main() {
     ejer_rust_en_sp::ejer_basicos::duración_tipos();
 */
 /* Closure                                      
+    ejer_rust_en_sp::ejer_closure::closure();
     ejer_rust_en_sp::ejer_closure::closure_0();
     ejer_rust_en_sp::ejer_closure::closure_1();
     ejer_rust_en_sp::ejer_closure::closure_hyperbolic_1();

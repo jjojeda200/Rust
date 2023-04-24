@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          01-02-2023
+    Fecha:          24-04-2023
     Titulo:         introducción a RUST
     Descripción:    closures, closure move
     Referencias:
@@ -31,14 +31,89 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
+use colored::*;
 use std::thread;
 use std::time::Duration;
+use std::collections::HashMap;
 
 fn imprime_titulo(titulo: &String) {
-    println!("\n{:*^80}", titulo);
+    println!("\n{:*^80}", titulo.red());
 }
 
-//*****************************************************************************
+//***************************************************************************** Introducción a Closure
+pub fn closure() {
+    let titulo = String::from(" Introducción a Closure ");
+    imprime_titulo(&titulo);
+
+    let num_vec = vec![2, 4, 6];
+
+    let double_vec = num_vec        // usa el vector
+        .iter()                     // para recorrerlo (iterar)
+        .map(|number| number * 2)   // para cada elemento, lo multiplica por 2
+        .collect::<Vec<i32>>();     // y crea un nuevo vector a partir de ello
+    println!("{:?}", double_vec);
+
+    double_vec
+        .iter()      // itera sobre num_vec
+        .enumerate() // obtiene pares de (índice, valor)
+        .for_each(|(index, number)| println!("El índice {} contiene el valor {}", index, number)); // imprime para cada elemento
+
+//*************************************
+    println!();
+    let some_numbers = vec![0, 1, 2, 3, 4, 5]; // un Vec<i32>
+    let some_words = vec!["cero", "uno", "dos", "tres", "cuatro", "cinco"]; // un Vec<&str>
+
+    let number_word_hashmap = some_numbers
+        .into_iter()                 // obtiene un iter
+        .zip(some_words.into_iter()) // se combinan con .zip() dos iter.
+//        .collect::<HashMap<i32, &str>>();
+        .collect::<HashMap<_, _>>();
+    println!("Para la clave {} se obtiene {}.", 2, number_word_hashmap.get(&2).unwrap());
+
+//*************************************
+    println!();
+    let new_vec = vec![8, 10, 0]; // solo un vec con números
+    let number_to_add = 5;       // Se usa en el cálculo más adelante
+    let mut empty_vec = vec![];  // El resultado va aquí
+
+    for index in 0..5 {
+        empty_vec.push(
+            new_vec
+               .get(index)
+               .and_then(|number| Some(number + 1))
+               .and_then(|number| Some(number + number_to_add))
+        );
+    }
+    println!("{:?}", empty_vec);
+
+//*************************************
+    println!();
+    let one = true;
+    let two = false;
+    let three = true;
+    let four = true;
+    println!("{}", one && three); // prints true
+    println!("{}", one && two && three && four); // prints false
+
+    let first_try = vec![Some("éxito"), None, Some("éxito"), Some("éxito"), None];
+    let second_try = vec![None, Some("éxito"), Some("éxito"), Some("éxito"), Some("éxito")];
+    let third_try = vec![Some("éxito"), Some("éxito"), Some("éxito"), Some("éxito"), None];
+
+    for i in 0..first_try.len() {
+        println!("{:?}", first_try[i].and(second_try[i]).and(third_try[i]));
+    }
+
+//*************************************
+    println!();
+    let num_vec = vec![10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+
+    println!("{:?}", num_vec.iter().find(|&number| number % 3 == 0)); // find takes a reference, so we give it &number
+    println!("{:?}", num_vec.iter().find(|&number| number * 2 == 30));
+    println!("{:?}", num_vec.iter().position(|&number| number % 3 == 0));
+    println!("{:?}", num_vec.iter().position(|&number| number * 2 == 30));
+}
+
+//***************************************************************************** Introducción a Closure 0
 pub fn closure_0() {
     let titulo = String::from(" Introducción a Closure 0 ");
     imprime_titulo(&titulo);
@@ -99,7 +174,7 @@ veces con diferentes valores de entrada para generar diferentes resultados.
 */
 }
 
-//*****************************************************************************
+//***************************************************************************** Introducción a Closure 1
 pub fn closure_1() {
     let titulo = String::from(" Introducción a Closure 1 ");
     imprime_titulo(&titulo);
@@ -145,9 +220,12 @@ fn rutina_aux0_closure_0(var_i: u32, var_j: u32) {
     }
 }
 
-//*****************************************************************************
+//***************************************************************************** Ejemplo Hiperbolic 
 //Hyperbolic Time Academy: https://www.youtube.com/watch?v=vsVL8CVGFkM
 pub fn closure_hyperbolic_1() {
+    let titulo = String::from(" Ejemplo Hiperbolic 1 ");
+    imprime_titulo(&titulo);
+
     /*
     Un closure move es un tipo de closure en Rust que toma propiedad de las variables que
     captura en su alcance. Esto significa que las variables capturadas se mueven a la
@@ -173,9 +251,12 @@ pub fn closure_hyperbolic_1() {
     println!("     var_x: {} \n", var_x);
 }
 
-//*****************************************************************************
+//***************************************************************************** Ejemplo Hiperbolic 2
 // Hyperbolic Time Academy: https://www.youtube.com/watch?v=vsVL8CVGFkM
 pub fn closure_hyperbolic_2() {
+    let titulo = String::from(" Ejemplo Hiperbolic 2 ");
+    imprime_titulo(&titulo);
+
     {
         // Fn Trait
         let mut var_str = "Texto principal,".to_string();
@@ -201,21 +282,25 @@ pub fn closure_hyperbolic_2() {
 }
 // Fn Trait
 fn add_0<F>(func: F)
-where
-    F: Fn(u8),
-{
-    func(5)
-}
+    where
+        F: Fn(u8),
+        {
+            func(5)
+        }
 // FnMut Trait
 fn add_1<F>(mut func: F)
-where
-    F: FnMut(u8),
-{
-    func(5)
-}
-//*****************************************************************************
+    where
+        F: FnMut(u8),
+        {
+            func(5)
+        }
+
+//***************************************************************************** Ejemplo Rhymu 
 // Rhymu's Videos: https://www.youtube.com/watch?v=drYtaZopxgQ
 pub fn closure_rhymu_0() {
+    let titulo = String::from(" Ejemplo Rhymu 0 ");
+    imprime_titulo(&titulo);
+
     let numeros = [1, 2, 3];
     let numeros_on_iter = numeros.into_iter();
     println!("\nnumeros_on_iter     = {:?}", numeros_on_iter);
@@ -224,6 +309,7 @@ pub fn closure_rhymu_0() {
     println!("numeros direcciones = {:?}", numeros.as_ptr_range());
 
     let multiplicado = numeros_on_iter.map(multiplicar(4));
+
     println!("Multiplicado        = {:?}", multiplicado);
     for i in multiplicado {
         println!("           = {:?}", i);
@@ -260,6 +346,9 @@ fn multiplicar(mut x: i32) -> impl FnMut(i32) -> i32 {
 //*****************************************************************************
 // Rust (Rainer Stropek): https://www.youtube.com/watch?v=bgZa9VRBhYU
 pub fn closure_rust_list() {
+    let titulo = String::from(" Ejemplo Rust list ");
+    imprime_titulo(&titulo);
+
     {
         let val_x = 21;
         let get_respuesta = |y: i32| return val_x + y;
