@@ -44,7 +44,7 @@ fn muestra_linea_mem(mem: &[u8], ancho: usize) -> String {
 }
 
 fn muestra_mem(mem: &[u8], size: usize, ancho: usize) -> String {
-    let mut salida = String::new();
+    let mut salida = format!("--> Tamaño ocupado en bytes ({})\n", mem.len());
     salida.push_str("   Dir. Memoria  || 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n");
     salida.push_str("  -------------- || -----------------------------------------------\n");
     let lineas = calcula_lineas(size, ancho);
@@ -55,29 +55,6 @@ fn muestra_mem(mem: &[u8], size: usize, ancho: usize) -> String {
         offset += ancho;
     }
     salida.push_str("  -----------------------------------------------------------------\n");
-    salida
-}
-
-fn muestra_mem_obj<T: std::fmt::Debug>(var_a: T) -> String {
-    let var_ptr = &var_a as *const T as *const u8;
-    let mut salida = format!("--> Tamaño ocupado en bytes ({})\n", std::mem::size_of::<T>());
-    println!("Type of T: {}", type_name::<T>());
-    //println!("{:p}, {:?}", &var_a, var_ptr);
-    //println!("{}", salida);
-    salida.push_str(&muestra_mem(
-        /*
-        La función std::slice::from_raw_parts crea un slice a partir de un puntero a un bloque de memoria.
-        El primer argumento es el puntero a la memoria que se utilizará para crear el slice.
-        El segundo argumento es el tamaño en bytes del tipo de datos que se almacenará en el slice.
-        El puntero a la memoria se proporciona como var_ptr, que se supone que es un puntero a un bloque
-        de memoria que contiene datos de tipo T. El segundo argumento, std::mem::size_of::<T>(), es una
-        llamada a la función size_of del módulo mem de Rust.
-        Esta función devuelve el tamaño en bytes del tipo de datos T.
-        */
-        unsafe { std::slice::from_raw_parts(var_ptr, std::mem::size_of::<T>()) },
-        std::mem::size_of::<T>(),
-        COL_POR_DEFECTO,
-    ));
     salida
 }
 
@@ -120,19 +97,17 @@ fn build_ui(application: &gtk::Application) {
 
     let mut memoria = BancosMemoria::new();
     memoria.escribir_memoria(0x0000, 0xff);
-    memoria.escribir_memoria(0x0016, 0xaa);
-    bufer0.set_text(&muestra_mem(&memoria.segmento_memoria[0][0..32], 32, 16));
-    //bufer0.set_text(&muestra_mem_obj::<&[u8]>(&memoria.segmento_memoria[0][0..32]));
+    memoria.escribir_memoria(0x0010, 0xaa);
+    bufer0.set_text(&muestra_mem(&memoria.segmento_memoria[0][0..64], 64, 16));
 
 //    let mut vec: [u8; 64] = [0;64];
 //    for i in 0..vec.len() { vec[i] = (i+0) as u8; }
-//    bufer0.set_text(&muestra_mem_obj(vec));
-    //bufer0.set_text(&muestra_mem_obj([1, 2, 4, 8, 16, 32, 64, 128]));
+//    bufer0.set_text(&muestra_mem(&vec,64,16));
 
     text_view.set_buffer(Some(&bufer0));
 
     window.add(&caja0);
-    caja0.pack_start(&text_view, true, true, 8);
+    caja0.pack_start(&text_view, true, true, 4);
     caja0.pack_start(&caja1, true, false, 4);
     caja1.pack_start(&boton10, false, false, 4);
     caja1.pack_start(&boton11, false, false, 4);
@@ -151,7 +126,6 @@ fn build_ui(application: &gtk::Application) {
         let used_memory = (vec.len() * std::mem::size_of::<i32>()) / (1024 * 1024);
         etiqueta.set_text(&format!("Ubicado {} MB de memoria", used_memory));
     });
-
 
     window.show_all();
 }
