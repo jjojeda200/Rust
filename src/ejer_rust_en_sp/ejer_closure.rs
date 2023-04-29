@@ -307,9 +307,10 @@ pub fn closure_rhymu_0() {
     que iter() permite la iteración de solo lectura sin consumir la colección.
     */
     let numeros_on_iter = numeros.into_iter();
+    println!("numeros on iter     = {:?}", numeros_on_iter);
+    
     let numeros_en_iter = numeros.iter();
     println!("numeros             = {:?}", numeros);
-    println!("numeros on iter     = {:?}", numeros_on_iter);
     println!("numeros_en_iter     = {:?}", numeros_en_iter);
     println!("numeros direcciones = {:?}", numeros.as_ptr_range());
 
