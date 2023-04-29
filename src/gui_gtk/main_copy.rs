@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          22-04-2023
+    Fecha:          29-04-2023
     Titulo:         introducción a RUST y GTK3
     Descripción:    
                     
@@ -32,10 +32,9 @@ pub fn maincopy() {
 
     // Crea una ventana
     let ventana = gtk::Window::new(gtk::WindowType::Toplevel);
-    // Establece el título de la ventana
     ventana.set_title("Hex de una dirección de memoria");
-    // Establece el tamaño de la ventana
     ventana.set_default_size(640, 480);
+    ventana.set_position(gtk::WindowPosition::Center);
 
     let boton_ventana1 = gtk::Button::with_label("Abre nueva ventana");
     boton_ventana1.connect_clicked(move |_| {

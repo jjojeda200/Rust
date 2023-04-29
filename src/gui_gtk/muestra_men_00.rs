@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          22-04-2023
+    Fecha:          29-04-2023
     Titulo:         introducción a RUST y GTK3
     Descripción:    
                     
@@ -84,66 +84,67 @@ fn build_ui(application: &gtk::Application) {
     let boton10 = Button::with_label("Reserva Memoria");
     let boton11 = Button::with_label("libera Memoria");
 
-    // Crea vistas de texto
-    let cont_bufer = TextView::new();
-    cont_bufer.set_editable(false);
-    cont_bufer.set_cursor_visible(false);
+    // Crea vistas de texto (Tabla Hex)
     let text_view = TextView::new();
     text_view.set_monospace(true);
     text_view.set_editable(false);
     text_view.set_cursor_visible(false);
 
+    // Crea vistas de texto (Salida botones 0 y 1)
+    let cont_bufer_01 = TextView::new();
+    cont_bufer_01.set_editable(false);
+    cont_bufer_01.set_cursor_visible(false);
+
+
     // Creamos el bufer's de texto
-    let bufer0 = TextBuffer::new(Some(&TextTagTable::new()));
-    let bufer1 = TextBuffer::new(Some(&TextTagTable::new()));
+    let bufer_00 = TextBuffer::new(Some(&TextTagTable::new()));
+    let bufer_01 = cont_bufer_01.buffer().unwrap();
+    bufer_01.set_text("Texto de ejemplo");
+
+    let _bufer1 = TextBuffer::new(Some(&TextTagTable::new()));
     let _bufer2 = TextBuffer::new(Some(&TextTagTable::new()));
+
 
     let mut memoria = BancosMemoria::new();
     memoria.escribir_memoria(0x0000, 0xff);
     memoria.escribir_memoria(0x0010, 0xaa);
-    bufer0.set_text(&muestra_mem(&memoria.segmento_memoria[0][0..64], 64, 16));
+    bufer_00.set_text(&muestra_mem(&memoria.segmento_memoria[0][0..64], 64, 16));
+/* 
+    let mut vec: [u8; 64] = [0;64];
+    for i in 0..vec.len() { vec[i] = (i+0) as u8; }
+    bufer_00.set_text(&muestra_mem(&vec,64,16));
+*/
+    text_view.set_buffer(Some(&bufer_00));
 
-//    let mut vec: [u8; 64] = [0;64];
-//    for i in 0..vec.len() { vec[i] = (i+0) as u8; }
-//    bufer0.set_text(&muestra_mem(&vec,64,16));
-
-    text_view.set_buffer(Some(&bufer0));
 
     window.add(&caja0);
     caja0.pack_start(&text_view, true, true, 4);
     caja0.pack_start(&caja1, true, false, 4);
     caja1.pack_start(&boton10, false, false, 4);
     caja1.pack_start(&boton11, false, false, 4);
-    caja0.pack_start(&cont_bufer, false, true, 2);
+    caja0.pack_start(&cont_bufer_01, false, true, 2);
     caja0.pack_end(&boton01, false, true, 0);
     caja0.pack_end(&boton00, false, true, 0);
     caja0.pack_end(&etiqueta, true, true, 8);
 
 
-    /* boton00.connect_clicked              
-    Esta línea de código se utiliza para establecer una función de devolución de llamada para el evento
-    de clic en el botón. En este caso, la función de devolución de llamada es una clausura (closure) que
-    no toma ningún argumento y no devuelve ningún valor (es decir, una función que toma un parámetro
-    llamado _ que se ignora y no tiene cuerpo).
-    */
+    // Conectar las señales "clicked" de los botones al callback
+    let bufer_01_clone1 = bufer_01.clone();
     boton00.connect_clicked(move |_| {
-        /* bufer1.set_text                  
-        Esta línea de código se utiliza para establecer el texto en el GtkTextBuffer llamado bufer1. Se
-        utiliza el método set_text() del objeto bufer1 para establecer el texto y se utiliza la macro
-        format!() para construir el mensaje que se va a mostrar en el buffer. En este caso, el mensaje
-        incluye el valor hexadecimal de un byte de la memoria en la dirección de memoria 0x0000.
-        */
-        bufer1.set_text(&format!("Contenido en memoria {:02x}", memoria.leer_memoria(0x0000)));
-        /* cont_bufer.set_buffer            
-        Esta línea de código se utiliza para establecer el GtkTextBuffer activo en un objeto GtkTextView
-        llamado cont_bufer. Se utiliza el método set_buffer() del objeto cont_bufer para establecer el
-        buffer activo y se pasa una referencia (&) al objeto bufer1 como argumento. Es importante tener en
-        cuenta que se está pasando una referencia a bufer1, lo que significa que el objeto bufer1 no puede
-        ser modificado mientras se está utilizando en cont_bufer.
-        */
-        cont_bufer.set_buffer(Some(&bufer1.clone()));
+        bufer_01_clone1.set_text(&format!("Contenido en memoria 0x{:02X}", memoria.leer_memoria(0x0000)));
     });
 
+    let bufer_01_clone2 = bufer_01.clone();
+    boton01.connect_clicked(move |_| {
+        bufer_01_clone2.set_text("Contenido actualizado por Botón 2");
+    });
+
+/* 
+    boton00.connect_clicked(move |_| {
+        bufer1.set_text(&format!("Contenido en memoria {:02x}", memoria.leer_memoria(0x0000)));
+        cont_bufer_01.set_buffer(Some(&bufer1.clone()));
+    });
+*/
 
     boton10.connect_clicked(move |_| {
         let vec = vec![0; 1048576];
