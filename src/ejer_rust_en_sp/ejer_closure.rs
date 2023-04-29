@@ -198,7 +198,6 @@ pub fn closure_1() {
     rutina_aux0_closure_0(valor_i, valor_j);
 }
 
-//*************************************
 fn rutina_aux0_closure_0(var_i: u32, var_j: u32) {
     // Función encapsulada en una variable --> |var_a|
     let cierre = |mut var_a| {
@@ -217,6 +216,29 @@ fn rutina_aux0_closure_0(var_i: u32, var_j: u32) {
             println!("Caso 3: valor devuelto por función anonima {}", cierre(var_i));
     }
 }
+
+//***************************************************************************** Introducción a Closure 2
+pub fn closure_2() {
+    let titulo = String::from(" Introducción a Closure 2 ");
+    imprime_titulo(&titulo);
+
+    let mut num = 5;
+    let closure = |x| x + num;
+
+    println!("Resultado del closure: {}", closure(10));
+    // Output: "Resultado de la closure: 15"
+
+    modify_num(&mut num, |x| *x *= 2);
+    println!("Nuevo valor de num: {}", num);
+    // Output: "Nuevo valor de num: 10"
+}
+
+fn modify_num<F>(num: &mut i32, closure: F)
+    where
+        F: FnOnce(&mut i32),
+    {
+        closure(num);
+    }
 
 //***************************************************************************** Ejemplo Hiperbolic 
 //Hyperbolic Time Academy: https://www.youtube.com/watch?v=vsVL8CVGFkM

@@ -21,6 +21,7 @@
 
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, Button, Box, Label, TextView, TextBuffer, TextTagTable};
+use crate::proyectos::sim_cpu_memoria;
 use crate::proyectos::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self, CPU}};
 use std::any::type_name;
 
@@ -58,6 +59,8 @@ fn muestra_mem(mem: &[u8], size: usize, ancho: usize) -> String {
     salida
 }
 
+
+
 fn build_ui(application: &gtk::Application) {
     let window = ApplicationWindow::new(application);
     window.set_title("Muestra Memoria - GTK Rust");
@@ -93,7 +96,7 @@ fn build_ui(application: &gtk::Application) {
     // Creamos el bufer's de texto
     let bufer0 = TextBuffer::new(Some(&TextTagTable::new()));
     let bufer1 = TextBuffer::new(Some(&TextTagTable::new()));
-    let bufer2 = TextBuffer::new(Some(&TextTagTable::new()));
+    let _bufer2 = TextBuffer::new(Some(&TextTagTable::new()));
 
     let mut memoria = BancosMemoria::new();
     memoria.escribir_memoria(0x0000, 0xff);
@@ -116,10 +119,31 @@ fn build_ui(application: &gtk::Application) {
     caja0.pack_end(&boton00, false, true, 0);
     caja0.pack_end(&etiqueta, true, true, 8);
 
+
+    /* boton00.connect_clicked              
+    Esta línea de código se utiliza para establecer una función de devolución de llamada para el evento
+    de clic en el botón. En este caso, la función de devolución de llamada es una clausura (closure) que
+    no toma ningún argumento y no devuelve ningún valor (es decir, una función que toma un parámetro
+    llamado _ que se ignora y no tiene cuerpo).
+    */
     boton00.connect_clicked(move |_| {
+        /* bufer1.set_text                  
+        Esta línea de código se utiliza para establecer el texto en el GtkTextBuffer llamado bufer1. Se
+        utiliza el método set_text() del objeto bufer1 para establecer el texto y se utiliza la macro
+        format!() para construir el mensaje que se va a mostrar en el buffer. En este caso, el mensaje
+        incluye el valor hexadecimal de un byte de la memoria en la dirección de memoria 0x0000.
+        */
         bufer1.set_text(&format!("Contenido en memoria {:02x}", memoria.leer_memoria(0x0000)));
-        cont_bufer.set_buffer(Some(&bufer1));
+        /* cont_bufer.set_buffer            
+        Esta línea de código se utiliza para establecer el GtkTextBuffer activo en un objeto GtkTextView
+        llamado cont_bufer. Se utiliza el método set_buffer() del objeto cont_bufer para establecer el
+        buffer activo y se pasa una referencia (&) al objeto bufer1 como argumento. Es importante tener en
+        cuenta que se está pasando una referencia a bufer1, lo que significa que el objeto bufer1 no puede
+        ser modificado mientras se está utilizando en cont_bufer.
+        */
+        cont_bufer.set_buffer(Some(&bufer1.clone()));
     });
+
 
     boton10.connect_clicked(move |_| {
         let vec = vec![0; 1048576];

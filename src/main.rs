@@ -88,6 +88,11 @@ fn main() {
 */
 
 
+ejer_rust_en_sp::ejer_closure::closure_2();
+ejer_rust_en_sp::ejer_closure::closure_hyperbolic_1();
+ejer_rust_en_sp::ejer_closure::closure_hyperbolic_2();
+ejer_rust_en_sp::ejer_closure::closure_rhymu_0();
+ejer_rust_en_sp::ejer_closure::closure_rust_list();
 
     gui_gtk::muestra_men_00::pru_muestra_men();
 //    gui_gtk::main_copy::maincopy();
@@ -117,6 +122,7 @@ fn main() {
     ejer_rust_en_sp::ejer_closure::closure();
     ejer_rust_en_sp::ejer_closure::closure_0();
     ejer_rust_en_sp::ejer_closure::closure_1();
+    ejer_rust_en_sp::ejer_closure::closure_2();
     ejer_rust_en_sp::ejer_closure::closure_hyperbolic_1();
     ejer_rust_en_sp::ejer_closure::closure_hyperbolic_2();
     ejer_rust_en_sp::ejer_closure::closure_rhymu_0();
