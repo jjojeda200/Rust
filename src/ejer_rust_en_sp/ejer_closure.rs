@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          24-04-2023
+    Fecha:          29-04-2023
     Titulo:         introducción a RUST
     Descripción:    closures, closure move
     Referencias:
@@ -23,6 +23,18 @@
     Crate gtk   https://gtk-rs.org/gtk3-rs/git/docs/gtk/index.html
 
 ***************************************************************************************/
+/* Apuntes:                                 
+    Los Closures son funciones anónimas que pueden capturar variables del entorno envolvente.
+    Esto es poderoso, significa que el cierre puede interactuar directamente con las variables
+    que definió fuera del cuerpo del cierre (a diferencia de las funciones en las que tiene
+    que pasar parámetros). Los cierres se utilizan en subprocesos y otra programación funcional
+    como características de Rust (como Map, Reduce, Filter, etc.)
+
+    Los closures o cierres son funciones anónimas que se pueden almacenar en una variable
+    o pasar como argumentos a otras funciones, esto nos permite crearlo en un lugar y luego
+    llamarla para evaluarla en un contexto diferente.
+    Los dos pipes son los que delimitan al closure
+    */
 /* Detalles de ||                       
 - Una || que no encierra ninguna variable exterior en su interior es una función anónima.
   No es, estrictamente, un closure.
@@ -119,14 +131,15 @@ pub fn closure_0() {
     imprime_titulo(&titulo);
 
     // Se define una variable mutable var_n de tipo u8 y se le asigna el valor 2.
-    let mut var_n: u8 = 2;
-
+    let mut var_n: u8 = 4;
+    println!("Valor de var_n: {}", var_n);
 //*************************************
     /* Se define un closure llamado mi_closure0 que toma un parámetro x de tipo u8 e
        imprime un mensaje con el valor incluido en la llamada almacenado en x. */
     let val_clo0 = |x: u8| println!("val_clo0: Valor de x = {}", x);
     // Se llama al closure mi_closure0 con el valor 2 como argumento.
     val_clo0(2);
+    val_clo0(0);
 
 //*************************************
     /* Se define una variable mutable val_clo1 que almacena un closure con la sintaxis
@@ -139,13 +152,14 @@ pub fn closure_0() {
         return var_n;
     };
     println!("val_clo1: 1ª llamada");
-    // OJO var_n vale 4 tras la 1ª llamada dentro del val_clo1 por el uso de move.
-    println!("val_clo1: valor devuelto para var_n por val_clo1(2): {}", val_clo1(2));
+    // OJO var_n vale 6 tras la 1ª llamada dentro del val_clo1 por el uso de move.
+    println!("val_clo1: valor devuelto para val_clo1(2): {}", val_clo1(2));
+    println!("Valor de var_n: {}", var_n);
     println!("val_clo1: 2ª llamada");
     // OJO var_n vale 6 tras la 2ª llamada dentro del val_clo1 por el uso de move.
-    println!("val_clo1: valor devuelto para var_n por val_clo1(2): {}", val_clo1(2));
-    println!("Valor de var_n original se mantiene fuera de val_clo1: {}\n", var_n);
-    assert_eq!(var_n, 2);
+    println!("val_clo1: valor devuelto para val_clo1(2): {}", val_clo1(2));
+    println!("Valor de var_n: {}. No varia fuera del closure val_clo1\n", var_n);
+    assert_eq!(var_n, 4);
     
 //*************************************
     /* Se define un closure llamado val_clo2 que toma un parámetro x de tipo u8 y
@@ -162,10 +176,10 @@ pub fn closure_0() {
     println!("val_clo2: 1ª llamada");
     // OJO var_n vale 4 tras la 1ª llamada fuera del val_clo2 por el no uso de move.    
     println!("val_clo2: valor devuelto para var_n por val_clo2(2): {}", val_clo2(2));
-    //println!("Valor de var_n original después de llamar a val_clo2: {}\n", var_n);
+//    println!("Valor de var_n: {}", var_n);
     println!("val_clo2: 2ª llamada");
     println!("val_clo2: valor devuelto para var_n por val_clo2(2): {}", val_clo2(2));
-    println!("Valor de var_n original después de llamar a val_clo2: {}\n", var_n);
+    println!("Valor de var_n: {}. Varía fuera del closure val_clo2\n", var_n);
 /*
 En resumen, el código muestra cómo definir y utilizar closures en Rust, y cómo el uso
 de la palabra clave move puede afectar la propiedad y la compartición de las variables
@@ -186,37 +200,21 @@ pub fn closure_1() {
 
 //*************************************
 fn rutina_aux0_closure_0(var_i: u32, var_j: u32) {
-    /*
-    Los Closures son funciones anónimas que pueden capturar variables del entorno envolvente.
-    Esto es poderoso, significa que el cierre puede interactuar directamente con las variables
-    que definió fuera del cuerpo del cierre (a diferencia de las funciones en las que tiene
-    que pasar parámetros). Los cierres se utilizan en subprocesos y otra programación funcional
-    como características de Rust (como Map, Reduce, Filter, etc.)
-
-    Los closures o cierres son funciones anónimas que se pueden almacenar en una variable
-    o pasar como argumentos a otras funciones, esto nos permite crearlo en un lugar y luego
-    llamarla para evaluarla en un contexto diferente.
-    Los dos pipes son los que delimitan al closure
-    */
     // Función encapsulada en una variable --> |var_a|
     let cierre = |mut var_a| {
-        println!("Valor recibido para var_a: {}", var_a);
+        println!("Valor recibido  para var_a: {}", var_a);
         var_a -= 4;
-        println!("Valor nuevo para var_a: {}", var_a);
+        println!("Valor calculado para var_a: {}", var_a);
         thread::sleep(Duration::from_secs(2));
         return var_a;
     };
-
     //---------------------------------
     if var_i < 10 {
-        println!("Hoy haz {} de descanso", cierre(var_i));
+        println!("Caso 1: valor devuelto por función anonima {}", cierre(var_i));
+    } else if var_j == 4 {
+            println!("Caso 2: valor devuelto por función anonima {}", cierre(var_j));
     } else {
-        if var_j == 4 {
-            println!("Descansa un poco y recuerda hidratarte");
-            cierre(var_j);
-        } else {
-            println!("Hoy estudia por {} minutos", cierre(var_i));
-        }
+            println!("Caso 3: valor devuelto por función anonima {}", cierre(var_i));
     }
 }
 
@@ -278,8 +276,10 @@ pub fn closure_hyperbolic_2() {
             num += 5;
             println!("Resultado = {}", num + x)
         });
+        println!("{}", num);
     }
 }
+
 // Fn Trait
 fn add_0<F>(func: F)
     where
@@ -301,19 +301,22 @@ pub fn closure_rhymu_0() {
     let titulo = String::from(" Ejemplo Rhymu 0 ");
     imprime_titulo(&titulo);
 
-    let numeros = [1, 2, 3];
+    let numeros = [1, 2, 3, 4, 1];
+    /* into_iter() versus iter()            
+    into_iter() consume la colección original, transfiriendo la propiedad de sus elementos, mientras
+    que iter() permite la iteración de solo lectura sin consumir la colección.
+    */
     let numeros_on_iter = numeros.into_iter();
-    println!("\nnumeros_on_iter     = {:?}", numeros_on_iter);
-    println!("{:?}", numeros);
-    println!("numeros contenido   = {:?}", numeros.into_iter());
+    let numeros_en_iter = numeros.iter();
+    println!("numeros             = {:?}", numeros);
+    println!("numeros on iter     = {:?}", numeros_on_iter);
+    println!("numeros_en_iter     = {:?}", numeros_en_iter);
     println!("numeros direcciones = {:?}", numeros.as_ptr_range());
 
-    let multiplicado = numeros_on_iter.map(multiplicar(4));
+    let multi = numeros_en_iter.map(multiplicar(5));
+    println!("Multi               = {:?}", multi);
 
-    println!("Multiplicado        = {:?}", multiplicado);
-    for i in multiplicado {
-        println!("           = {:?}", i);
-    }
+    for i in multi { println!("           = {:?}", i); }
 }
 
 /*
@@ -334,7 +337,8 @@ fn tripe(n: i32) -> i32 { return n * 3; }
 */
 
 // Nota 2. Forma de hacerlo con closure (traits) -->
-fn multiplicar(mut x: i32) -> impl FnMut(i32) -> i32 {
+fn multiplicar(mut x: i32) -> impl FnMut(&i32) -> i32 {
+    // Al usar iter(), se debe usar impl FnMut con una referencia: "impl FnMut(&i32)"
     println!("x recibido = {:?}", x);
     move |n| {
         x += 1;
