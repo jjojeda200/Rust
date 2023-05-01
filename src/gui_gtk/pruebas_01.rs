@@ -22,7 +22,7 @@
 //Se necesita el siguiente cargo para usar los widgets de GTK
 use gtk::prelude::*;
 use gtk::{Window, WindowType, Button};
-use gdk::{EventMask, Event};
+use gdk::{EventMask};
 
 pub fn gtk_prueba_00() {
 
@@ -62,19 +62,32 @@ pub fn gtk_prueba_00() {
         Inhibit(false)
     });
 
+//********************************************************** Añadir a pruebas_00
 
-            // Connect the key-press-event
-            window.connect_key_press_event(|_, key| {
-                println!("Key pressed: {}", key.keyval());
-                Inhibit(false)
-            });
-    
-            // Connect the key-release-event
-            window.connect_key_release_event(|_, key| {
-                println!("Key released: {}", key.keyval());
-                Inhibit(false)
-            });
-    
+    // Conectamos la función al evento de entrada del ratón
+    window.connect_event(move |_, event| {
+        if let gdk::EventType::EnterNotify = event.event_type() {
+            println!("Mouse entered window!");
+            Inhibit(false)
+        } else {
+            gtk::Inhibit(false)
+        }
+    });
+
+
+    // Conectamos la función al evento de salida del ratón
+    window.connect_event(move |_, event| {
+        if let gdk::EventType::LeaveNotify = event.event_type() {
+            println!("Mouse left window!");
+            Inhibit(false)
+        } else {
+            gtk::Inhibit(false)
+        }
+    });
+
+//********************************************************** Añadir a pruebas_00
+
+
 
     window.show_all();
 

@@ -78,6 +78,23 @@ pub fn gtk_prueba_00() {
         });
 
 
+        // Conecta con key-press-event
+        let buffer_clon_tecla0 = buffer.clone();
+        window.connect_key_press_event(move |_, key| {
+            println!("Tecla presionada: {}", key.keyval());
+            buffer_clon_tecla0.set_text(&format!("Tecla soltada {:?}", key.keyval()));
+            Inhibit(false)
+        });
+
+        // Conecta con key-release-event
+        let buffer_clon_tecla1 = buffer.clone();
+        window.connect_key_release_event(move |_, key| {
+            println!("Tecla soltada   : {}", key.keyval());
+            buffer_clon_tecla1.set_text(&format!("Tecla soltada {:?}", key.keycode()));
+            Inhibit(false)
+        });
+    
+    
 
         // Crear una caja vertical para alinear los elementos
         let vbox = gtk::Box::new(gtk::Orientation::Vertical, 0);
