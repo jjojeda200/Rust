@@ -11,4 +11,5 @@ pub mod dialogo;
 pub mod draw_00;
 
 pub mod pruebas_00;
+pub mod pruebas_01;
 pub mod main_copy;

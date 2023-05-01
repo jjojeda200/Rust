@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          11-04-2023
+    Fecha:          01-05-2023
     Titulo:         pruebas de minifb
     Descripción:    
     Referencias:    https://github.com/emoon/rust_minifb
@@ -99,3 +99,5 @@ pub fn gate_bool() {
         std::thread::sleep(std::time::Duration::from_millis(10));
     }
 }
+
+//***************************************************************************** 

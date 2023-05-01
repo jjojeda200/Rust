@@ -87,20 +87,12 @@ fn main() {
     }
 */
 
-
-ejer_rust_en_sp::ejer_closure::closure_2();
-ejer_rust_en_sp::ejer_closure::closure_hyperbolic_1();
-ejer_rust_en_sp::ejer_closure::closure_hyperbolic_2();
-ejer_rust_en_sp::ejer_closure::closure_rhymu_0();
-ejer_rust_en_sp::ejer_closure::closure_rust_list();
-
+    gui_gtk::pruebas_00::gtk_prueba_00();
+    gui_gtk::pruebas_01::gtk_prueba_00();
     gui_gtk::muestra_men_00::pru_muestra_men();
-//    gui_gtk::main_copy::maincopy();
 
-    
 //    proyectos::sim_cpu_generica::cpu_generica_0();
 //    proyectos::sim_cpu_pruebas::cpu_sim_0();
-
 
     // ANALIZAR EN DETALLE OPTIMIZACIONES
     //ejer_rust_en_sp::ejer_trait_rasgos6::manipulacion_byte_0();
@@ -267,21 +259,24 @@ ejer_rust_en_sp::ejer_closure::closure_rust_list();
     proyectos::pruebas_plotters::pru_ploter2();
 */
 /* pruebas gui                  
-    minifb::pruebas_00::inicio();
-    minifb::pruebas_00::flags();
-    minifb::pruebas_01::gate_bool();
+    gui::minifb_00::inicio();
+    gui::minifb_00::flags();
+    gui::minifb_01::gate_bool();
 
     gui::piston_window_00::piston_win_00();
     gui::piston_window_00::piston_win_01();
+
+    gui::termion_00::xx();
 */
 /* pruebas gui GTK              
+    gui_gtk::pruebas_00::gtk_prueba_00();
+    gui_gtk::pruebas_01::gtk_prueba_00();
     gui_gtk::muestra_men_00::pru_muestra_men();
     gui_gtk::draw_00::draw_00();
+    gui_gtk::main_copy::maincopy();
     
     gui_gtk::celcius_fahrenheit::c_f();
     gui_gtk::dialogo::pru_dialogo();
-
-    gui_gtk::main_copy::maincopy();
 */
 
 //*****************************************************************************
