@@ -22,9 +22,9 @@ fn imprime_titulo(titulo: &String) {
 
 //***************************************************************************** 
 pub struct Aux {
-    imp_contador_programa: u16,
-    imp_instruccion: u8,
-    imp_mnemonico: String,
+    pub imp_contador_programa: u16,
+    pub imp_instruccion: u8,
+    pub imp_mnemonico: String,
 }
 
 impl CPU{
@@ -46,7 +46,7 @@ impl CPU{
         //info_pruebas();
     }
 
-    fn run_no_win(&mut self, aux: &mut Aux) {
+    pub fn run_no_win(&mut self, aux: &mut Aux) {
          loop {
             self.step_no_win(aux);
             println!("Contador: 0x{:04X}, Instruccion: {:02x}, Mnemonic: {},\tReg A: {:02x}, Reg B: {:02x}",

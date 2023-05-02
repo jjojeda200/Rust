@@ -123,9 +123,9 @@ fn build_ui(application: &gtk::Application) {
     caja_opcode_0.pack_start(&text_view_opcode_0, true, true, 4);
     caja_opcode_0.pack_end(&etiqueta_opcode, true, true, 8);
 
-    let eventos = ventana_opcode.get_events();
-    for event in eventos {
-        match event {
+
+    window.connect_key_press_event(move |_, key| {
+        match event.event {
             // Si se presiona la tecla "q", salir de la aplicación
             Event::KeyPress { keyval, .. } => {
                 if keyval == 113 {
@@ -134,7 +134,11 @@ fn build_ui(application: &gtk::Application) {
             }
             _ => (),
         }
-    }
+
+        println!("Tecla presionada: {}", key.keyval());
+        buffer_clon_tecla0.set_text(&format!("Tecla soltada {:?}", key.keyval()));
+        Inhibit(false)
+    });
 
 
     // Crea cajas
