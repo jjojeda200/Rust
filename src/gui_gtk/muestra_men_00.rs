@@ -23,7 +23,8 @@ use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, Button, Box, Label, TextView, TextBuffer, TextTagTable};
 use crate::proyectos::sim_cpu_memoria;
 use crate::proyectos::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self, CPU}};
-use std::any::type_name;
+//use std::any::type_name;
+use crate::proyectos::sim_cpu_pruebas;
 
 const COL_POR_DEFECTO: usize = 16;
 
@@ -60,16 +61,81 @@ fn muestra_mem(mem: &[u8], size: usize, ancho: usize) -> String {
 }
 
 
-
 fn build_ui(application: &gtk::Application) {
-    let window = ApplicationWindow::new(application);
-    window.set_title("Muestra Memoria - GTK Rust");
-    window.set_position(gtk::WindowPosition::Center);
-    //window.set_default_size(420, 400);
-    window.set_default_width(400);
-    window.set_default_height(500);
-    window.set_border_width(10);
-    window.set_resizable(false);
+    let mut cpu = CPU::new();
+    let mut aux = sim_cpu_pruebas::Aux {imp_contador_programa: 0x0, imp_instruccion: 0x0, imp_mnemonico: String::new()};
+    let programa = vec![
+        0x00,               // NOP
+        0x3E, 0x04,         // Almacenar el valor 0x04 en el Registro A
+        0x06, 0x0a,         // Almacenar el valor 0x0a en el Registro B
+        0x04,               // Incrementa Registro B
+        0x80,               // Suma el contenido del Registro B al Registro A
+        0x00,               // NOP
+        0x3E, 0xf0,         // Almacenar el valor 0xf0 en el Registro A
+        0x06, 0x0f,         // Almacenar el valor 0x0f en el Registro B
+        0x80,               // Suma el contenido del Registro B al Registro A
+        0x00,               // NOP
+        0x3E, 0x3b,         // Almacenar el valor 0x3b en el Registro A
+        0x3C,               // Incrementa Registro A
+        0x32, 0x15, 0x00,   // Mueve el contenido de A a la dirección indicada por los dos bytes siguientes 
+        0x00, 0x00,         // <-- Se cambio el contenido y se convierte en 3C
+        0x3A, 0x0b, 0x00,   // Mueve el contenido (0x0f) de la dirección indicada (0x0b) en los dos bytes siguientes a A 
+        0x00, 0x00,
+        0x06, 0xff,         // Almacenar el valor 0xff en el Registro B
+        0x80,               // Suma el contenido del Registro B al Registro A
+        0x00, 0x00,
+        0xFF,
+        0xC3, 0x00, 0x00,   // Salta a la dirección 0x0000
+        0xFF, 0xFF,         // Marca fin de programa
+    ];
+    cpu.cargar_programa(&programa);
+    cpu.run_no_win(&mut  aux);
+
+
+    let ventana = ApplicationWindow::new(application);
+    ventana.set_title("Muestra Memoria - GTK Rust");
+    ventana.set_position(gtk::WindowPosition::Center);
+    //ventana.set_default_size(420, 400);
+    ventana.set_default_width(400);
+    ventana.set_default_height(500);
+    ventana.set_border_width(10);
+    ventana.set_resizable(false);
+
+    let ventana_opcode = gtk::Window::new(gtk::WindowType::Toplevel);
+    ventana_opcode.set_title("OPCode");
+    ventana_opcode.set_default_size(400, 200);
+    ventana_opcode.set_border_width(10);
+    ventana_opcode.set_resizable(false);
+
+    let text_view_opcode_0 = TextView::new();
+    text_view_opcode_0.set_monospace(true);
+    text_view_opcode_0.set_editable(false);
+    text_view_opcode_0.set_cursor_visible(false);
+
+
+    let etiqueta_opcode  = Label::new(None);
+    let caja_opcode_0 = Box::new(gtk::Orientation::Vertical, 8);
+    caja_opcode_0.set_margin(8);
+    let caja_opcode_1 = Box::new(gtk::Orientation::Horizontal, 8);
+    caja_opcode_1.set_margin(4);
+
+    ventana_opcode.add(&caja_opcode_0);
+    caja_opcode_0.pack_start(&text_view_opcode_0, true, true, 4);
+    caja_opcode_0.pack_end(&etiqueta_opcode, true, true, 8);
+
+    let eventos = ventana_opcode.get_events();
+    for event in eventos {
+        match event {
+            // Si se presiona la tecla "q", salir de la aplicación
+            Event::KeyPress { keyval, .. } => {
+                if keyval == 113 {
+                    ventana_opcode.destroy();
+                }
+            }
+            _ => (),
+        }
+    }
+
 
     // Crea cajas
     let caja0 = Box::new(gtk::Orientation::Vertical, 8);
@@ -82,7 +148,7 @@ fn build_ui(application: &gtk::Application) {
     let boton00 = Button::with_label("Botón 0");
     let boton01 = Button::with_label("Botón 1");
     let boton10 = Button::with_label("Reserva Memoria");
-    let boton11 = Button::with_label("libera Memoria");
+    let boton11 = Button::with_label("Ventana OPCode");
 
     // Crea vistas de texto (Tabla Hex)
     let text_view = TextView::new();
@@ -105,19 +171,17 @@ fn build_ui(application: &gtk::Application) {
     let _bufer2 = TextBuffer::new(Some(&TextTagTable::new()));
 
 
-    let mut memoria = BancosMemoria::new();
-    memoria.escribir_memoria(0x0000, 0xff);
-    memoria.escribir_memoria(0x0010, 0xaa);
-    bufer_00.set_text(&muestra_mem(&memoria.segmento_memoria[0][0..64], 64, 16));
+    //let mut memoria = BancosMemoria::new();
+    //cpu.memoria.escribir_memoria(0x0000, 0xff);
+    //cpu.memoria.escribir_memoria(0x0010, 0xaa);
+    bufer_00.set_text(&muestra_mem(&cpu.memoria.segmento_memoria[0][0..64], 64, 16));
 /* 
     let mut vec: [u8; 64] = [0;64];
     for i in 0..vec.len() { vec[i] = (i+0) as u8; }
     bufer_00.set_text(&muestra_mem(&vec,64,16));
 */
     text_view.set_buffer(Some(&bufer_00));
-
-
-    window.add(&caja0);
+    ventana.add(&caja0);
     caja0.pack_start(&text_view, true, true, 4);
     caja0.pack_start(&caja1, true, false, 4);
     caja1.pack_start(&boton10, false, false, 4);
@@ -128,10 +192,17 @@ fn build_ui(application: &gtk::Application) {
     caja0.pack_end(&etiqueta, true, true, 8);
 
 
+
+    boton11.connect_clicked(move |_| {
+        ventana_opcode.show_all();
+    });
+
+
+
     // Conectar las señales "clicked" de los botones al callback
     let bufer_01_clone1 = bufer_01.clone();
     boton00.connect_clicked(move |_| {
-        bufer_01_clone1.set_text(&format!("Contenido en memoria 0x{:02X}", memoria.leer_memoria(0x0000)));
+        bufer_01_clone1.set_text(&format!("Contenido en memoria 0x{:02X}", cpu.memoria.leer_memoria(0x0000)));
     });
 
     let bufer_01_clone2 = bufer_01.clone();
@@ -152,7 +223,7 @@ fn build_ui(application: &gtk::Application) {
         etiqueta.set_text(&format!("Ubicado {} MB de memoria", used_memory));
     });
 
-    window.show_all();
+    ventana.show_all();
 }
 
 pub fn pru_muestra_men() {
@@ -161,12 +232,9 @@ pub fn pru_muestra_men() {
         Default::default(),
     );
 
-    application.connect_activate(|app| {
-        build_ui(app);
-    });
+    application.connect_activate(|app| { build_ui(app); });
 
     application.run();
 }
-
 
 //***************************************************************************** 

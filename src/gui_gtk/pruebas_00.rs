@@ -46,18 +46,13 @@ pub fn gtk_prueba_00() {
         let button2 = Button::with_label("Botón 2");
 
         // Conecta las señales "clicked" de los botones al callback
-        let buffer_clone = buffer.clone();
-        button1.connect_clicked(move |_| {
-            buffer_clone.set_text("Contenido actualizado por Botón 1");
-        });
-
+        let buffer_clone1 = buffer.clone();
+        button1.connect_clicked(move |_| { buffer_clone1.set_text("Contenido actualizado por Botón 1"); });
         let buffer_clone2 = buffer.clone();
-        button2.connect_clicked(move |_| {
-            buffer_clone2.set_text("Contenido actualizado por Botón 2");
-        });
+        button2.connect_clicked(move |_| { buffer_clone2.set_text("Contenido actualizado por Botón 2"); });
 
 
-
+    //*************************************
         // Agrega máscara de evento para recibir eventos
         window.add_events(EventMask::BUTTON_PRESS_MASK);
         button2.add_events(EventMask::ENTER_NOTIFY_MASK);
@@ -70,7 +65,7 @@ pub fn gtk_prueba_00() {
                     println!("Coordenadas: ({:?},{:?})", event.button(), event.button());
                 },
                 gdk::EventType::EnterNotify => {
-                    println!("XXXXXXXXXXXXX!");
+                    println!("¡Mouse entra en la ventana!");
                 },
                 _ => (),
             }
@@ -78,6 +73,7 @@ pub fn gtk_prueba_00() {
         });
 
 
+    //*************************************
         // Conecta con key-press-event
         let buffer_clon_tecla0 = buffer.clone();
         window.connect_key_press_event(move |_, key| {
@@ -87,13 +83,34 @@ pub fn gtk_prueba_00() {
         });
 
         // Conecta con key-release-event
-        let buffer_clon_tecla1 = buffer.clone();
+        let buffer_clon_tecla0 = buffer.clone();
         window.connect_key_release_event(move |_, key| {
             println!("Tecla soltada   : {}", key.keyval());
-            buffer_clon_tecla1.set_text(&format!("Tecla soltada {:?}", key.keycode()));
+            buffer_clon_tecla0.set_text(&format!("Tecla soltada {:?}", key.keycode()));
             Inhibit(false)
         });
-    
+
+
+    //*************************************
+        // Conectamos la función al evento de entrada del ratón
+        button1.connect_event(move |_, event| {
+            if let gdk::EventType::EnterNotify = event.event_type() {
+                println!("¡Mouse entra en bóton 1!");
+                Inhibit(false)
+            } else {
+                gtk::Inhibit(false)
+            }
+        });
+        
+        // Conectamos la función al evento de salida del ratón
+        button1.connect_event(move |_, event| {
+            if let gdk::EventType::LeaveNotify = event.event_type() {
+                println!("¡Mouse sale del bóton 1!");
+                Inhibit(false)
+            } else {
+                gtk::Inhibit(false)
+            }
+        });
     
 
         // Crear una caja vertical para alinear los elementos
