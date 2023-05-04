@@ -21,9 +21,10 @@
 
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, Button, Box, Label, TextView, TextBuffer, TextTagTable};
+use gtk::gdk::Event;
+//use gdk::keys::constants::Q;
 use crate::proyectos::sim_cpu_memoria;
 use crate::proyectos::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self, CPU}};
-//use std::any::type_name;
 use crate::proyectos::sim_cpu_pruebas;
 
 const COL_POR_DEFECTO: usize = 16;
@@ -60,6 +61,43 @@ fn muestra_mem(mem: &[u8], size: usize, ancho: usize) -> String {
     salida
 }
 
+fn crear_ventana_opcode() -> gtk::Window {
+    let ventana_opcode = gtk::Window::new(gtk::WindowType::Toplevel);
+    ventana_opcode.set_title("OPCode");
+    ventana_opcode.set_default_size(400, 200);
+    ventana_opcode.set_border_width(10);
+    ventana_opcode.set_resizable(false);
+
+    let text_view_opcode_0 = TextView::new();
+    text_view_opcode_0.set_monospace(true);
+    text_view_opcode_0.set_editable(false);
+    text_view_opcode_0.set_cursor_visible(false);
+
+    let etiqueta_opcode = Label::new(None);
+    let caja_opcode_0 = Box::new(gtk::Orientation::Vertical, 8);
+    caja_opcode_0.set_margin(8);
+    let caja_opcode_1 = Box::new(gtk::Orientation::Horizontal, 8);
+    caja_opcode_1.set_margin(4);
+
+    //let table = Table::new(7, 2, true);
+
+    ventana_opcode.add(&caja_opcode_0);
+    caja_opcode_0.pack_start(&text_view_opcode_0, true, true, 4);
+    caja_opcode_0.pack_end(&etiqueta_opcode, true, true, 8);
+
+    ventana_opcode.connect_key_press_event(move |x, key| {
+        if key.keyval() == gdk::keys::constants::Q || key.keyval() == gdk::keys::constants::q {
+            // println!("Enter key pressed");
+            x.hide();
+        }
+        Inhibit(false)
+    });
+
+
+
+
+    ventana_opcode
+}
 
 fn build_ui(application: &gtk::Application) {
     let mut cpu = CPU::new();
@@ -101,6 +139,8 @@ fn build_ui(application: &gtk::Application) {
     ventana.set_border_width(10);
     ventana.set_resizable(false);
 
+    let ventana_opcode = crear_ventana_opcode();
+/* 
     let ventana_opcode = gtk::Window::new(gtk::WindowType::Toplevel);
     ventana_opcode.set_title("OPCode");
     ventana_opcode.set_default_size(400, 200);
@@ -111,7 +151,6 @@ fn build_ui(application: &gtk::Application) {
     text_view_opcode_0.set_monospace(true);
     text_view_opcode_0.set_editable(false);
     text_view_opcode_0.set_cursor_visible(false);
-
 
     let etiqueta_opcode  = Label::new(None);
     let caja_opcode_0 = Box::new(gtk::Orientation::Vertical, 8);
@@ -124,22 +163,17 @@ fn build_ui(application: &gtk::Application) {
     caja_opcode_0.pack_end(&etiqueta_opcode, true, true, 8);
 
 
-    window.connect_key_press_event(move |_, key| {
-        match event.event {
-            // Si se presiona la tecla "q", salir de la aplicación
-            Event::KeyPress { keyval, .. } => {
-                if keyval == 113 {
-                    ventana_opcode.destroy();
+    ventana_opcode.connect_key_press_event(move |x, key| {
+                if key.keyval() ==  gdk::keys::constants::Q || key.keyval() == gdk::keys::constants::q {
+                    println!("Enter key pressed");
+                    x.hide();
                 }
-            }
-            _ => (),
-        }
 
-        println!("Tecla presionada: {}", key.keyval());
-        buffer_clon_tecla0.set_text(&format!("Tecla soltada {:?}", key.keyval()));
+        // println!("Tecla presionada: {}", key.keyval());
+        // buffer_clon_tecla0.set_text(&format!("Tecla soltada {:?}", key.keyval()));
         Inhibit(false)
     });
-
+*/
 
     // Crea cajas
     let caja0 = Box::new(gtk::Orientation::Vertical, 8);
@@ -196,16 +230,15 @@ fn build_ui(application: &gtk::Application) {
     caja0.pack_end(&etiqueta, true, true, 8);
 
 
-
     boton11.connect_clicked(move |_| {
         ventana_opcode.show_all();
     });
 
 
-
     // Conectar las señales "clicked" de los botones al callback
     let bufer_01_clone1 = bufer_01.clone();
     boton00.connect_clicked(move |_| {
+        //bufer_01_clone1.set_text(&format!("Contenido en memoria 0x{:02X}", cpu.memoria.leer_memoria(0x0000)));
         bufer_01_clone1.set_text(&format!("Contenido en memoria 0x{:02X}", cpu.memoria.leer_memoria(0x0000)));
     });
 
