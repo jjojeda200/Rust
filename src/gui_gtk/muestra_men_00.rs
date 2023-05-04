@@ -1,6 +1,6 @@
 /***************************************************************************************
     José Juan Ojeda Granados
-    Fecha:          29-04-2023
+    Fecha:          04-05-2023
     Titulo:         introducción a RUST y GTK3
     Descripción:    
                     
@@ -21,12 +21,12 @@
 
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, Button, Box, Grid, Label, TextView, TextBuffer, TextTagTable};
-use gtk::Align::Start;
+use gtk::Align::*;
 use gtk::gdk::Event;
 //use gdk::keys::constants::Q;
 use crate::proyectos::sim_cpu_memoria;
 use crate::proyectos::{sim_cpu_memoria::BancosMemoria, sim_cpu_registros::{self, CPU}};
-use crate::proyectos::sim_cpu_pruebas;
+use crate::proyectos::sim_cpu_pruebas::{self, Aux};
 
 const COL_POR_DEFECTO: usize = 16;
 
@@ -62,37 +62,54 @@ fn muestra_mem(mem: &[u8], size: usize, ancho: usize) -> String {
     salida
 }
 
-fn crear_ventana_opcode(cpu: &CPU) -> gtk::Window {
+fn ventana_opcode(cpu: &CPU, aux: &Aux) -> gtk::Window {
     let ventana_opcode = gtk::Window::new(gtk::WindowType::Toplevel);
     ventana_opcode.set_title("OPCode");
     ventana_opcode.set_default_size(400, 200);
     ventana_opcode.set_border_width(10);
     ventana_opcode.set_resizable(false);
-
-    let text_view_opcode = TextView::new();
-    text_view_opcode.set_monospace(true);
-    text_view_opcode.set_editable(false);
-    text_view_opcode.set_cursor_visible(false);
-    let bufer_opcode = text_view_opcode.buffer().unwrap();
+    ventana_opcode.set_deletable(false);
+    /*  
+        ventana_opcode.connect_delete_event(move |_, _| {
+        ventana_opcode.hide();
+        Inhibit(false)
+    });
+    */
 
     let etiqueta_opcode = Label::new(None);
     etiqueta_opcode.set_halign(Start);
-    let etiqueta_inst = Label::new(Some("Instrucción: "));
-    //etiqueta_inst.set_size_request(100, -1);
+    etiqueta_opcode.set_size_request(100, -1);
+
+    let etiqueta_inst = Label::new(Some("Nemónico: "));
     etiqueta_inst.set_halign(Start);
     let etiqueta_hex = Label::new(Some("Hexadecimal: "));
     etiqueta_hex.set_halign(Start);
     let etiqueta_pc = Label::new(Some("Contador PC: "));
     etiqueta_pc.set_halign(Start);
+
+    let text_view_inst = TextView::new();
+    text_view_inst.set_monospace(true);
+    text_view_inst.set_halign(Center);
+    text_view_inst.set_editable(false);
+    text_view_inst.set_cursor_visible(false);
+    let bufer_inst = text_view_inst.buffer().unwrap();
+
+    let text_view_hex = TextView::new();
+    text_view_hex.set_monospace(true);
+    text_view_hex.set_halign(Center);
+    text_view_hex.set_editable(false);
+    text_view_hex.set_cursor_visible(false);
+    let bufer_hex = text_view_hex.buffer().unwrap();
+    
+    let text_view_pc = TextView::new();
+    text_view_pc.set_monospace(true);
+    text_view_pc.set_halign(Center);
+    text_view_pc.set_editable(false);
+    text_view_pc.set_cursor_visible(false);
+    let bufer_pc = text_view_pc.buffer().unwrap();
+    
     let caja_opcode_0 = Box::new(gtk::Orientation::Vertical, 8);
     caja_opcode_0.set_margin(8);
-    //let caja_opcode_1 = Box::new(gtk::Orientation::Horizontal, 8);
-    //caja_opcode_1.set_margin(4);
-
-
-        //bufer_opcode.set_text(&format!("0x{:02X}", cpu.get_a()));
-        //text_view_opcode.set_buffer(Some(&bufer_opcode));
-
 
     let grid_opcode = Grid::new();
     grid_opcode.set_row_homogeneous(false);
@@ -101,31 +118,46 @@ fn crear_ventana_opcode(cpu: &CPU) -> gtk::Window {
     grid_opcode.set_column_spacing(6);
     grid_opcode.set_property("margin", &8);
 
-    // Agregar widgets a las celdas del grid
     grid_opcode.attach(&etiqueta_inst, 0, 0, 1, 1);
     grid_opcode.attach(&etiqueta_hex, 0, 1, 1, 1);
-    grid_opcode.attach(&etiqueta_pc, 0, 3, 1, 1);
-    grid_opcode.attach(&text_view_opcode, 1, 0, 1, 1);
-    grid_opcode.attach(&etiqueta_opcode, 1, 1, 1, 1);
-    //grid_opcode.attach(&etiqueta_pc, 0, 3, 1, 1);
+    grid_opcode.attach(&etiqueta_pc, 0, 2, 1, 1);
+    grid_opcode.attach(&text_view_inst, 1, 0, 1, 1);
+    grid_opcode.attach(&text_view_hex, 1, 1, 1, 1);
+    grid_opcode.attach(&text_view_pc, 1, 2, 1, 1);
+    grid_opcode.attach(&etiqueta_opcode, 1, 3, 1, 1);
 
     ventana_opcode.add(&caja_opcode_0);
     caja_opcode_0.pack_start(&grid_opcode, true, true, 4);
-    //caja_opcode_0.pack_start(&text_view_opcode, true, true, 4);
+    //caja_opcode_0.pack_end(&boton_avance, true, true, 4);
     //caja_opcode_0.pack_end(&etiqueta_opcode, true, true, 8);
+
+
+
+
+
+        bufer_inst.set_text(&format!("{}", aux.imp_instruccion));
+        text_view_inst.set_buffer(Some(&bufer_inst));
+        bufer_hex.set_text(&format!("{}", cpu.memoria.leer_memoria(cpu.contador_de_programa)));
+        text_view_hex.set_buffer(Some(&bufer_hex));
+        bufer_pc.set_text(&format!("0x{:04X}", cpu.contador_de_programa));
+        text_view_pc.set_buffer(Some(&bufer_pc));
+
+        //bufer_opcode.set_text(&format!("0x{:02X}", cpu.get_a()));
+        //etiqueta_pc.set_text(&format!("0x{:04X}", cpu.contador_de_programa));
 
     ventana_opcode.connect_key_press_event(move |x, key| {
         if key.keyval() == gdk::keys::constants::Q || key.keyval() == gdk::keys::constants::q {
             x.hide();
         } else if key.keyval() == gdk::keys::constants::x {
-            //bufer_opcode.set_text(&cpu.get_a() String);
             println!("Presionaste: {}", key.keyval())
         } else {
-            etiqueta_opcode.set_text(&format!("Presionaste: {}", key.keyval()));
+            etiqueta_opcode.set_text(&format!("Tecla: {}", key.keyval()));
             println!("Presionaste: {}", key.keyval())
         }
         Inhibit(false)
     });
+
+
 
 
     //ventana_opcode.show_all();
@@ -161,7 +193,7 @@ fn build_ui(application: &gtk::Application) {
         0xFF, 0xFF,         // Marca fin de programa
     ];
     cpu.cargar_programa(&programa);
-    cpu.run_no_win(&mut  aux);
+    cpu.run_no_win(&mut aux);
 
 
     let ventana = ApplicationWindow::new(application);
@@ -173,7 +205,7 @@ fn build_ui(application: &gtk::Application) {
     ventana.set_border_width(10);
     ventana.set_resizable(false);
 
-    let ventana_opcode = crear_ventana_opcode(&cpu);
+    let ventana_opcode = ventana_opcode(&cpu, &aux);
 
     // Crea cajas
     let caja0 = Box::new(gtk::Orientation::Vertical, 8);
@@ -186,7 +218,15 @@ fn build_ui(application: &gtk::Application) {
     let boton00 = Button::with_label("Botón 0");
     let boton01 = Button::with_label("Botón 1");
     let boton10 = Button::with_label("Reserva Memoria");
-    let boton11 = Button::with_label("Ventana OPCode");
+    let boton11 = Button::with_label("Ventana OPCode");    
+    let boton_avance = Button::with_label("Avanzar");
+
+/* 
+    boton_avance.connect_clicked(|_| {
+        cpu.step_no_win(&mut aux);
+        println!("Avanzando en bucle");
+    });
+ */
 
     // Crea vistas de texto (Tabla Hex)
     let text_view = TextView::new();
@@ -232,16 +272,14 @@ fn build_ui(application: &gtk::Application) {
     caja0.pack_end(&etiqueta, true, true, 8);
 
 
-    boton11.connect_clicked(move |_| {
-        ventana_opcode.show_all();
-    });
+    boton11.connect_clicked(move |_| { ventana_opcode.show_all(); });
 
 
     // Conectar las señales "clicked" de los botones al callback
     let bufer_01_clone1 = bufer_01.clone();
     boton00.connect_clicked(move |_| {
-        //bufer_01_clone1.set_text(&format!("Contenido en memoria 0x{:02X}", cpu.memoria.leer_memoria(0x0000)));
         bufer_01_clone1.set_text(&format!("Contenido en memoria 0x{:02X}", cpu.memoria.leer_memoria(0x0000)));
+        //bufer_01_clone1.set_text("Contenido actualizado por Botón 1");
     });
 
     let bufer_01_clone2 = bufer_01.clone();

@@ -28,7 +28,7 @@ pub struct Aux {
 }
 
 impl CPU{
-    fn step_no_win(&mut self, aux: &mut Aux) {
+    pub fn step_no_win(&mut self, aux: &mut Aux) {
         aux.imp_contador_programa = self.contador_de_programa;
         let instruccion = self.busca_instruccion();
         aux.imp_instruccion = instruccion;
