@@ -90,9 +90,9 @@ fn main() {
     gui_gtk::muestra_men_00::pru_muestra_men();
 //    gui_gtk::pruebas_00::gtk_prueba_00();
 //    gui_gtk::pruebas_00::gtk_prueba_01();
-    gui_gtk::pruebas_01::gtk_prueba_00();
+//    gui_gtk::pruebas_01::gtk_prueba_00();
 
-//    proyectos::sim_cpu_generica::cpu_generica_0();
+    proyectos::sim_cpu_generica::cpu_generica_0();
 //    proyectos::sim_cpu_pruebas::cpu_sim_0();
 
     // ANALIZAR EN DETALLE OPTIMIZACIONES

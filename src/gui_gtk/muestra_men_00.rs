@@ -20,7 +20,8 @@
 #![allow(unused_imports)]
 
 use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow, Button, Box, Label, TextView, TextBuffer, TextTagTable};
+use gtk::{Application, ApplicationWindow, Button, Box, Grid, Label, TextView, TextBuffer, TextTagTable};
+use gtk::Align::Start;
 use gtk::gdk::Event;
 //use gdk::keys::constants::Q;
 use crate::proyectos::sim_cpu_memoria;
@@ -61,43 +62,76 @@ fn muestra_mem(mem: &[u8], size: usize, ancho: usize) -> String {
     salida
 }
 
-fn crear_ventana_opcode() -> gtk::Window {
+fn crear_ventana_opcode(cpu: &CPU) -> gtk::Window {
     let ventana_opcode = gtk::Window::new(gtk::WindowType::Toplevel);
     ventana_opcode.set_title("OPCode");
     ventana_opcode.set_default_size(400, 200);
     ventana_opcode.set_border_width(10);
     ventana_opcode.set_resizable(false);
 
-    let text_view_opcode_0 = TextView::new();
-    text_view_opcode_0.set_monospace(true);
-    text_view_opcode_0.set_editable(false);
-    text_view_opcode_0.set_cursor_visible(false);
+    let text_view_opcode = TextView::new();
+    text_view_opcode.set_monospace(true);
+    text_view_opcode.set_editable(false);
+    text_view_opcode.set_cursor_visible(false);
+    let bufer_opcode = text_view_opcode.buffer().unwrap();
 
     let etiqueta_opcode = Label::new(None);
+    etiqueta_opcode.set_halign(Start);
+    let etiqueta_inst = Label::new(Some("Instrucción: "));
+    //etiqueta_inst.set_size_request(100, -1);
+    etiqueta_inst.set_halign(Start);
+    let etiqueta_hex = Label::new(Some("Hexadecimal: "));
+    etiqueta_hex.set_halign(Start);
+    let etiqueta_pc = Label::new(Some("Contador PC: "));
+    etiqueta_pc.set_halign(Start);
     let caja_opcode_0 = Box::new(gtk::Orientation::Vertical, 8);
     caja_opcode_0.set_margin(8);
-    let caja_opcode_1 = Box::new(gtk::Orientation::Horizontal, 8);
-    caja_opcode_1.set_margin(4);
+    //let caja_opcode_1 = Box::new(gtk::Orientation::Horizontal, 8);
+    //caja_opcode_1.set_margin(4);
 
-    //let table = Table::new(7, 2, true);
+
+        //bufer_opcode.set_text(&format!("0x{:02X}", cpu.get_a()));
+        //text_view_opcode.set_buffer(Some(&bufer_opcode));
+
+
+    let grid_opcode = Grid::new();
+    grid_opcode.set_row_homogeneous(false);
+    grid_opcode.set_column_homogeneous(false);
+    grid_opcode.set_row_spacing(6);
+    grid_opcode.set_column_spacing(6);
+    grid_opcode.set_property("margin", &8);
+
+    // Agregar widgets a las celdas del grid
+    grid_opcode.attach(&etiqueta_inst, 0, 0, 1, 1);
+    grid_opcode.attach(&etiqueta_hex, 0, 1, 1, 1);
+    grid_opcode.attach(&etiqueta_pc, 0, 3, 1, 1);
+    grid_opcode.attach(&text_view_opcode, 1, 0, 1, 1);
+    grid_opcode.attach(&etiqueta_opcode, 1, 1, 1, 1);
+    //grid_opcode.attach(&etiqueta_pc, 0, 3, 1, 1);
 
     ventana_opcode.add(&caja_opcode_0);
-    caja_opcode_0.pack_start(&text_view_opcode_0, true, true, 4);
-    caja_opcode_0.pack_end(&etiqueta_opcode, true, true, 8);
+    caja_opcode_0.pack_start(&grid_opcode, true, true, 4);
+    //caja_opcode_0.pack_start(&text_view_opcode, true, true, 4);
+    //caja_opcode_0.pack_end(&etiqueta_opcode, true, true, 8);
 
     ventana_opcode.connect_key_press_event(move |x, key| {
         if key.keyval() == gdk::keys::constants::Q || key.keyval() == gdk::keys::constants::q {
-            // println!("Enter key pressed");
             x.hide();
+        } else if key.keyval() == gdk::keys::constants::x {
+            //bufer_opcode.set_text(&cpu.get_a() String);
+            println!("Presionaste: {}", key.keyval())
+        } else {
+            etiqueta_opcode.set_text(&format!("Presionaste: {}", key.keyval()));
+            println!("Presionaste: {}", key.keyval())
         }
         Inhibit(false)
     });
 
 
-
-
+    //ventana_opcode.show_all();
     ventana_opcode
 }
+
 
 fn build_ui(application: &gtk::Application) {
     let mut cpu = CPU::new();
@@ -139,41 +173,7 @@ fn build_ui(application: &gtk::Application) {
     ventana.set_border_width(10);
     ventana.set_resizable(false);
 
-    let ventana_opcode = crear_ventana_opcode();
-/* 
-    let ventana_opcode = gtk::Window::new(gtk::WindowType::Toplevel);
-    ventana_opcode.set_title("OPCode");
-    ventana_opcode.set_default_size(400, 200);
-    ventana_opcode.set_border_width(10);
-    ventana_opcode.set_resizable(false);
-
-    let text_view_opcode_0 = TextView::new();
-    text_view_opcode_0.set_monospace(true);
-    text_view_opcode_0.set_editable(false);
-    text_view_opcode_0.set_cursor_visible(false);
-
-    let etiqueta_opcode  = Label::new(None);
-    let caja_opcode_0 = Box::new(gtk::Orientation::Vertical, 8);
-    caja_opcode_0.set_margin(8);
-    let caja_opcode_1 = Box::new(gtk::Orientation::Horizontal, 8);
-    caja_opcode_1.set_margin(4);
-
-    ventana_opcode.add(&caja_opcode_0);
-    caja_opcode_0.pack_start(&text_view_opcode_0, true, true, 4);
-    caja_opcode_0.pack_end(&etiqueta_opcode, true, true, 8);
-
-
-    ventana_opcode.connect_key_press_event(move |x, key| {
-                if key.keyval() ==  gdk::keys::constants::Q || key.keyval() == gdk::keys::constants::q {
-                    println!("Enter key pressed");
-                    x.hide();
-                }
-
-        // println!("Tecla presionada: {}", key.keyval());
-        // buffer_clon_tecla0.set_text(&format!("Tecla soltada {:?}", key.keyval()));
-        Inhibit(false)
-    });
-*/
+    let ventana_opcode = crear_ventana_opcode(&cpu);
 
     // Crea cajas
     let caja0 = Box::new(gtk::Orientation::Vertical, 8);
@@ -219,6 +219,8 @@ fn build_ui(application: &gtk::Application) {
     bufer_00.set_text(&muestra_mem(&vec,64,16));
 */
     text_view.set_buffer(Some(&bufer_00));
+
+
     ventana.add(&caja0);
     caja0.pack_start(&text_view, true, true, 4);
     caja0.pack_start(&caja1, true, false, 4);

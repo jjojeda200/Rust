@@ -17,7 +17,7 @@
 
 ***************************************************************************************/
 #![allow(dead_code)]
-//#![allow(unused_imports)]
+#![allow(unused_imports)]
 
 //Se necesita el siguiente cargo para usar los widgets de GTK
 use gtk::{prelude::*};
@@ -175,7 +175,6 @@ pub fn gtk_prueba_01() {
     window.connect_enter_notify_event(|win, event| on_mouse_enter(win.downcast_ref().unwrap(), event));
 
 
-
     // Conecta una señal para manejar eventos de pulsación de botón
     window.connect_event(move |_, event| {
         match event.event_type() {
@@ -201,7 +200,6 @@ pub fn gtk_prueba_01() {
             gtk::Inhibit(false)
         }
     });
-
 
 
     window.show_all();
